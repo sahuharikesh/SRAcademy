@@ -1,0 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background-color: #f0f2f5;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Custom Scrollbar ───────────────────────────────── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: #1a1a1a; }
+::-webkit-scrollbar-thumb  { background: #C9A84C; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #f0d080; }
+
+/* ─── Keyframes ──────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92) translateY(14px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+@keyframes shimmerMove {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(201,168,76,0.5); }
+  50%       { box-shadow: 0 0 0 8px rgba(201,168,76,0);  }
+}
+@keyframes pulseRed {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(220,38,38,0.5); }
+  50%       { box-shadow: 0 0 0 8px rgba(220,38,38,0);  }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Animation utilities ────────────────────────────── */
+.anim-fade-up    { animation: fadeInUp   0.5s cubic-bezier(.22,1,.36,1) both; }
+.anim-fade-in    { animation: fadeIn     0.4s ease both; }
+.anim-slide-left { animation: slideInLeft 0.42s cubic-bezier(.22,1,.36,1) both; }
+.anim-scale-in   { animation: scaleIn    0.38s cubic-bezier(.22,1,.36,1) both; }
+
+/* stagger delays */
+.d-0   { animation-delay:   0ms; }
+.d-75  { animation-delay:  75ms; }
+.d-150 { animation-delay: 150ms; }
+.d-225 { animation-delay: 225ms; }
+.d-300 { animation-delay: 300ms; }
+.d-400 { animation-delay: 400ms; }
+
+/* ─── Page entry ─────────────────────────────────────── */
+.page-enter { animation: fadeInUp 0.45s cubic-bezier(.22,1,.36,1) both; }
+
+/* ─── Card hover lift ────────────────────────────────── */
+.card-lift {
+  transition: transform 0.22s cubic-bezier(.22,1,.36,1),
+              box-shadow 0.22s ease;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.18), 0 2px 10px rgba(201,168,76,0.2) !important;
+}
+
+/* ─── Pulse badges ───────────────────────────────────── */
+.badge-overdue { animation: pulseRed  1.8s ease-in-out infinite; }
+.badge-gold    { animation: pulseGold 2.2s ease-in-out infinite; }
+
+/* ─── Shimmer button ─────────────────────────────────── */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -85%;
+  width: 40%; height: 200%;
+  background: rgba(255,255,255,0.20);
+  transform: skewX(-20deg);
+  transition: left 0.5s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+}
+.btn-shine:hover::after { left: 135%; }
+.btn-shine:hover        { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.5); }
+.btn-shine:active       { transform: scale(0.97); }
+
+/* ─── Sidebar active indicator ───────────────────────── */
+.nav-item {
+  position: relative;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px; height: 65%;
+  background: linear-gradient(180deg, #f0d080, #C9A84C);
+  border-radius: 0 3px 3px 0;
+  transition: transform 0.22s cubic-bezier(.22,1,.36,1);
+}
+.nav-item:hover::before  { transform: translateY(-50%) scaleY(0.5); }
+.nav-item.active::before { transform: translateY(-50%) scaleY(1);   }
+
+/* ─── Table row hover ────────────────────────────────── */
+.tr-anim {
+  animation: fadeInUp 0.35s cubic-bezier(.22,1,.36,1) both;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.tr-anim:hover {
+  background: rgba(201,168,76,0.07) !important;
+  transform: translateX(2px);
+}
+
+/* ─── Input focus glow ───────────────────────────────── */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2.5px rgba(201,168,76,0.3);
+  border-color: #C9A84C !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* ─── Glass card ─────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
