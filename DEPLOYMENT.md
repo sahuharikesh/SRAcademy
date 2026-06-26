@@ -196,4 +196,32 @@ git push origin main
 
 ---
 
+## 8. How Auto-Deploy Works (Simple)
+
+Ek baar GitHub se connect ho jaane ke baad, sirf **ek command** se dono deploy ho jaate hain:
+
+```
+Code badlo  →  git push origin main  →  Vercel + Render automatically deploy
+```
+
+### Step-by-step:
+
+```
+1. Aap  →  git push origin main
+
+2. GitHub  →  Vercel ko signal bheja
+            →  Render ko signal bheja
+
+3. Vercel  →  Frontend build kiya (npm run build)
+            →  Live ho gaya ✅  (https://sr-academy-smoky.vercel.app)
+
+4. Render  →  Backend restart kiya (node server.js)
+            →  Live ho gaya ✅  (https://sracademy.onrender.com)
+```
+
+> **Note:** Claude Code khud `git push` nahi kar sakta — uske liye GitHub credentials chahiye.
+> Isliye push hamesha aapko manually karna hoga.
+
+---
+
 *Generated: 26 June 2026*
