@@ -33,6 +33,7 @@ export default function Students() {
       dateOfAdmission: s.dateOfAdmission?.split('T')[0] || '',
       feeType: s.feeType, actualFees: s.actualFees,
       recommendedFees: s.recommendedFees, groupNo: s.groupNo || '',
+      medium: s.medium || [], schoolName: s.schoolName || '', comment: s.comment || '',
     });
     setEditId(s._id); setShowForm(true); window.scrollTo(0, 0);
   };

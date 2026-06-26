@@ -5,7 +5,10 @@ import { STD_OPTIONS, GOLD, DARK } from '../../utils/constants';
 export const EMPTY = {
   name: '', mobile: '', std: '', dateOfAdmission: '',
   feeType: 'Monthly', actualFees: '', recommendedFees: '', groupNo: '',
+  medium: [], schoolName: '', comment: '',
 };
+
+const MEDIUM_OPTIONS = ['Hindi', 'English', 'Semi-English'];
 
 export default function StudentForm({ form, setForm, editId, onSubmit, onCancel, groups = [] }) {
   const [newGroup, setNewGroup] = useState(false);
@@ -76,6 +79,38 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
           <input type="number" className={inp} value={form.recommendedFees} required placeholder="Final agreed amount"
             onChange={(e) => setForm({ ...form, recommendedFees: e.target.value })} />
         </Field>
+        <div className="col-span-1 sm:col-span-2 flex flex-col gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="School Name">
+              <input className={inp} value={form.schoolName} placeholder="Student's school name"
+                onChange={(e) => setForm({ ...form, schoolName: e.target.value })} />
+            </Field>
+            <Field label="Comment (Optional)">
+              <input className={inp} value={form.comment} placeholder="Any notes about the student..."
+                onChange={(e) => setForm({ ...form, comment: e.target.value })} />
+            </Field>
+          </div>
+          <Field label="Medium">
+            <div className="flex gap-4 flex-wrap mt-1">
+              {MEDIUM_OPTIONS.map((m) => (
+                <label key={m} className="flex items-center gap-1.5 text-sm cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={form.medium.includes(m)}
+                    onChange={(e) => {
+                      const updated = e.target.checked
+                        ? [...form.medium, m]
+                        : form.medium.filter((x) => x !== m);
+                      setForm({ ...form, medium: updated });
+                    }}
+                    className="accent-yellow-600 w-4 h-4"
+                  />
+                  {m}
+                </label>
+              ))}
+            </div>
+          </Field>
+        </div>
 
         <div className="col-span-1 sm:col-span-2 flex gap-3 flex-wrap">
           <button type="submit" className="px-6 py-2 rounded-lg font-semibold text-sm" style={GOLD}>

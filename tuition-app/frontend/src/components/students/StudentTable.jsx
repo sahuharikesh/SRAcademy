@@ -4,14 +4,14 @@ export default function StudentTable({ students, onEdit, onDelete }) {
       <table className="w-full text-sm">
         <thead>
           <tr style={{ background: '#1a1a1a' }}>
-            {['#','Name','Class','Mobile','Group','Fee Type','Fees (Rs.)','Admission Date','Actions'].map((h) => (
+            {['#','Name','Class','Mobile','School','Medium','Group','Fee Type','Fees (Rs.)','Admission Date','Actions'].map((h) => (
               <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {students.length === 0 ? (
-            <tr><td colSpan={9} className="p-6 text-center text-gray-400">No students found</td></tr>
+            <tr><td colSpan={11} className="p-6 text-center text-gray-400">No students found</td></tr>
           ) : (
             students.map((s, i) => (
               <tr key={s._id} className="border-b hover:bg-yellow-50 transition">
@@ -22,6 +22,13 @@ export default function StudentTable({ students, onEdit, onDelete }) {
                     style={{ background: '#fff3cd', color: '#856404' }}>{s.std}</span>
                 </td>
                 <td className="p-3 text-gray-600">{s.mobile}</td>
+                <td className="p-3 text-gray-600">{s.schoolName || '—'}</td>
+                <td className="p-3">
+                  {s.medium && s.medium.length > 0
+                    ? <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
+                        style={{ background: '#e8f4f8', color: '#1a6080' }}>{s.medium.join(', ')}</span>
+                    : '—'}
+                </td>
                 <td className="p-3">
                   {s.groupNo
                     ? <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
