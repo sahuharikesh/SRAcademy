@@ -18,7 +18,7 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
       <table className="w-full text-xs">
         <thead>
           <tr style={{ background: '#1a1a1a' }}>
-            {['#','Student','Class','Group','Call','Status'].map((h) => (
+            {['Student','Class','Group','Call','Status'].map((h) => (
               <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
             ))}
           </tr>
@@ -30,7 +30,6 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
             paged.map((row, i) => (
               <tr key={row.student._id} className="border-b transition"
                 style={{ background: marks[row.student._id] === 'Absent' ? '#fff5f5' : '#fff' }}>
-                <td className="p-3 text-gray-400">{(page - 1) * pageSize + i + 1}</td>
                 <td className="p-3 font-semibold">{row.student.name}</td>
                 <td className="p-3">{row.student.std}</td>
                 <td className="p-3">{row.student.groupNo || '—'}</td>

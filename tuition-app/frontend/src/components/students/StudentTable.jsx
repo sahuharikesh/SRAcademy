@@ -63,7 +63,7 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
                 <input type="checkbox" checked={allChecked} onChange={toggleAll}
                   className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
               </th>
-              {['#','Name','Class','Mobile','School','Medium','Group','Fee Type','Fees (Rs.)','Admission Date','Actions'].map((h) => (
+              {['Name','Class','Mobile','School','Medium','Group','Fee Type','Fees (Rs.)','Admission Date','Actions'].map((h) => (
                 <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
               ))}
             </tr>
@@ -79,7 +79,6 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
                     <input type="checkbox" checked={selected.has(s._id)} onChange={() => toggle(s._id)}
                       className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
                   </td>
-                  <td className="p-3 text-gray-400">{(page - 1) * pageSize + i + 1}</td>
                   <td className="p-3 font-semibold text-gray-800">{s.name}</td>
                   <td className="p-3">
                     <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
