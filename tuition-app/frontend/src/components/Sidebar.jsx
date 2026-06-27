@@ -49,7 +49,7 @@ export default function Sidebar() {
       <div className="px-5 py-4 text-center anim-fade-in"
         style={{ borderTop: '1px solid rgba(201,168,76,0.15)', animationDelay: '350ms' }}>
         <p className="text-[10px] font-semibold tracking-widest" style={{ color: 'rgba(201,168,76,0.35)' }}>
-          SINCE 2016
+          SINCE 2016 -v.1.0
         </p>
       </div>
     </aside>

@@ -77,7 +77,7 @@ function PaperPreview({ meta, questions, logoSrc }) {
           ))}
           {questions.length === 0 && (
             <div style={{ color: '#aaa', textAlign: 'center', padding: '12px 0', fontSize: 11 }}>
-              Koi question nahi — left panel se add karein
+              Koi question nahi — left panel se add karein 
             </div>
           )}
         </div>
@@ -203,7 +203,7 @@ export default function QuestionPaper() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-lg sm:text-xl font-black" style={{ color: dark }}>Question Paper Designer</h1>
+          <h1 className="text-md sm:text-xl font-black" style={{ color: dark }}>Question Paper Designer </h1>
           <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">Fill details and questions — preview updates live</p>
         </div>
         <div className="flex gap-2">
