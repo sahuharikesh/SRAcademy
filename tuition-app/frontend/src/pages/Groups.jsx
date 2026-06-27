@@ -8,6 +8,7 @@ import WaPreviewModal from '../components/common/WaPreviewModal';
 import { buildGroupFeeMsg, buildGroupUpiQrUrl, feeMatchesStudent } from '../utils/messages';
 import GroupDetail from '../components/groups/GroupDetail';
 import { GOLD } from '../utils/constants';
+import PageSpinner from '../components/common/PageSpinner';
 import toast from 'react-hot-toast';
 
 function PayModal({ fee, open, onClose, onSuccess }) {
@@ -90,11 +91,17 @@ export default function Groups() {
   const [payModal,      setPayModal]      = useState(null);
   const [page,          setPage]          = useState(1);
   const [pageSize,      setPageSize]      = useState(10);
+  const [loading,       setLoading]       = useState(true);
 
-  const load = () => {
-    getGroups().then(setGroups).catch(() => toast.error('Failed to load groups'));
-    getFees().then(setAllFees);
-    getStudents().then(setAllStudents);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [g, f, s] = await Promise.all([getGroups(), getFees().catch(() => []), getStudents().catch(() => [])]);
+      setGroups(g);
+      setAllFees(f);
+      setAllStudents(s);
+    } catch { toast.error('Failed to load groups'); }
+    finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -156,6 +163,8 @@ export default function Groups() {
     return { g, students, due };
   });
   const groupRows = allGroupRows.slice((page - 1) * pageSize, page * pageSize);
+
+  if (loading) return <PageSpinner />;
 
   return (
     <div className="anim-fade-up">

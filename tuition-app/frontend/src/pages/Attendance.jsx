@@ -3,6 +3,7 @@ import { getAttendance, saveAttendance, sendWhatsApp, markAttendanceNotified, ge
 import { MONTHS } from '../utils/constants';
 import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, TeamOutlined, SendOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import AppModal from '../components/common/AppModal';
+import PageSpinner from '../components/common/PageSpinner';
 import WaPreviewModal from '../components/common/WaPreviewModal';
 import AttendanceControls from '../components/attendance/AttendanceControls';
 import AttendanceTable    from '../components/attendance/AttendanceTable';
@@ -19,7 +20,8 @@ export default function Attendance() {
   const [date,    setDate]    = useState(today);
   const [data,    setData]    = useState([]);
   const [marks,   setMarks]   = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading,     setLoading]     = useState(true);
+  const [pageReady,   setPageReady]   = useState(false);
 
   // ── Monthly state ──
   const now = new Date();
@@ -50,6 +52,7 @@ export default function Attendance() {
       setMarks(m);
     } catch { toast.error('Failed to load attendance'); }
     setLoading(false);
+    setPageReady(true);
   };
 
   useEffect(() => { load(date); }, [date]);
@@ -209,6 +212,8 @@ export default function Attendance() {
 
   const totalAbsent  = filteredData.reduce((s, r) => s + r.totalAbsent, 0);
   const totalPresent = filteredData.reduce((s, r) => s + r.totalPresent, 0);
+
+  if (!pageReady) return <PageSpinner />;
 
   return (
     <div>

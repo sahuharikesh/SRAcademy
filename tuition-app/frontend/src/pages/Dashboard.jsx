@@ -4,16 +4,25 @@ import { buildFeeMsg } from '../utils/messages';
 import StatsGrid      from '../components/dashboard/StatsGrid';
 import DueFeePanel    from '../components/dashboard/DueFeePanel';
 import WaPreviewModal from '../components/common/WaPreviewModal';
+import PageSpinner    from '../components/common/PageSpinner';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
   const [stats,     setStats]     = useState(null);
   const [dueFees,   setDueFees]   = useState([]);
-  const [waPreview, setWaPreview] = useState(null); // { fee, msg }
+  const [waPreview, setWaPreview] = useState(null);
+  const [loading,   setLoading]   = useState(true);
 
-  const load = () => {
-    getDashboard().then(setStats).catch(() => toast.error('Failed to connect to server'));
-    getDueFees().then(setDueFees);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [s, d] = await Promise.all([
+        getDashboard().catch(() => { toast.error('Failed to connect to server'); return null; }),
+        getDueFees().catch(() => []),
+      ]);
+      setStats(s);
+      setDueFees(d);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
@@ -38,6 +47,8 @@ export default function Dashboard() {
     setDueFees((prev) => prev.map((f) => ({ ...f, notificationSent: true })));
     toast.success(`Sending ${dueFees.length} WhatsApp messages...`);
   };
+
+  if (loading) return <PageSpinner />;
 
   return (
     <div className="anim-fade-up">

@@ -7,7 +7,7 @@ const links = [
   { to: '/attendance',      label: 'Attendance',     icon: <CalendarOutlined />     },
   { to: '/fees',            label: 'Fees',           icon: <DollarOutlined />       },
   { to: '/groups',          label: 'Groups',         icon: <UsergroupAddOutlined /> },
-  { to: '/question-paper',  label: 'Question Paper', icon: <FileTextOutlined />     },
+  { to: '/question-paper',  label: 'Set Paper',      icon: <FileTextOutlined />     },
 ];
 
 const delays = [0, 75, 150, 225, 300, 375];

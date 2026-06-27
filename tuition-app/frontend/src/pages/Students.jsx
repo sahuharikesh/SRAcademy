@@ -20,20 +20,30 @@ export default function Students() {
   const [filterMedium,  setFilterMedium]  = useState('');
   const [showWaGroup,    setShowWaGroup]    = useState(false);
   const [certStudent,    setCertStudent]    = useState(null);
+  const [submitting,     setSubmitting]     = useState(false);
+  const [loading,        setLoading]        = useState(true);
 
-  const load = () => {
-    getStudents().then(setStudents).catch(() => toast.error('Failed to load students'));
-    getGroups().then(setGroups).catch(() => {});
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [s, g] = await Promise.all([getStudents(), getGroups().catch(() => [])]);
+      setStudents(s);
+      setGroups(g);
+    } catch { toast.error('Failed to load students'); }
+    finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     try {
       if (editId) { await updateStudent(editId, form); toast.success('Student updated!'); }
       else        { await addStudent(form);             toast.success('Student admitted!'); }
       setForm(EMPTY); setEditId(null); setShowForm(false); load();
     } catch (err) { toast.error(err.response?.data?.error || 'Something went wrong'); }
+    finally { setSubmitting(false); }
   };
 
   const handleEdit = (s) => {
@@ -100,7 +110,7 @@ export default function Students() {
         <StudentForm
           form={form} setForm={setForm}
           editId={editId} onSubmit={handleSubmit} onCancel={handleCancel}
-          groups={groups}
+          groups={groups} submitting={submitting}
         />
       )}
 
@@ -146,8 +156,15 @@ export default function Students() {
         )}
       </div>
 
-      <StudentTable students={filtered} onEdit={handleEdit} onDelete={handleDelete}
-        onBulkDelete={handleBulkDelete} onCertificate={setCertStudent} />
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
+            style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }} />
+        </div>
+      ) : (
+        <StudentTable students={filtered} onEdit={handleEdit} onDelete={handleDelete}
+          onBulkDelete={handleBulkDelete} onCertificate={setCertStudent} />
+      )}
 
       <WaGroupModal open={showWaGroup} onClose={() => setShowWaGroup(false)} students={students} />
       <CertificateModal open={!!certStudent} onClose={() => setCertStudent(null)} student={certStudent} />

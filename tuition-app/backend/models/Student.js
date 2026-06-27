@@ -19,4 +19,10 @@ const StudentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Prevent duplicate active students with same name+mobile+std per admin
+StudentSchema.index(
+  { adminEmail: 1, mobile: 1, std: 1, name: 1 },
+  { unique: true, partialFilterExpression: { isActive: true } }
+);
+
 module.exports = mongoose.model('Student', StudentSchema);

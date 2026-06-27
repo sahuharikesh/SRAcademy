@@ -6,6 +6,7 @@ import AddFeeForm    from '../components/fees/AddFeeForm';
 import FeeFilterTabs from '../components/fees/FeeFilterTabs';
 import FeeTable      from '../components/fees/FeeTable';
 import AppModal      from '../components/common/AppModal';
+import PageSpinner   from '../components/common/PageSpinner';
 import toast from 'react-hot-toast';
 
 function PayModal({ fee, open, onClose, onSuccess }) {
@@ -118,9 +119,18 @@ export default function Fees() {
   const [waModal,      setWaModal]      = useState(null);
   const [payModal,     setPayModal]     = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
+  const [loading,      setLoading]      = useState(true);
 
-  const load = () => getFees().then(setFees).catch(() => toast.error('Failed to load fees'));
-  useEffect(() => { load(); getStudents().then(setStudents).catch(() => {}); }, []);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [f, s] = await Promise.all([getFees(), getStudents().catch(() => [])]);
+      setFees(f);
+      setStudents(s);
+    } catch { toast.error('Failed to load fees'); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { load(); }, []);
 
   const handlePay = (fee) => setPayModal(fee);
 
@@ -181,6 +191,8 @@ export default function Fees() {
     if (filterYear  && f.year  !== Number(filterYear)) return false;
     return true;
   });
+
+  if (loading) return <PageSpinner />;
 
   return (
     <div className="anim-fade-up">

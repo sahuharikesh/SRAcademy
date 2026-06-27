@@ -7,10 +7,8 @@ export const EMPTY = {
   medium: 'Hindi', schoolName: '', comment: '',
 };
 
-export default function StudentForm({ form, setForm, editId, onSubmit, onCancel, groups = [] }) {
-  const nextNum = Math.max(0, ...groups.map((g) => parseInt(g.replace(/\D/g, '')) || 0)) + 1;
-  const nextGroupNo = `F${nextNum}`;
-  const isNewGroup = form.groupNo && !groups.includes(form.groupNo);
+export default function StudentForm({ form, setForm, editId, onSubmit, onCancel, groups = [], submitting = false }) {
+  const isNewGroup = form.groupNo === '__new__';
 
   return (
     <div className="rounded-xl shadow-md p-6 mb-6"
@@ -55,7 +53,7 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
             <div className="flex items-center gap-2">
               <span className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
                 style={{ background: '#f0f4ff', color: '#3730a3', border: '1px solid #c7d2fe' }}>
-                New Group {form.groupNo} (auto-assigned)
+                New Group (auto-assigned on save)
               </span>
               <button type="button"
                 className="px-3 py-1.5 text-xs rounded-lg border"
@@ -66,13 +64,10 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
             </div>
           ) : (
             <select className={inp} value={form.groupNo}
-              onChange={(e) => {
-                if (e.target.value === '__new__') setForm({ ...form, groupNo: nextGroupNo });
-                else setForm({ ...form, groupNo: e.target.value });
-              }}>
+              onChange={(e) => setForm({ ...form, groupNo: e.target.value })}>
               <option value="">— No Group —</option>
               {groups.map((g) => <option key={g} value={g}>Group {g}</option>)}
-              <option value="__new__">+ Create new group ({nextGroupNo})</option>
+              <option value="__new__">+ Create new group</option>
             </select>
           )}
         </Field>
@@ -115,8 +110,10 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
         </div>
 
         <div className="col-span-1 sm:col-span-2 flex gap-3 flex-wrap">
-          <button type="submit" className="px-4 py-1 rounded-lg font-semibold text-xs" style={GOLD}>
-            {editId ? 'Update Student' : 'Admit Student'}
+          <button type="submit" disabled={submitting}
+            className="px-4 py-1 rounded-lg font-semibold text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+            style={GOLD}>
+            {submitting ? 'Saving...' : (editId ? 'Update Student' : 'Admit Student')}
           </button>
           <button type="button" onClick={onCancel}
             className="px-4 py-1 rounded-lg font-semibold text-xs border"

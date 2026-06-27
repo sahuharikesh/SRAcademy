@@ -55,10 +55,25 @@ exports.create = async (req, res) => {
       adminEmail: req.adminEmail,
     });
     if (existing) {
-      return res.status(409).json({ error: 'A student with the same Name, Class, and Mobile already exists.' });
+      return res.status(409).json({ error: 'A student with the same Name, Mobile, and Class already exists.' });
     }
 
-    const student = await Student.create({ ...req.body, mobile, adminEmail: req.adminEmail });
+    // If frontend requests a new group, generate next available groupNo atomically
+    let groupNo = req.body.groupNo || '';
+    if (groupNo === '__new__') {
+      const existingGroups = await Student.distinct('groupNo', {
+        adminEmail: req.adminEmail,
+        isActive: true,
+        groupNo: { $nin: ['', null] },
+      });
+      const maxNum = existingGroups.reduce((max, g) => {
+        const n = parseInt((g || '').replace(/\D/g, '')) || 0;
+        return Math.max(max, n);
+      }, 0);
+      groupNo = `F${maxNum + 1}`;
+    }
+
+    const student = await Student.create({ ...req.body, mobile, groupNo, adminEmail: req.adminEmail });
 
     const admission = new Date(student.dateOfAdmission);
     const dueDay    = Math.max(1, admission.getDate() - 1);
@@ -74,7 +89,12 @@ exports.create = async (req, res) => {
     });
 
     res.status(201).json(student);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) {
+    if (e.code === 11000) {
+      return res.status(409).json({ error: 'A student with the same Name, Mobile, and Class already exists.' });
+    }
+    res.status(400).json({ error: e.message });
+  }
 };
 
 exports.update = async (req, res) => {
