@@ -4,6 +4,7 @@ const ctrl   = require('../controllers/studentController');
 router.get('/',                    ctrl.getAll);
 router.get('/groups',              ctrl.getGroups);
 router.get('/group/:groupNo',      ctrl.getByGroup);
+router.delete('/group/:groupNo',   ctrl.deleteGroup);
 router.post('/',                   ctrl.create);
 router.put('/:id',                 ctrl.update);
 router.delete('/:id',              ctrl.remove);

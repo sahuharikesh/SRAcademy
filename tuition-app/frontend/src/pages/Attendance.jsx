@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getAttendance, saveAttendance, sendWhatsApp, markAttendanceNotified, getMonthlyAttendance, getStudents } from '../api';
 import { MONTHS } from '../utils/constants';
+import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, TeamOutlined, SendOutlined, WhatsAppOutlined } from '@ant-design/icons';
+import AppModal from '../components/common/AppModal';
+import WaPreviewModal from '../components/common/WaPreviewModal';
 import AttendanceControls from '../components/attendance/AttendanceControls';
 import AttendanceTable    from '../components/attendance/AttendanceTable';
 import AbsentNotifyPanel  from '../components/attendance/AbsentNotifyPanel';
@@ -25,6 +28,9 @@ export default function Attendance() {
   const [monthlyData, setMonthlyData] = useState([]);
   const [mLoading,    setMLoading]    = useState(false);
   const [searched,    setSearched]    = useState(false);
+
+  // ── WA preview state ──
+  const [waPreview, setWaPreview] = useState(null); // { row, msg }
 
   // ── Modal state ──
   const [showModal,   setShowModal]   = useState(false);
@@ -76,13 +82,22 @@ export default function Attendance() {
   };
 
   const handleSendOne = (row) => {
-    sendWhatsApp(row.student.mobile, buildAbsentMsg(row));
-    if (row.attendance?._id) markAttendanceNotified(row.attendance._id).catch(() => {});
+    setWaPreview({ row, msg: buildAbsentMsg(row) });
+  };
+
+  const confirmAbsentSend = () => {
+    if (!waPreview) return;
+    sendWhatsApp(waPreview.row.student.mobile, waPreview.msg);
+    if (waPreview.row.attendance?._id) markAttendanceNotified(waPreview.row.attendance._id).catch(() => {});
+    toast.success('WhatsApp opened!');
   };
 
   const handleSendAll = () => {
     if (absentList.length === 0) return toast.error('No absent students!');
-    absentList.forEach((row, i) => setTimeout(() => handleSendOne(row), i * 600));
+    absentList.forEach((row, i) => setTimeout(() => {
+      sendWhatsApp(row.student.mobile, buildAbsentMsg(row));
+      if (row.attendance?._id) markAttendanceNotified(row.attendance._id).catch(() => {});
+    }, i * 600));
     toast.success(`Sending ${absentList.length} WhatsApp messages...`);
   };
 
@@ -201,14 +216,14 @@ export default function Attendance() {
       <div className="flex items-center gap-2 mb-5">
         <button
           onClick={() => setTab('daily')}
-          className="px-4 py-2 text-sm font-bold rounded-lg transition-all"
+          className="px-3 py-1.5 text-xs font-bold rounded-lg transition-all"
           style={tab === 'daily'
             ? { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }
             : { background: '#1a1a1a', color: '#888', border: '1px solid #333' }}
         >Daily Attendance</button>
         <button
           onClick={handleTabMonthly}
-          className="px-4 py-2 text-sm font-bold rounded-lg transition-all"
+          className="px-3 py-1.5 text-xs font-bold rounded-lg transition-all"
           style={tab === 'monthly'
             ? { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }
             : { background: '#1a1a1a', color: '#888', border: '1px solid #333' }}
@@ -220,9 +235,9 @@ export default function Attendance() {
         <>
           <AttendanceControls date={date} onDateChange={setDate} onSetAll={handleSetAll} onSave={handleSave} />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 sm:gap-3 sm:mb-6">
-            <StatCard label="Present" value={stats.present} variant="green"  icon="✅" />
-            <StatCard label="Absent"  value={stats.absent}  variant="red"    icon="🔴" />
-            <StatCard label="Late"    value={stats.late}    variant="purple" icon="⏰" />
+            <StatCard label="Present" value={stats.present} variant="green"  icon={<CheckCircleOutlined />} />
+            <StatCard label="Absent"  value={stats.absent}  variant="red"    icon={<CloseCircleOutlined />} />
+            <StatCard label="Late"    value={stats.late}    variant="purple" icon={<ClockCircleOutlined />} />
           </div>
           <AttendanceTable data={data} marks={marks} onMark={handleMark} loading={loading} />
           <AbsentNotifyPanel absentList={absentList} onSendOne={handleSendOne} onSendAll={handleSendAll} />
@@ -243,28 +258,28 @@ export default function Attendance() {
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <select value={month} onChange={(e) => { const m = Number(e.target.value); setMonth(m); loadMonthly(m, year); }}
-                className="text-sm font-semibold rounded-lg px-3 py-2 outline-none"
+                className="text-xs font-semibold rounded-lg px-2 py-1 outline-none"
                 style={{ background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' }}>
                 {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
               </select>
               <select value={year} onChange={(e) => { const y = Number(e.target.value); setYear(y); loadMonthly(month, y); }}
-                className="text-sm font-semibold rounded-lg px-3 py-2 outline-none"
+                className="text-xs font-semibold rounded-lg px-2 py-1 outline-none"
                 style={{ background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' }}>
                 {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
               </select>
               <button onClick={handleSendMonthlyAll}
-                className="px-4 py-2 rounded-lg text-sm font-black flex items-center gap-1.5"
+                className="px-3 py-1 rounded-lg text-xs font-black flex items-center gap-1.5"
                 style={{ background: 'linear-gradient(135deg,#25D366,#1ead52)', color: '#fff' }}>
-                📤 Send All
+                <SendOutlined className="mr-1" />Send All
               </button>
             </div>
           </div>
 
           {/* Summary cards */}
           <div className="grid grid-cols-3 gap-2 mb-4 sm:gap-3 sm:mb-5">
-            <StatCard label="Students"      value={filteredData.length} variant="blue"  icon="👥" />
-            <StatCard label="Total Present" value={totalPresent}        variant="green" icon="✅" />
-            <StatCard label="Total Absent"  value={totalAbsent}         variant="red"   icon="🔴" />
+            <StatCard label="Students"      value={filteredData.length} variant="blue"  icon={<TeamOutlined />}          />
+            <StatCard label="Total Present" value={totalPresent}        variant="green" icon={<CheckCircleOutlined />}   />
+            <StatCard label="Total Absent"  value={totalAbsent}         variant="red"   icon={<CloseCircleOutlined />}   />
           </div>
 
           {mLoading ? (
@@ -296,23 +311,23 @@ export default function Attendance() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-bold px-2.5 py-1 rounded-full"
                           style={{ background: 'rgba(77,217,122,0.15)', color: '#4DD97A', border: '1px solid rgba(77,217,122,0.3)' }}>
-                          ✓ {row.totalPresent} Present
+                          {row.totalPresent} Present
                         </span>
                         <span className="text-xs font-bold px-2.5 py-1 rounded-full"
                           style={{ background: 'rgba(245,101,101,0.15)', color: '#F56565', border: '1px solid rgba(245,101,101,0.3)' }}>
-                          ✗ {row.totalAbsent} Absent
+                          {row.totalAbsent} Absent
                         </span>
                         {row.totalLate > 0 && (
                           <span className="text-xs font-bold px-2.5 py-1 rounded-full"
                             style={{ background: 'rgba(245,200,66,0.15)', color: '#F5C842', border: '1px solid rgba(245,200,66,0.3)' }}>
-                            ⏰ {row.totalLate} Late
+                            {row.totalLate} Late
                           </span>
                         )}
                         <button
                           onClick={() => handleSendMonthlyOne(row)}
-                          className="text-xs font-black px-3 py-1 rounded-full flex items-center gap-1"
+                          className="w-7 h-7 rounded-full flex items-center justify-center"
                           style={{ background: '#25D366', color: '#fff' }}>
-                          WhatsApp
+                          <WhatsAppOutlined />
                         </button>
                       </div>
                     </div>
@@ -320,7 +335,7 @@ export default function Attendance() {
                     {/* Absent date chips */}
                     <div className="px-4 py-3">
                       {absentDays.length === 0 ? (
-                        <p className="text-xs text-gray-400 italic">No absents this month 🎉</p>
+                        <p className="text-xs text-gray-400 italic">No absents this month</p>
                       ) : (
                         <>
                           <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Absent Dates</p>
@@ -384,87 +399,72 @@ export default function Attendance() {
         </>
       )}
 
+      <WaPreviewModal
+        open={!!waPreview}
+        onClose={() => setWaPreview(null)}
+        title="Absence Alert"
+        subtitle={waPreview ? `${waPreview.row.student.name} — ${waPreview.row.student.mobile}` : ''}
+        message={waPreview?.msg}
+        onSend={confirmAbsentSend}
+      />
+
       {/* ── SEARCH MODAL ── */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
-            style={{ background: '#fff', border: '2px solid #C9A84C' }}>
-
-            {/* Modal header */}
-            <div className="px-6 py-4 flex items-start justify-between"
-              style={{ background: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)', borderBottom: '2px solid #C9A84C' }}>
-              <div>
-                <h2 className="text-base font-black text-white">Monthly Report</h2>
-                <p className="text-xs mt-0.5" style={{ color: '#C9A84C' }}>Select month, class and student</p>
-              </div>
-              <button onClick={handleCancel}
-                className="text-gray-400 hover:text-white text-xl font-bold leading-none mt-0.5">✕</button>
+      <AppModal open={showModal} onClose={handleCancel} title="Monthly Report" subtitle="Select month, class and student">
+        <div className="px-6 py-5 flex flex-col gap-4">
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Month</label>
+              <select value={month} onChange={(e) => setMonth(Number(e.target.value))}
+                className="w-full px-2 py-1.5 rounded-lg text-xs font-semibold outline-none"
+                style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
+                {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+              </select>
             </div>
-
-            {/* Modal body — all dropdowns */}
-            <div className="px-6 py-5 flex flex-col gap-4">
-
-              {/* Month + Year row */}
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Month</label>
-                  <select value={month} onChange={(e) => setMonth(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold outline-none"
-                    style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
-                    {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                  </select>
-                </div>
-                <div className="w-24">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Year</label>
-                  <select value={year} onChange={(e) => setYear(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold outline-none"
-                    style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
-                    {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              {/* Class dropdown */}
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Class (Std)</label>
-                <select value={filterStd}
-                  onChange={(e) => { setFilterStd(e.target.value); setFilterName(''); }}
-                  className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold outline-none"
-                  style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
-                  <option value="">-- All Classes --</option>
-                  {stdOptions.map((s) => <option key={s} value={s}>Class {s}</option>)}
-                </select>
-              </div>
-
-              {/* Student dropdown — only when class selected */}
-              {filterStd && (
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Student</label>
-                  <select value={filterName} onChange={(e) => setFilterName(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold outline-none"
-                    style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
-                    <option value="">-- All Students of Class {filterStd} --</option>
-                    {studentOptions.map((s) => <option key={s._id} value={s.name}>{s.name}</option>)}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            {/* Modal footer */}
-            <div className="px-6 pb-5 flex gap-3">
-              <button onClick={handleCancel}
-                className="flex-1 py-2.5 rounded-lg text-sm font-bold"
-                style={{ background: '#f3f4f6', color: '#666' }}>Cancel</button>
-              <button onClick={handleModalSearch}
-                className="flex-1 py-2.5 rounded-lg text-sm font-black"
-                style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
-                Search
-              </button>
+            <div className="w-24">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Year</label>
+              <select value={year} onChange={(e) => setYear(Number(e.target.value))}
+                className="w-full px-2 py-1.5 rounded-lg text-xs font-semibold outline-none"
+                style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
+                {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
+              </select>
             </div>
           </div>
+
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Class (Std)</label>
+            <select value={filterStd}
+              onChange={(e) => { setFilterStd(e.target.value); setFilterName(''); }}
+              className="w-full px-2 py-1.5 rounded-lg text-xs font-semibold outline-none"
+              style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
+              <option value="">-- All Classes --</option>
+              {stdOptions.map((s) => <option key={s} value={s}>Class {s}</option>)}
+            </select>
+          </div>
+
+          {filterStd && (
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Student</label>
+              <select value={filterName} onChange={(e) => setFilterName(e.target.value)}
+                className="w-full px-2 py-1.5 rounded-lg text-xs font-semibold outline-none"
+                style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
+                <option value="">-- All Students of Class {filterStd} --</option>
+                {studentOptions.map((s) => <option key={s._id} value={s.name}>{s.name}</option>)}
+              </select>
+            </div>
+          )}
         </div>
-      )}
+
+        <div className="px-6 pb-5 flex gap-3">
+          <button onClick={handleCancel}
+            className="flex-1 py-1.5 rounded-lg text-xs font-bold"
+            style={{ background: '#f3f4f6', color: '#666' }}>Cancel</button>
+          <button onClick={handleModalSearch}
+            className="flex-1 py-1.5 rounded-lg text-xs font-black"
+            style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+            Search
+          </button>
+        </div>
+      </AppModal>
     </div>
   );
 }

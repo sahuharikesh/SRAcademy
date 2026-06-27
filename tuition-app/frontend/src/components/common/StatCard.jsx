@@ -97,7 +97,7 @@ export default function StatCard({ label, value, icon, variant = 'default' }) {
       {/* Text */}
       <div className="min-w-0 flex-1">
         <div
-          className="text-2xl font-black leading-tight tabular-nums"
+          className="text-xl font-black leading-tight tabular-nums"
           style={{ color: t.accent }}
         >
           {displayValue}
@@ -113,7 +113,7 @@ export default function StatCard({ label, value, icon, variant = 'default' }) {
       {/* Icon bubble */}
       {icon && (
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
           style={{
             background: t.icon.bg,
             color:      t.icon.color,

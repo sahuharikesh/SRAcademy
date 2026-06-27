@@ -1,12 +1,11 @@
 const Fee              = require('../models/Fee');
 const Student          = require('../models/Student');
 const QRCode           = require('qrcode');
-const { updateOverdue, cleanupOldPaidFees } = require('../utils/fees');
+const { updateOverdue } = require('../utils/fees');
 
 exports.getAll = async (req, res) => {
   try {
     await updateOverdue(req.adminEmail);
-    await cleanupOldPaidFees(req.adminEmail);
     const fees = await Fee.find({ adminEmail: req.adminEmail })
       .populate({ path: 'studentId', select: 'name mobile std groupNo feeType isActive', match: { isActive: true } })
       .sort({ dueDate: 1 });
@@ -92,13 +91,17 @@ exports.markPaid = async (req, res) => {
     const { payment, paidDate } = req.body;
     const fee = await Fee.findById(req.params.id);
     if (!fee) return res.status(404).json({ error: 'Fee not found' });
+
     const totalPaid = (fee.paidAmount || 0) + Number(payment);
     const status    = totalPaid >= fee.amount ? 'Paid' : 'Partial';
-    const updated   = await Fee.findByIdAndUpdate(
+    const paidOn    = paidDate || new Date();
+
+    const updated = await Fee.findByIdAndUpdate(
       req.params.id,
-      { status, paidAmount: totalPaid, paidDate: paidDate || new Date() },
+      { status, paidAmount: totalPaid, paidDate: paidOn },
       { new: true }
     );
+
     res.json(updated);
   } catch (e) { res.status(400).json({ error: e.message }); }
 };
@@ -140,38 +143,37 @@ exports.remove = async (req, res) => {
 exports.generate = async (req, res) => {
   try {
     const students = await Student.find({ isActive: true, feeType: 'Monthly', adminEmail: req.adminEmail });
-    const now   = new Date();
-    const next7 = new Date(); next7.setDate(now.getDate() + 7);
-    let created = 0, skipped = 0;
+    const today = new Date(); today.setHours(23, 59, 59, 999);
+    let created = 0;
 
     for (const s of students) {
       const admission = new Date(s.dateOfAdmission);
-      const dueDay    = Math.max(1, admission.getDate() - 1);
-      const lastFee   = await Fee.findOne({ studentId: s._id, adminEmail: req.adminEmail }).sort({ dueDate: -1 });
+      // Due day = admission day - 1 (e.g. admitted 15th → due 14th of next month)
+      const dueDay = Math.max(1, admission.getDate() - 1);
 
-      let dueDate;
-      if (lastFee) {
-        // Next month after last fee
-        dueDate = new Date(new Date(lastFee.dueDate).getFullYear(), new Date(lastFee.dueDate).getMonth() + 1, dueDay);
-      } else {
-        // New student — use current month's due date (may be past-due)
-        dueDate = new Date(now.getFullYear(), now.getMonth(), dueDay);
-        // If current month's due is still >7 days away, try previous month (already overdue)
-        if (dueDate > next7) {
-          dueDate = new Date(now.getFullYear(), now.getMonth() - 1, dueDay);
+      // First expected fee is one month after admission
+      let cursor = new Date(admission.getFullYear(), admission.getMonth() + 1, dueDay);
+
+      // Generate ALL missing months from first due date up to today
+      while (cursor <= today) {
+        const monthName = cursor.toLocaleString('default', { month: 'long' });
+        const year      = cursor.getFullYear();
+        const exists    = await Fee.findOne({ studentId: s._id, month: monthName, year, adminEmail: req.adminEmail });
+        if (!exists) {
+          await Fee.create({
+            studentId: s._id, month: monthName, year,
+            dueDate: new Date(cursor),
+            amount: s.recommendedFees, status: 'Overdue', adminEmail: req.adminEmail,
+          });
+          created++;
         }
-      }
-
-      if (dueDate > next7) { skipped++; continue; }
-
-      const monthName = dueDate.toLocaleString('default', { month: 'long' });
-      const year      = dueDate.getFullYear();
-      const exists    = await Fee.findOne({ studentId: s._id, month: monthName, year, adminEmail: req.adminEmail });
-      if (!exists) {
-        await Fee.create({ studentId: s._id, month: monthName, year, dueDate, amount: s.recommendedFees, status: 'Upcoming', adminEmail: req.adminEmail });
-        created++;
+        cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, dueDay);
       }
     }
-    res.json({ message: `${created} fee record(s) generated. ${skipped} student(s) skipped.` });
+
+    if (created === 0) {
+      return res.json({ message: 'No Future Data Available' });
+    }
+    res.json({ message: `${created} fee record(s) generated.` });
   } catch (e) { res.status(500).json({ error: e.message }); }
 };

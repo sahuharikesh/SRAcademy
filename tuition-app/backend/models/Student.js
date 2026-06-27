@@ -10,7 +10,7 @@ const StudentSchema = new mongoose.Schema(
     actualFees:      { type: Number, required: true },
     recommendedFees: { type: Number, required: true },
     groupNo:         { type: String, default: '' },
-    medium:          { type: [String], enum: ['Hindi', 'English', 'Semi-English'], default: [] },
+    medium:          { type: String, enum: ['Hindi', 'English', 'Semi-English', ''], default: '' },
     schoolName:      { type: String, default: '' },
     comment:         { type: String, default: '' },
     isActive:        { type: Boolean, default: true },

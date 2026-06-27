@@ -1,4 +1,5 @@
 import { GOLD } from '../../utils/constants';
+import { WhatsAppOutlined, PhoneOutlined, WarningOutlined } from '@ant-design/icons';
 
 export default function AbsentNotifyPanel({ absentList, onSendOne, onSendAll }) {
   if (absentList.length === 0) return null;
@@ -7,9 +8,9 @@ export default function AbsentNotifyPanel({ absentList, onSendOne, onSendAll }) 
     <div className="rounded-xl shadow-md p-5" style={{ background: '#fff', border: '1px solid #C9A84C' }}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-bold text-sm" style={{ color: '#1a1a1a' }}>
-          ⚠️ Absent Students — WhatsApp Notification ({absentList.length})
+          <WarningOutlined className="mr-1" />Absent Students — WhatsApp Notification ({absentList.length})
         </h2>
-        <button onClick={onSendAll} className="px-4 py-2 rounded-lg text-sm font-semibold" style={GOLD}>
+        <button onClick={onSendAll} className="px-3 py-1 rounded-lg text-xs font-semibold" style={GOLD}>
           Send to All
         </button>
       </div>
@@ -21,10 +22,15 @@ export default function AbsentNotifyPanel({ absentList, onSendOne, onSendAll }) 
               <div className="font-semibold text-sm">{row.student.name}</div>
               <div className="text-xs text-gray-500">Class {row.student.std} · {row.student.mobile}</div>
             </div>
-            <button onClick={() => onSendOne(row)}
-              className="px-3 py-1 rounded text-xs font-semibold" style={GOLD}>
-              WhatsApp
+            <button onClick={() => onSendOne(row)} title="Send WhatsApp"
+              className="w-7 h-7 rounded flex items-center justify-center" style={GOLD}>
+              <WhatsAppOutlined />
             </button>
+            <a href={`tel:${row.student.mobile}`} title="Call"
+              className="w-7 h-7 rounded flex items-center justify-center"
+              style={{ background: '#d4edda', color: '#155724' }}>
+              <PhoneOutlined />
+            </a>
           </div>
         ))}
       </div>

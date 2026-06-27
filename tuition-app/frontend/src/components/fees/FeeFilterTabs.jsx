@@ -23,7 +23,7 @@ export default function FeeFilterTabs({ fees, active, onChange }) {
           <button
             key={tab}
             onClick={() => onChange(tab)}
-            className="btn-shine px-4 py-1.5 rounded-full text-xs font-bold transition-all"
+            className="btn-shine px-3 py-0.5 rounded-full text-xs font-bold transition-all"
             style={isActive
               ? { ...GOLD, border: '1.5px solid transparent', boxShadow: '0 4px 14px rgba(201,168,76,0.4)' }
               : { ...colorStyle, border: `1.5px solid ${colorStyle.borderColor}` }}>

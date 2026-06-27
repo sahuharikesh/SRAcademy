@@ -20,26 +20,34 @@ export function buildFeeMsg(fee) {
     `Amount  : Rs. *${fee.amount}*\n` +
     `Due Date : *${due}*\n\n` +
     `*Pay via UPI:*\n` +
-    `UPI ID : *${UPI_ID}*\n\n` +
+    `UPI ID : *${UPI_ID}*\n` +
+    `On Mobile No. : ${UPI_ID.split('@')[0]}\n\n` +
     `*Scan QR to Pay Instantly:*\n` +
     `${buildUpiQrUrl(fee)}\n\n` +
     `_Kindly pay before the due date to avoid inconvenience._\n\n` +
-    `Contact : *8422053851*\n` +
+    `Contact : *${UPI_ID.split('@')[0]}*\n` +
     `-- *${SCHOOL}*`
   );
 }
 
+export function buildGroupUpiQrUrl(totalDue, groupNo) {
+  const note    = `Group ${groupNo} Family Fees`;
+  const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${totalDue}&cu=INR&tn=${encodeURIComponent(note)}`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
+}
+
 export function buildGroupFeeMsg(students, fees) {
-  const parent     = students[0];
   const totalDue   = students
     .flatMap((s) => fees.filter((f) => feeMatchesStudent(f, s) && f.status !== 'Paid'))
-    .reduce((sum, f) => sum + f.amount, 0);
+    .reduce((sum, f) => sum + (f.amount - (f.paidAmount || 0)), 0);
   const childLines = students.map((s) => {
     const amt = fees
       .filter((f) => feeMatchesStudent(f, s) && f.status !== 'Paid')
-      .reduce((sum, f) => sum + f.amount, 0);
+      .reduce((sum, f) => sum + (f.amount - (f.paidAmount || 0)), 0);
     return `  • ${s.name} (${s.std}) — Rs. ${amt}`;
-  }).join('\n');
+  }).filter((l) => !l.endsWith('Rs. 0')).join('\n');
+
+  const qrUrl = buildGroupUpiQrUrl(totalDue, students[0]?.groupNo || '');
 
   return (
     `*${SCHOOL}*\n` +
@@ -47,11 +55,14 @@ export function buildGroupFeeMsg(students, fees) {
     `*Family Fees Reminder*\n\n` +
     `Dear Parent,\n\n` +
     `*Pending Fees:*\n${childLines}\n\n` +
-    `*Total Due : Rs. ${totalDue}*\n\n` +
+    `*Total Fees : Rs. ${totalDue}*\n\n` +
     `*Pay via UPI:*\n` +
-    `UPI ID : *${UPI_ID}*\n\n` +
+    `UPI ID : *${UPI_ID}*\n` +
+    `On Mobile No. : ${UPI_ID.split('@')[0]}\n\n` +
+    `*Scan QR to Pay Instantly:*\n` +
+    `${qrUrl}\n\n` +
     `_Kindly pay before the due date._\n\n` +
-    `Contact : *8422053851*\n` +
+    `Contact : *${UPI_ID.split('@')[0]}*\n` +
     `-- *${SCHOOL}*`
   );
 }

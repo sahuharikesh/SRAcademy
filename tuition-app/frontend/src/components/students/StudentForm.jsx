@@ -1,23 +1,22 @@
-import { useState } from 'react';
 import Field, { inp } from '../common/Field';
-import { STD_OPTIONS, GOLD, DARK } from '../../utils/constants';
+import { STD_OPTIONS, MEDIUM_OPTIONS, GOLD, DARK } from '../../utils/constants';
 
 export const EMPTY = {
   name: '', mobile: '', std: '', dateOfAdmission: '',
   feeType: 'Monthly', actualFees: '', recommendedFees: '', groupNo: '',
-  medium: [], schoolName: '', comment: '',
+  medium: 'Hindi', schoolName: '', comment: '',
 };
 
-const MEDIUM_OPTIONS = ['Hindi', 'English', 'Semi-English'];
-
 export default function StudentForm({ form, setForm, editId, onSubmit, onCancel, groups = [] }) {
-  const [newGroup, setNewGroup] = useState(false);
+  const nextNum = Math.max(0, ...groups.map((g) => parseInt(g.replace(/\D/g, '')) || 0)) + 1;
+  const nextGroupNo = `F${nextNum}`;
+  const isNewGroup = form.groupNo && !groups.includes(form.groupNo);
 
   return (
     <div className="rounded-xl shadow-md p-6 mb-6"
       style={{ background: '#fff', border: '1px solid #C9A84C' }}>
       <h2 className="text-lg font-bold mb-4" style={{ color: '#1a1a1a' }}>
-        {editId ? '✏️ Edit Student' : '🎓 New Admission'}
+        {editId ? 'Edit Student' : 'New Admission'}
       </h2>
       <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Student Name *">
@@ -25,8 +24,13 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
             onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </Field>
         <Field label="Mobile Number *">
-          <input className={inp} value={form.mobile} required placeholder="Parent's mobile number"
-            onChange={(e) => setForm({ ...form, mobile: e.target.value })} />
+          <input className={inp} value={form.mobile} required placeholder="10-digit mobile number"
+            type="tel" inputMode="numeric" maxLength={10} pattern="[6-9][0-9]{9}"
+            title="Enter a valid 10-digit Indian mobile number"
+            onChange={(e) => {
+              const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+              setForm({ ...form, mobile: val });
+            }} />
         </Field>
         <Field label="Class / Standard *">
           <select className={inp} value={form.std} required
@@ -47,27 +51,28 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
           </select>
         </Field>
         <Field label="Group No (Family)">
-          {newGroup ? (
-            <div className="flex gap-2">
-              <input className={inp} autoFocus value={form.groupNo}
-                placeholder="Enter group name e.g. G3"
-                onChange={(e) => setForm({ ...form, groupNo: e.target.value })} />
+          {isNewGroup ? (
+            <div className="flex items-center gap-2">
+              <span className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                style={{ background: '#f0f4ff', color: '#3730a3', border: '1px solid #c7d2fe' }}>
+                New Group {form.groupNo} (auto-assigned)
+              </span>
               <button type="button"
                 className="px-3 py-1.5 text-xs rounded-lg border"
                 style={{ background: '#f5f0e8', color: '#7a6020' }}
-                onClick={() => { setNewGroup(false); setForm({ ...form, groupNo: '' }); }}>
-                Cancel
+                onClick={() => setForm({ ...form, groupNo: '' })}>
+                Clear
               </button>
             </div>
           ) : (
             <select className={inp} value={form.groupNo}
               onChange={(e) => {
-                if (e.target.value === '__new__') { setNewGroup(true); setForm({ ...form, groupNo: '' }); }
+                if (e.target.value === '__new__') setForm({ ...form, groupNo: nextGroupNo });
                 else setForm({ ...form, groupNo: e.target.value });
               }}>
               <option value="">— No Group —</option>
               {groups.map((g) => <option key={g} value={g}>Group {g}</option>)}
-              <option value="__new__">+ Create New Group</option>
+              <option value="__new__">+ Create new group ({nextGroupNo})</option>
             </select>
           )}
         </Field>
@@ -95,14 +100,11 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
               {MEDIUM_OPTIONS.map((m) => (
                 <label key={m} className="flex items-center gap-1.5 text-sm cursor-pointer select-none">
                   <input
-                    type="checkbox"
-                    checked={form.medium.includes(m)}
-                    onChange={(e) => {
-                      const updated = e.target.checked
-                        ? [...form.medium, m]
-                        : form.medium.filter((x) => x !== m);
-                      setForm({ ...form, medium: updated });
-                    }}
+                    type="radio"
+                    name="medium"
+                    value={m}
+                    checked={form.medium === m}
+                    onChange={() => setForm({ ...form, medium: m })}
                     className="accent-yellow-600 w-4 h-4"
                   />
                   {m}
@@ -113,11 +115,11 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
         </div>
 
         <div className="col-span-1 sm:col-span-2 flex gap-3 flex-wrap">
-          <button type="submit" className="px-6 py-2 rounded-lg font-semibold text-sm" style={GOLD}>
+          <button type="submit" className="px-4 py-1 rounded-lg font-semibold text-xs" style={GOLD}>
             {editId ? 'Update Student' : 'Admit Student'}
           </button>
           <button type="button" onClick={onCancel}
-            className="px-6 py-2 rounded-lg font-semibold text-sm border"
+            className="px-4 py-1 rounded-lg font-semibold text-xs border"
             style={DARK}>
             Cancel
           </button>

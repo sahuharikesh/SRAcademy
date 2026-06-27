@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import StatusBadge from '../common/StatusBadge';
 import { GOLD, DARK } from '../../utils/constants';
+import { WhatsAppOutlined, PhoneOutlined, WarningOutlined, BellOutlined, ClockCircleOutlined, CloseCircleOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 const today = new Date(); today.setHours(0, 0, 0, 0);
 
@@ -14,11 +15,11 @@ export default function DueFeePanel({ dueFees, totalDueFees, onSendOne, onSendAl
     totalDueFees === 0
       ? <div className="rounded-xl p-6 text-center font-medium"
           style={{ background: '#f0fff4', border: '1px solid #b7ebc8', color: '#155724' }}>
-          ✅ All fees are cleared! Nothing is due.
+          All fees are cleared! Nothing is due.
         </div>
       : <div className="rounded-xl p-6 text-center font-medium"
           style={{ background: '#fffdf0', border: '1px solid #ffe082', color: '#856404' }}>
-          🔔 {totalDueFees} fee(s) due or overdue — none upcoming within 7 days.
+          <BellOutlined className="mr-1" /> {totalDueFees} fee(s) due or overdue — none upcoming within 7 days.
         </div>
   );
 
@@ -30,16 +31,17 @@ export default function DueFeePanel({ dueFees, totalDueFees, onSendOne, onSendAl
       <div className="px-5 py-4 flex items-center justify-between flex-wrap gap-3"
         style={{ background: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)', borderBottom: '2px solid #C9A84C' }}>
         <div>
-          <h2 className="text-base font-black text-white">⚠️ {dueFees.length} Student(s) — Fees Alert</h2>
+          <h2 className="text-base font-black text-white"><WarningOutlined className="mr-1" />{dueFees.length} Student(s) — Fees Alert</h2>
           <p className="text-[11px] mt-0.5 font-medium" style={{ color: 'rgba(201,168,76,0.8)' }}>Action required on pending / overdue payments</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={onSendAll} className="btn-shine px-4 py-1.5 rounded-lg text-xs font-bold" style={GOLD}>
-            Send All WhatsApp
+          <button onClick={onSendAll} title="Send All WhatsApp"
+            className="btn-shine px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1" style={GOLD}>
+            <WhatsAppOutlined /> Send All
           </button>
-          <button onClick={() => setShow((v) => !v)}
-            className="px-3 py-1.5 rounded-lg text-xs font-bold border" style={DARK}>
-            {show ? 'Hide' : 'Show'}
+          <button onClick={() => setShow((v) => !v)} title={show ? 'Hide' : 'Show'}
+            className="w-7 h-7 rounded-lg font-bold border flex items-center justify-center" style={DARK}>
+            {show ? <EyeInvisibleOutlined /> : <EyeOutlined />}
           </button>
         </div>
       </div>
@@ -49,27 +51,27 @@ export default function DueFeePanel({ dueFees, totalDueFees, onSendOne, onSendAl
       <div className="flex gap-3 text-xs flex-wrap">
         {overdue.length > 0 && (
           <span className="px-3 py-1 rounded-full font-semibold" style={{ background: '#f8d7da', color: '#721c24' }}>
-            🔴 {overdue.length} Overdue
+            <CloseCircleOutlined className="mr-1" />{overdue.length} Overdue
           </span>
         )}
         {pending.length > 0 && (
           <span className="px-3 py-1 rounded-full font-semibold" style={{ background: '#e2e3e5', color: '#383d41' }}>
-            ⏳ {pending.length} Due Today
+            <ClockCircleOutlined className="mr-1" />{pending.length} Due Today
           </span>
         )}
         {upcoming.length > 0 && (
           <span className="px-3 py-1 rounded-full font-semibold" style={{ background: '#fff3cd', color: '#856404' }}>
-            🔔 {upcoming.length} Upcoming (within 7 days)
+            <BellOutlined className="mr-1" />{upcoming.length} Upcoming (within 7 days)
           </span>
         )}
       </div>
 
       {show && (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-xs">
             <thead>
               <tr style={{ background: '#1a1a1a' }}>
-                {['Student','Class','Mobile','Month','Amount','Due Date','Status','Action'].map((h) => (
+                {['Student','Class','Mobile','Month','Amount','Due Date','Status','Actions'].map((h) => (
                   <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
                 ))}
               </tr>
@@ -98,11 +100,19 @@ export default function DueFeePanel({ dueFees, totalDueFees, onSendOne, onSendAl
                   </td>
                   <td className="p-2"><StatusBadge status={fee.status} /></td>
                   <td className="p-2">
-                    <button onClick={() => onSendOne(fee)}
-                      className="px-3 py-1 rounded text-xs font-semibold"
-                      style={fee.notificationSent ? { background: '#e2e3e5', color: '#666' } : GOLD}>
-                      {fee.notificationSent ? 'Sent' : 'WhatsApp'}
-                    </button>
+                    <div className="flex gap-1.5">
+                      <button onClick={() => onSendOne(fee)} title={fee.notificationSent ? 'WhatsApp sent' : 'Send WhatsApp'}
+                        className="w-7 h-7 rounded flex items-center justify-center"
+                        style={fee.notificationSent ? { background: '#e2e3e5', color: '#666' } : GOLD}>
+                        <WhatsAppOutlined />
+                      </button>
+                      <a href={`tel:${fee.studentId?.mobile}`} title="Call"
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-7 h-7 rounded flex items-center justify-center"
+                        style={{ background: '#d4edda', color: '#155724' }}>
+                        <PhoneOutlined />
+                      </a>
+                    </div>
                   </td>
                 </tr>
               ))}

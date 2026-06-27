@@ -9,7 +9,7 @@ export default function AddFeeForm({ students, onSubmit, onCancel }) {
 
   return (
     <div className="rounded-xl shadow-md p-5 mb-6" style={{ background: '#fff', border: '1px solid #C9A84C' }}>
-      <h2 className="font-bold mb-4 text-sm" style={{ color: '#1a1a1a' }}>➕ Add Fee Record</h2>
+      <h2 className="font-bold mb-4 text-sm" style={{ color: '#1a1a1a' }}>Add Fee Record</h2>
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(form, () => setForm(EMPTY)); }}
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <Field label="Student *">
@@ -39,9 +39,9 @@ export default function AddFeeForm({ students, onSubmit, onCancel }) {
             onChange={(e) => setForm({ ...form, amount: e.target.value })} />
         </Field>
         <div className="flex items-end gap-2">
-          <button type="submit" className="px-4 py-2 rounded-lg text-sm font-semibold" style={GOLD}>Add</button>
+          <button type="submit" className="px-3 py-1 rounded-lg text-xs font-semibold" style={GOLD}>Add</button>
           <button type="button" onClick={onCancel}
-            className="px-4 py-2 rounded-lg text-sm font-semibold border"
+            className="px-3 py-1 rounded-lg text-xs font-semibold border"
             style={{ background: '#1a1a1a', color: '#C9A84C', borderColor: '#C9A84C' }}>Cancel</button>
         </div>
       </form>

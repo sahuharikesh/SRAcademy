@@ -21,28 +21,5 @@ async function updateOverdue(adminEmail) {
   );
 }
 
-// Keep only the 2 most recent paid fees per student; delete older ones
-async function cleanupOldPaidFees(adminEmail) {
-  const paidFees = await Fee.find({ status: 'Paid', adminEmail })
-    .sort({ dueDate: -1 })
-    .select('_id studentId');
-
-  const byStudent = {};
-  paidFees.forEach((f) => {
-    const sid = f.studentId.toString();
-    if (!byStudent[sid]) byStudent[sid] = [];
-    byStudent[sid].push(f._id);
-  });
-
-  const toDelete = [];
-  Object.values(byStudent).forEach((ids) => {
-    if (ids.length > 2) toDelete.push(...ids.slice(2));
-  });
-
-  if (toDelete.length > 0) {
-    await Fee.deleteMany({ _id: { $in: toDelete } });
-  }
-}
-
-module.exports = { updateOverdue, cleanupOldPaidFees };
+module.exports = { updateOverdue };
 

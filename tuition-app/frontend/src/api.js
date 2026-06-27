@@ -29,6 +29,7 @@ export const updateStudent = (id, data) => api.put(`/students/${id}`, data).then
 export const deleteStudent = (id) => api.delete(`/students/${id}`).then((r) => r.data);
 export const getGroups = () => api.get('/students/groups').then((r) => r.data);
 export const getStudentsByGroup = (g) => api.get(`/students/group/${g}`).then((r) => r.data);
+export const deleteGroup = (g) => api.delete(`/students/group/${g}`).then((r) => r.data);
 
 export const getAttendance = (date) => api.get(`/attendance/${date}`).then((r) => r.data);
 export const saveAttendance = (date, records) =>

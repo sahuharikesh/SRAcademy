@@ -7,6 +7,8 @@ export const STD_OPTIONS = [
   'Jr/Sr KG','1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th',
 ];
 
+export const MEDIUM_OPTIONS = ['Hindi', 'English', 'Semi-English'];
+
 export const GOLD = { background: 'linear-gradient(135deg, #C9A84C, #f0d080)', color: '#000' };
 export const DARK = { background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' };
 

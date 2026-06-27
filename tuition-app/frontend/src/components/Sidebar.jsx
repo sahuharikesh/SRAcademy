@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
+import { DashboardOutlined, TeamOutlined, CalendarOutlined, DollarOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 
 const links = [
-  { to: '/',           label: 'Dashboard',  icon: '⊞', emoji: '🏠' },
-  { to: '/students',   label: 'Students',   icon: '⊞', emoji: '👨‍🎓' },
-  { to: '/attendance', label: 'Attendance', icon: '⊞', emoji: '📋' },
-  { to: '/fees',       label: 'Fees',       icon: '⊞', emoji: '💰' },
-  { to: '/groups',     label: 'Groups',     icon: '⊞', emoji: '👪' },
+  { to: '/',           label: 'Dashboard',  icon: <DashboardOutlined />     },
+  { to: '/students',   label: 'Students',   icon: <TeamOutlined />          },
+  { to: '/attendance', label: 'Attendance', icon: <CalendarOutlined />      },
+  { to: '/fees',       label: 'Fees',       icon: <DollarOutlined />        },
+  { to: '/groups',     label: 'Groups',     icon: <UsergroupAddOutlined />  },
 ];
 
 const delays = [0, 75, 150, 225, 300];
@@ -37,7 +38,7 @@ export default function Sidebar() {
                 ? { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000', boxShadow: '0 4px 16px rgba(201,168,76,0.35)' }
                 : {}),
             })}>
-            <span className="text-[17px] leading-none flex-shrink-0">{n.emoji}</span>
+            <span className="text-base leading-none flex-shrink-0">{n.icon}</span>
             <span className="font-semibold">{n.label}</span>
           </NavLink>
         ))}
