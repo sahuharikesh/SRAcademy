@@ -51,11 +51,12 @@ function UserMenu() {
 }
 
 const links = [
-  { to: '/',           label: 'Dashboard'  },
-  { to: '/students',   label: 'Students'   },
-  { to: '/attendance', label: 'Attendance' },
-  { to: '/fees',       label: 'Fees'       },
-  { to: '/groups',     label: 'Groups'     },
+  { to: '/',                label: 'Dashboard'      },
+  { to: '/students',        label: 'Students'       },
+  { to: '/attendance',      label: 'Attendance'     },
+  { to: '/fees',            label: 'Fees'           },
+  { to: '/groups',          label: 'Groups'         },
+  { to: '/question-paper',  label: 'Question Paper' },
 ];
 
 export default function Navbar() {
@@ -158,8 +159,20 @@ export default function Navbar() {
           ))}
         </nav>
 
+        {/* Logout Button */}
+        <div className="px-3 pb-2">
+          <button onClick={logout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all hover:bg-red-950"
+            style={{ color: '#f87171', border: '1px solid rgba(248,113,113,0.3)' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+            Logout
+          </button>
+        </div>
+
         {/* Drawer Footer */}
-        <div className="px-5 py-4 text-center" style={{ borderTop: '1px solid rgba(201,168,76,0.2)' }}>
+        <div className="px-5 py-3 text-center" style={{ borderTop: '1px solid rgba(201,168,76,0.2)' }}>
           <p className="text-xs" style={{ color: 'rgba(201,168,76,0.5)' }}>Since 2016</p>
         </div>
       </div>
