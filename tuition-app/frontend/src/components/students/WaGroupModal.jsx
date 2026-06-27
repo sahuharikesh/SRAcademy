@@ -28,6 +28,7 @@ export default function WaGroupModal({ open, onClose, students }) {
   const [inviteLink,   setInviteLink]   = useState('');
   const [added,        setAdded]        = useState(new Set());
   const [showAll,      setShowAll]      = useState(false);
+  const [seqIndex,     setSeqIndex]     = useState(null); // sequential send mode
 
   const byYear = students.reduce((acc, s) => {
     const yr = getAcademicYear(s.dateOfAdmission);
@@ -72,13 +73,24 @@ export default function WaGroupModal({ open, onClose, students }) {
   const handleSendAll = () => {
     if (!inviteLink.trim()) { toast.error('Paste the WhatsApp group invite link first'); return; }
     if (pendingStudents.length === 0) { toast('All students already added!'); return; }
-    pendingStudents.forEach((s, i) => {
-      setTimeout(() => {
-        window.open(`https://wa.me/${s.mobile.replace(/\D/g, '')}?text=${encodeURIComponent(buildMsg(s.name))}`, '_blank');
-      }, i * 600);
-    });
-    markAdded(pendingStudents.map((s) => s._id));
-    toast.success(`Sending invite to ${pendingStudents.length} student(s)…`);
+    setSeqIndex(0);
+  };
+
+  const handleSeqSend = () => {
+    const s = pendingStudents[seqIndex];
+    window.open(`https://wa.me/${s.mobile.replace(/\D/g, '')}?text=${encodeURIComponent(buildMsg(s.name))}`, '_blank');
+    markAdded([s._id]);
+    if (seqIndex + 1 < pendingStudents.length) {
+      setSeqIndex(seqIndex + 1);
+    } else {
+      setSeqIndex(null);
+      toast.success('All invites sent!');
+    }
+  };
+
+  const handleSeqSkip = () => {
+    if (seqIndex + 1 < pendingStudents.length) setSeqIndex(seqIndex + 1);
+    else { setSeqIndex(null); toast('Done!'); }
   };
 
   const handleReset = () => {
@@ -156,6 +168,41 @@ export default function WaGroupModal({ open, onClose, students }) {
             <SendOutlined /> Send to All ({pendingStudents.length})
           </button>
         </div>
+
+        {/* Sequential send overlay */}
+        {seqIndex !== null && (
+          <div className="rounded-xl p-4 flex flex-col gap-3"
+            style={{ background: '#f0fdf4', border: '2px solid #25D366' }}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-green-700">
+                Sending {seqIndex + 1} of {pendingStudents.length}
+              </span>
+              <button onClick={() => setSeqIndex(null)}
+                className="text-xs px-2 py-0.5 rounded" style={{ background: '#fee2e2', color: '#dc2626' }}>
+                Cancel
+              </button>
+            </div>
+            <div className="rounded-lg px-3 py-2" style={{ background: '#fff', border: '1px solid #86efac' }}>
+              <p className="text-sm font-black" style={{ color: '#1a1a1a' }}>{pendingStudents[seqIndex]?.name}</p>
+              <p className="text-xs text-gray-500">{pendingStudents[seqIndex]?.mobile} &nbsp;·&nbsp; Class {pendingStudents[seqIndex]?.std}</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={handleSeqSend}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-black"
+                style={{ background: 'linear-gradient(135deg,#25D366,#1ead52)', color: '#fff' }}>
+                <WhatsAppOutlined /> Tap to Send
+              </button>
+              <button onClick={handleSeqSkip}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold"
+                style={{ background: '#f3f4f6', color: '#6b7280', border: '1px solid #e5e7eb' }}>
+                Skip
+              </button>
+            </div>
+            <div className="w-full rounded-full overflow-hidden" style={{ background: '#dcfce7', height: 6 }}>
+              <div className="h-full rounded-full transition-all" style={{ background: '#25D366', width: `${(seqIndex / pendingStudents.length) * 100}%` }} />
+            </div>
+          </div>
+        )}
 
         {/* Student list */}
         <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto pr-1">

@@ -1,5 +1,58 @@
 import { useState, useRef, useEffect } from 'react';
-import { PlusOutlined, DeleteOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, DownloadOutlined, PrinterOutlined, PictureOutlined } from '@ant-design/icons';
+
+async function processImage(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      // Draw at original size
+      const c1 = document.createElement('canvas');
+      c1.width = img.width; c1.height = img.height;
+      const ctx1 = c1.getContext('2d');
+      ctx1.drawImage(img, 0, 0);
+
+      // Find bounding box of non-white pixels
+      const { data, width, height } = ctx1.getImageData(0, 0, c1.width, c1.height);
+      let minX = width, minY = height, maxX = 0, maxY = 0;
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const i = (y * width + x) * 4;
+          if (data[i+3] > 10 && (data[i] < 235 || data[i+1] < 235 || data[i+2] < 235)) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      // Fallback if all white
+      if (minX > maxX) { minX = 0; minY = 0; maxX = width - 1; maxY = height - 1; }
+
+      const pad = 4;
+      minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
+      maxX = Math.min(width - 1, maxX + pad); maxY = Math.min(height - 1, maxY + pad);
+
+      // Crop + resize to 100×100 + make white transparent
+      const c2 = document.createElement('canvas');
+      c2.width = 90; c2.height = 90;
+      const ctx2 = c2.getContext('2d');
+      ctx2.drawImage(c1, minX, minY, maxX - minX + 1, maxY - minY + 1, 0, 0, 90, 90);
+
+      const imgData = ctx2.getImageData(0, 0, 90, 90);
+      for (let i = 0; i < imgData.data.length; i += 4) {
+        if (imgData.data[i] > 230 && imgData.data[i+1] > 230 && imgData.data[i+2] > 230)
+          imgData.data[i+3] = 0;
+      }
+      ctx2.putImageData(imgData, 0, 0);
+
+      URL.revokeObjectURL(url);
+      resolve(c2.toDataURL('image/png'));
+    };
+    img.src = url;
+  });
+}
 
 const SUBJECTS = ['Maths','Maths-1','Maths-2','Science','Science-1','Science-2','English','Marathi','Hindi','History/Civics','Geography','Sanskrit'];
 const EXAMS    = ['Half Yearly Exam', 'Annual Exam', 'Unit Test 1', 'Unit Test 2', 'Unit Test 3', 'Final Exam', 'Monthly Test', 'Weekly Test'];
@@ -53,20 +106,39 @@ function PaperPreview({ meta, questions, logoSrc }) {
         <div style={{ fontSize: 12, color: dark }}>
           {questions.map((q, qi) => (
             <div key={q.id} style={{ marginBottom: 9 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <div style={{ display: 'flex', gap: 6, flex: 1 }}>
+              {/* Question row: number + 60/40 split if image, else full width */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', gap: 6, flex: 1, alignItems: 'flex-start' }}>
                   <span style={{ fontWeight: 700, flexShrink: 0 }}>Q{qi + 1}.</span>
-                  <span style={{ flex: 1 }}>{q.text || <span style={{ color: '#aaa' }}>Question text...</span>}</span>
+                  {q.image ? (
+                    <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                      <div style={{ width: '60%' }}>{q.text || <span style={{ color: '#aaa' }}>Question text...</span>}</div>
+                      <div style={{ width: '40%', display: 'flex', justifyContent: 'flex-end' }}>
+                        <img src={q.image} alt="diagram" style={{ width: 90, height: 90, objectFit: 'contain' }} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ flex: 1 }}>{q.text || <span style={{ color: '#aaa' }}>Question text...</span>}</div>
+                  )}
                 </div>
                 {q.marks && <span style={{ fontWeight: 700, flexShrink: 0, color: '#555', fontSize: 10.5 }}>[{q.marks} {Number(q.marks) === 1 ? 'Mark' : 'Marks'}]</span>}
               </div>
-              {q.subQuestions.filter(s => s.text).length > 0 && (
+              {q.subQuestions.filter(s => s.text || s.image).length > 0 && (
                 <div style={{ marginLeft: 22, marginTop: 4 }}>
-                  {q.subQuestions.map((sq, si) => sq.text ? (
-                    <div key={sq.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 3 }}>
-                      <div style={{ display: 'flex', gap: 5, flex: 1 }}>
+                  {q.subQuestions.map((sq, si) => (sq.text || sq.image) ? (
+                    <div key={sq.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 3, alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', gap: 5, flex: 1, alignItems: 'flex-start' }}>
                         <span style={{ flexShrink: 0 }}>({String.fromCharCode(97 + si)})</span>
-                        <span>{sq.text}</span>
+                        {sq.image ? (
+                          <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                            <div style={{ width: '60%' }}>{sq.text}</div>
+                            <div style={{ width: '40%', display: 'flex', justifyContent: 'flex-end' }}>
+                              <img src={sq.image} alt="diagram" style={{ width: 90, height: 90, objectFit: 'contain' }} />
+                            </div>
+                          </div>
+                        ) : (
+                          <span>{sq.text}</span>
+                        )}
                       </div>
                       {sq.marks && <span style={{ fontWeight: 700, flexShrink: 0, color: '#555', fontSize: 10.5 }}>[{sq.marks}]</span>}
                     </div>
@@ -88,8 +160,8 @@ function PaperPreview({ meta, questions, logoSrc }) {
 }
 
 let idSeq = 1;
-const newQ  = () => ({ id: idSeq++, text: '', marks: '', subQuestions: [] });
-const newSQ = () => ({ id: idSeq++, text: '', marks: '' });
+const newQ  = () => ({ id: idSeq++, text: '', marks: '', image: null, subQuestions: [] });
+const newSQ = () => ({ id: idSeq++, text: '', marks: '', image: null });
 
 export default function QuestionPaper() {
   const logoSrc = '/logo.jpg';
@@ -308,20 +380,48 @@ export default function QuestionPaper() {
                   <input type="number" value={q.marks} onChange={e => setQ(q.id, 'marks', e.target.value)}
                     placeholder="Marks" className="w-14 px-2 py-1 rounded-lg text-xs outline-none"
                     style={{ border: '1px solid #d1d5db', background: '#fff' }} />
+                  <label title="Add diagram image" className="cursor-pointer text-xs" style={{ color: q.image ? '#25D366' : gold }}>
+                    <PictureOutlined />
+                    <input type="file" accept="image/*" className="hidden" onChange={async e => {
+                      if (e.target.files[0]) { const img = await processImage(e.target.files[0]); setQ(q.id, 'image', img); e.target.value = ''; }
+                    }} />
+                  </label>
                   <button onClick={() => delQ(q.id)} className="text-red-400 hover:text-red-600 text-xs"><DeleteOutlined /></button>
                 </div>
 
+                {/* Image preview in form */}
+                {q.image && (
+                  <div className="flex items-center gap-2 pl-6">
+                    <img src={q.image} alt="diagram" className="rounded border" style={{ width: 60, height: 60, objectFit: 'contain', background: '#f0f0f0' }} />
+                    <button onClick={() => setQ(q.id, 'image', null)} className="text-[10px] text-red-400">Remove</button>
+                  </div>
+                )}
+
                 {/* Sub-questions */}
                 {q.subQuestions.map((sq, si) => (
-                  <div key={sq.id} className="flex items-center gap-2 pl-4">
-                    <span className="text-[10px] text-gray-400">({String.fromCharCode(97 + si)})</span>
-                    <input value={sq.text} onChange={e => setSQ(q.id, sq.id, 'text', e.target.value)}
-                      placeholder="Sub-question..." className="flex-1 px-2 py-1 rounded-lg text-[11px] outline-none"
-                      style={{ border: '1px solid #e5e7eb', background: '#fff' }} />
-                    <input type="number" value={sq.marks} onChange={e => setSQ(q.id, sq.id, 'marks', e.target.value)}
-                      placeholder="Marks" className="w-12 px-2 py-1 rounded-lg text-[11px] outline-none"
-                      style={{ border: '1px solid #e5e7eb', background: '#fff' }} />
-                    <button onClick={() => delSQ(q.id, sq.id)} className="text-red-300 hover:text-red-500 text-xs"><DeleteOutlined /></button>
+                  <div key={sq.id} className="flex flex-col gap-1 pl-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-gray-400">({String.fromCharCode(97 + si)})</span>
+                      <input value={sq.text} onChange={e => setSQ(q.id, sq.id, 'text', e.target.value)}
+                        placeholder="Sub-question..." className="flex-1 px-2 py-1 rounded-lg text-[11px] outline-none"
+                        style={{ border: '1px solid #e5e7eb', background: '#fff' }} />
+                      <input type="number" value={sq.marks} onChange={e => setSQ(q.id, sq.id, 'marks', e.target.value)}
+                        placeholder="Marks" className="w-12 px-2 py-1 rounded-lg text-[11px] outline-none"
+                        style={{ border: '1px solid #e5e7eb', background: '#fff' }} />
+                      <label title="Add diagram image" className="cursor-pointer text-xs" style={{ color: sq.image ? '#25D366' : gold }}>
+                        <PictureOutlined />
+                        <input type="file" accept="image/*" className="hidden" onChange={async e => {
+                          if (e.target.files[0]) { const img = await processImage(e.target.files[0]); setSQ(q.id, sq.id, 'image', img); e.target.value = ''; }
+                        }} />
+                      </label>
+                      <button onClick={() => delSQ(q.id, sq.id)} className="text-red-300 hover:text-red-500 text-xs"><DeleteOutlined /></button>
+                    </div>
+                    {sq.image && (
+                      <div className="flex items-center gap-2 pl-4">
+                        <img src={sq.image} alt="diagram" className="rounded border" style={{ width: 50, height: 50, objectFit: 'contain', background: '#f0f0f0' }} />
+                        <button onClick={() => setSQ(q.id, sq.id, 'image', null)} className="text-[10px] text-red-400">Remove</button>
+                      </div>
+                    )}
                   </div>
                 ))}
 
