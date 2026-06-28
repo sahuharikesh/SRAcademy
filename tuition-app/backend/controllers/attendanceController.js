@@ -53,18 +53,6 @@ exports.saveBulk = async (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 };
 
-exports.getAbsent = async (req, res) => {
-  try {
-    const { start, end } = dayRange(req.params.date);
-    const records = await Attendance.find({
-      date: { $gte: start, $lte: end },
-      status: 'Absent',
-      adminEmail: req.adminEmail,
-    }).populate('studentId', 'name mobile std groupNo');
-    res.json(records);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-};
-
 exports.getMonthlyReport = async (req, res) => {
   try {
     const month = parseInt(req.query.month);

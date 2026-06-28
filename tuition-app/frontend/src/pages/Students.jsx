@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getStudents, addStudent, updateStudent, deleteStudent, getGroups } from '../api';
 import StudentForm, { EMPTY }   from '../components/students/StudentForm';
 import StudentTable              from '../components/students/StudentTable';
@@ -6,6 +6,7 @@ import WaGroupModal              from '../components/students/WaGroupModal';
 import CertificateModal          from '../components/students/CertificateModal';
 import { STD_OPTIONS, MEDIUM_OPTIONS } from '../utils/constants';
 import { WhatsAppOutlined } from '@ant-design/icons';
+import usePagination from '../hooks/usePagination';
 import toast from 'react-hot-toast';
 
 export default function Students() {
@@ -18,21 +19,28 @@ export default function Students() {
   const [filterStd,     setFilterStd]     = useState('');
   const [filterGroup,   setFilterGroup]   = useState('');
   const [filterMedium,  setFilterMedium]  = useState('');
+  const { page, setPage, setTotal, reset: resetPage, paginationProps } = usePagination(15);
   const [showWaGroup,    setShowWaGroup]    = useState(false);
   const [certStudent,    setCertStudent]    = useState(null);
   const [submitting,     setSubmitting]     = useState(false);
   const [loading,        setLoading]        = useState(true);
 
-  const load = async () => {
+  const load = useCallback(async (p = 1) => {
     setLoading(true);
     try {
-      const [s, g] = await Promise.all([getStudents(), getGroups().catch(() => [])]);
-      setStudents(s);
+      const [res, g] = await Promise.all([
+        getStudents({ page: p, limit: 15, search, std: filterStd, group: filterGroup, medium: filterMedium }),
+        getGroups().catch(() => []),
+      ]);
+      setStudents(res.data);
+      setTotal(res.total);
       setGroups(g);
     } catch { toast.error('Failed to load students'); }
     finally { setLoading(false); }
-  };
-  useEffect(() => { load(); }, []);
+  }, [search, filterStd, filterGroup, filterMedium]);
+
+  useEffect(() => { resetPage(); load(1); }, [search, filterStd, filterGroup, filterMedium]);
+  useEffect(() => { if (page > 1) load(page); }, [page]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +49,7 @@ export default function Students() {
     try {
       if (editId) { await updateStudent(editId, form); toast.success('Student updated!'); }
       else        { await addStudent(form);             toast.success('Student admitted!'); }
-      setForm(EMPTY); setEditId(null); setShowForm(false); load();
+      setForm(EMPTY); setEditId(null); setShowForm(false); load(page);
     } catch (err) { toast.error(err.response?.data?.error || 'Something went wrong'); }
     finally { setSubmitting(false); }
   };
@@ -60,29 +68,18 @@ export default function Students() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to remove this student?')) return;
-    await deleteStudent(id); toast.success('Student removed'); load();
+    await deleteStudent(id); toast.success('Student removed'); load(page);
   };
 
   const handleBulkDelete = async (ids) => {
     try {
       await Promise.all(ids.map((id) => deleteStudent(id)));
       toast.success(`${ids.length} student(s) deleted`);
-      load();
+      load(page);
     } catch { toast.error('Failed to delete some students'); }
   };
 
   const handleCancel = () => { setShowForm(false); setForm(EMPTY); setEditId(null); };
-
-  const filtered = students.filter((s) => {
-    const matchSearch = !search ||
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.mobile.includes(search) ||
-      s.std.toLowerCase().includes(search.toLowerCase());
-    const matchStd    = !filterStd    || s.std === filterStd;
-    const matchGroup  = !filterGroup  || s.groupNo === filterGroup;
-    const matchMedium = !filterMedium || s.medium === filterMedium;
-    return matchSearch && matchStd && matchGroup && matchMedium;
-  });
 
   return (
     <div className="anim-fade-up">
@@ -162,8 +159,9 @@ export default function Students() {
             style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }} />
         </div>
       ) : (
-        <StudentTable students={filtered} onEdit={handleEdit} onDelete={handleDelete}
-          onBulkDelete={handleBulkDelete} onCertificate={setCertStudent} />
+        <StudentTable students={students} onEdit={handleEdit} onDelete={handleDelete}
+          onBulkDelete={handleBulkDelete} onCertificate={setCertStudent}
+          paginationProps={paginationProps} />
       )}
 
       <WaGroupModal open={showWaGroup} onClose={() => setShowWaGroup(false)} students={students} />

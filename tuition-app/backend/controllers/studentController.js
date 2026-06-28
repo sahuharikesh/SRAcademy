@@ -1,13 +1,24 @@
 const Student    = require('../models/Student');
 const Fee        = require('../models/Fee');
 const Attendance = require('../models/Attendance');
+const { getPagination, paginateQuery } = require('../utils/paginate');
 
 const isValidMobile = (mobile) => /^[6-9][0-9]{9}$/.test((mobile || '').trim());
 
 exports.getAll = async (req, res) => {
   try {
-    const students = await Student.find({ isActive: true, adminEmail: req.adminEmail }).sort({ createdAt: -1 });
-    res.json(students);
+    const { page, limit } = getPagination(req.query);
+
+    const filter = { isActive: true, adminEmail: req.adminEmail };
+    if (req.query.search) {
+      const r = new RegExp(req.query.search.trim(), 'i');
+      filter.$or = [{ name: r }, { mobile: r }, { std: r }];
+    }
+    if (req.query.std)    filter.std     = req.query.std;
+    if (req.query.group)  filter.groupNo = req.query.group;
+    if (req.query.medium) filter.medium  = req.query.medium;
+
+    res.json(await paginateQuery(Student, filter, { createdAt: -1 }, page, limit));
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 

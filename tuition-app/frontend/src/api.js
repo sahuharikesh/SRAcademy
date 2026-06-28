@@ -23,7 +23,9 @@ api.interceptors.response.use(
 export const login = (email, password) =>
   api.post('/auth/login', { email, password }).then((r) => r.data);
 
-export const getStudents = () => api.get('/students').then((r) => r.data);
+export const getStudents = ({ page = 1, limit = 15, search = '', std = '', group = '', medium = '' } = {}) =>
+  api.get('/students', { params: { page, limit, search: search || undefined, std: std || undefined, group: group || undefined, medium: medium || undefined } })
+     .then((r) => r.data); // returns { data, total, page, pages }
 export const addStudent = (data) => api.post('/students', data).then((r) => r.data);
 export const updateStudent = (id, data) => api.put(`/students/${id}`, data).then((r) => r.data);
 export const deleteStudent = (id) => api.delete(`/students/${id}`).then((r) => r.data);
@@ -34,20 +36,20 @@ export const deleteGroup = (g) => api.delete(`/students/group/${g}`).then((r) =>
 export const getAttendance = (date) => api.get(`/attendance/${date}`).then((r) => r.data);
 export const saveAttendance = (date, records) =>
   api.post('/attendance/bulk', { date, records }).then((r) => r.data);
-export const getAbsentStudents = (date) => api.get(`/attendance/absent/${date}`).then((r) => r.data);
 export const markAttendanceNotified = (id) =>
   api.patch(`/attendance/notified/${id}`).then((r) => r.data);
 export const getMonthlyAttendance = (month, year) =>
   api.get(`/attendance/monthly?month=${month}&year=${year}`).then((r) => r.data);
 
-export const getFees = () => api.get('/fees').then((r) => r.data);
+export const getFees = ({ page = 1, limit = 15, status = '', month = '', year = '' } = {}) =>
+  api.get('/fees', { params: { page, limit, status: status || undefined, month: month || undefined, year: year || undefined } })
+     .then((r) => r.data); // returns { data, total, page, pages }
 export const getDueFees = () => api.get('/fees/due').then((r) => r.data);
 export const addFee = (data) => api.post('/fees', data).then((r) => r.data);
 export const payFee = (id, data) => api.patch(`/fees/pay/${id}`, data).then((r) => r.data);
 export const markFeeNotified = (id) => api.patch(`/fees/notified/${id}`).then((r) => r.data);
 export const updateFeeComments = (id, comments) => api.patch(`/fees/comments/${id}`, { comments }).then((r) => r.data);
-export const deleteFee  = (id) => api.delete(`/fees/${id}`).then((r) => r.data);
-export const getFeeQR   = (id) => api.get(`/fees/qr/${id}`).then((r) => r.data);
+export const deleteFee    = (id) => api.delete(`/fees/${id}`).then((r) => r.data);
 export const generateFees = (data) => api.post('/fees/generate', data).then((r) => r.data);
 
 export const getDashboard = () => api.get('/dashboard').then((r) => r.data);

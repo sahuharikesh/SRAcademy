@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { PhoneOutlined, CheckOutlined, CloseOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import Pagination from '../common/Pagination';
+import usePagination from '../../hooks/usePagination';
 
 export default function AttendanceTable({ data, marks, onMark, loading }) {
-  const [page,     setPage]     = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const { paginationProps, reset } = usePagination(15);
+  const { page, pageSize } = paginationProps;
 
-  useEffect(() => { setPage(1); }, [data.length]);
+  useEffect(() => { reset(); }, [data.length]);
 
   if (loading) return <div className="text-center text-gray-400 py-10">Loading...</div>;
 
@@ -63,8 +64,7 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
         </tbody>
       </table>
     </div>
-    <Pagination page={page} pageSize={pageSize} total={data.length}
-      onChange={setPage} onPageSizeChange={setPageSize} />
+    <Pagination {...paginationProps} total={data.length} />
     </>
   );
 }

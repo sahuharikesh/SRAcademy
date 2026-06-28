@@ -127,7 +127,10 @@ export default function Attendance() {
     setFilterName('');
     setShowModal(true);
     if (allStudents.length === 0) {
-      try { setAllStudents(await getStudents()); } catch {}
+      try {
+        const res = await getStudents({ limit: 1000 });
+        setAllStudents(res.data || res);
+      } catch {}
     }
   };
 
@@ -245,7 +248,9 @@ export default function Attendance() {
             <StatCard label="Late"    value={stats.late}    variant="purple" icon={<ClockCircleOutlined />} />
           </div>
           <AttendanceTable data={data} marks={marks} onMark={handleMark} loading={loading} />
-          <AbsentNotifyPanel absentList={absentList} onSendOne={handleSendOne} onSendAll={handleSendAll} />
+          <div className="mt-4">
+            <AbsentNotifyPanel absentList={absentList} onSendOne={handleSendOne} onSendAll={handleSendAll} />
+          </div>
         </>
       )}
 

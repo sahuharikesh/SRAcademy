@@ -56,7 +56,7 @@ export default function Pagination({ page, pageSize, total, onChange, onPageSize
           <select value={pageSize} onChange={(e) => { onPageSizeChange(Number(e.target.value)); onChange(1); }}
             className="ml-2 text-xs rounded px-1.5 py-1 outline-none"
             style={{ border: '1px solid #C9A84C', background: '#fff', color: '#374151' }}>
-            {[10, 20, 50].map((s) => <option key={s} value={s}>{s} / page</option>)}
+            {[15, 25, 50].map((s) => <option key={s} value={s}>{s} / page</option>)}
           </select>
         )}
       </div>

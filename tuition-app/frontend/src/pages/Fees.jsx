@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getFees, payFee, sendWhatsApp, markFeeNotified, getStudents, addFee, deleteFee, generateFees } from '../api';
 import { buildFeeMsg, buildUpiQrUrl } from '../utils/messages';
 import { GOLD, DARK } from '../utils/constants';
@@ -7,6 +7,7 @@ import FeeFilterTabs from '../components/fees/FeeFilterTabs';
 import FeeTable      from '../components/fees/FeeTable';
 import AppModal      from '../components/common/AppModal';
 import PageSpinner   from '../components/common/PageSpinner';
+import usePagination from '../hooks/usePagination';
 import toast from 'react-hot-toast';
 
 function PayModal({ fee, open, onClose, onSuccess }) {
@@ -115,29 +116,36 @@ export default function Fees() {
   const [filter,       setFilter]       = useState('All');
   const [filterMonth,  setFilterMonth]  = useState('');
   const [filterYear,   setFilterYear]   = useState('');
+  const { page, setPage, setTotal, reset: resetPage, paginationProps } = usePagination(15);
   const [showAddFee,   setShowAddFee]   = useState(false);
   const [waModal,      setWaModal]      = useState(null);
   const [payModal,     setPayModal]     = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
   const [loading,      setLoading]      = useState(true);
 
-  const load = async () => {
+  const load = useCallback(async (p = 1) => {
     setLoading(true);
     try {
-      const [f, s] = await Promise.all([getFees(), getStudents().catch(() => [])]);
-      setFees(f);
-      setStudents(s);
+      const [res, s] = await Promise.all([
+        getFees({ page: p, limit: 15, status: filter, month: filterMonth, year: filterYear }),
+        getStudents().catch(() => ({ data: [] })),
+      ]);
+      setFees(res.data);
+      setTotal(res.total);
+      setStudents(Array.isArray(s) ? s : (s.data || []));
     } catch { toast.error('Failed to load fees'); }
     finally { setLoading(false); }
-  };
-  useEffect(() => { load(); }, []);
+  }, [filter, filterMonth, filterYear]);
+
+  useEffect(() => { resetPage(); load(1); }, [filter, filterMonth, filterYear]);
+  useEffect(() => { if (page > 1) load(page); }, [page]);
 
   const handlePay = (fee) => setPayModal(fee);
 
   const handleAddFee = async (formData, resetForm) => {
     try {
       await addFee(formData); toast.success('Fee record added!');
-      setShowAddFee(false); resetForm(); load();
+      setShowAddFee(false); resetForm(); load(page);
     } catch (err) { toast.error(err.response?.data?.error || 'Something went wrong'); }
   };
 
@@ -145,7 +153,7 @@ export default function Fees() {
     setConfirmModal({
       message: 'Generate fees for students whose due date is within next 7 days?',
       onConfirm: async () => {
-        try { const res = await generateFees({}); toast.success(res.message); load(); }
+        try { const res = await generateFees({}); toast.success(res.message); load(page); }
         catch { toast.error('Failed to generate fees'); }
       },
     });
@@ -155,7 +163,7 @@ export default function Fees() {
     setConfirmModal({
       message: `Delete fee record for ${fee.studentId?.name} — ${fee.month} ${fee.year}?`,
       onConfirm: async () => {
-        try { await deleteFee(fee._id); toast.success('Fee deleted'); load(); }
+        try { await deleteFee(fee._id); toast.success('Fee deleted'); load(page); }
         catch { toast.error('Failed to delete'); }
       },
     });
@@ -165,7 +173,7 @@ export default function Fees() {
     try {
       await Promise.all(ids.map((id) => deleteFee(id)));
       toast.success(`${ids.length} fee record(s) deleted`);
-      load();
+      load(page);
     } catch { toast.error('Failed to delete some records'); }
   };
 
@@ -183,14 +191,8 @@ export default function Fees() {
   };
 
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const years  = [...new Set(fees.map((f) => f.year))].sort((a, b) => b - a);
-
-  const filtered = fees.filter((f) => {
-    if (filter !== 'All' && f.status !== filter) return false;
-    if (filterMonth && f.month !== filterMonth) return false;
-    if (filterYear  && f.year  !== Number(filterYear)) return false;
-    return true;
-  });
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   if (loading) return <PageSpinner />;
 
@@ -242,7 +244,7 @@ export default function Fees() {
       </div>
 
       <FeeTable
-        fees={filtered}
+        fees={fees}
         onPay={handlePay}
         onWhatsApp={handleWhatsApp}
         onDelete={handleDelete}
@@ -250,9 +252,10 @@ export default function Fees() {
         onCommentSaved={(id, comments) =>
           setFees((prev) => prev.map((f) => f._id === id ? { ...f, comments } : f))
         }
+        paginationProps={paginationProps}
       />
 
-      <PayModal fee={payModal} open={!!payModal} onClose={() => setPayModal(null)} onSuccess={load} />
+      <PayModal fee={payModal} open={!!payModal} onClose={() => setPayModal(null)} onSuccess={() => load(page)} />
 
       <ConfirmModal
         open={!!confirmModal}

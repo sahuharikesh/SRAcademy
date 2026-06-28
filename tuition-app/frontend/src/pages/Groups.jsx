@@ -1,6 +1,7 @@
 import { useEffect, useState, Fragment } from 'react';
 import { getGroups, getStudentsByGroup, getFees, getStudents, sendWhatsApp, deleteGroup, payFee } from '../api';
 import Pagination from '../components/common/Pagination';
+import usePagination from '../hooks/usePagination';
 import { WhatsAppOutlined, PhoneOutlined, EyeOutlined, EyeInvisibleOutlined, TeamOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import AppModal from '../components/common/AppModal';
@@ -89,8 +90,7 @@ export default function Groups() {
   const [namesModal,    setNamesModal]    = useState(null);
   const [waPreview,     setWaPreview]     = useState(null);
   const [payModal,      setPayModal]      = useState(null);
-  const [page,          setPage]          = useState(1);
-  const [pageSize,      setPageSize]      = useState(10);
+  const { paginationProps } = usePagination(15);
   const [loading,       setLoading]       = useState(true);
 
   const load = async () => {
@@ -162,6 +162,7 @@ export default function Groups() {
     const due      = fees.filter((f) => f.status !== 'Paid').reduce((sum, f) => sum + (f.amount - (f.paidAmount || 0)), 0);
     return { g, students, due };
   });
+  const { page, pageSize } = paginationProps;
   const groupRows = allGroupRows.slice((page - 1) * pageSize, page * pageSize);
 
   if (loading) return <PageSpinner />;
@@ -278,8 +279,7 @@ export default function Groups() {
           </tbody>
         </table>
       </div>
-      <Pagination page={page} pageSize={pageSize} total={allGroupRows.length}
-        onChange={setPage} onPageSizeChange={setPageSize} />
+      <Pagination {...paginationProps} total={allGroupRows.length} />
 
       <WaPreviewModal
         open={!!waPreview}

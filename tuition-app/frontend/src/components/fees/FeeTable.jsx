@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import StatusBadge from '../common/StatusBadge';
 import { updateFeeComments } from '../../api';
 import { GOLD } from '../../utils/constants';
@@ -105,22 +105,17 @@ function PendingModal({ fee, open, onClose, onCommentSaved }) {
   );
 }
 
-export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDelete, onCommentSaved }) {
+export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDelete, onCommentSaved, paginationProps = {} }) {
   const [pendingModal, setPendingModal] = useState(null);
   const [selected,     setSelected]     = useState(new Set());
-  const [page,         setPage]         = useState(1);
-  const [pageSize,     setPageSize]     = useState(10);
 
-  useEffect(() => { setPage(1); }, [fees.length]);
-
-  const paged    = fees.slice((page - 1) * pageSize, page * pageSize);
-  const allChecked = paged.length > 0 && paged.every((f) => selected.has(f._id));
+  const allChecked = fees.length > 0 && fees.every((f) => selected.has(f._id));
 
   const toggle = (id) => setSelected((prev) => {
     const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next;
   });
 
-  const toggleAll = () => setSelected(allChecked ? new Set() : new Set(paged.map((f) => f._id)));
+  const toggleAll = () => setSelected(allChecked ? new Set() : new Set(fees.map((f) => f._id)));
 
   const handleBulkDelete = () => {
     Modal.confirm({
@@ -158,10 +153,10 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
             </tr>
           </thead>
           <tbody>
-            {paged.length === 0 ? (
+            {fees.length === 0 ? (
               <tr><td colSpan={10} className="p-6 text-center text-gray-400">No records found</td></tr>
             ) : (
-              paged.map((fee, i) => (
+              fees.map((fee, i) => (
                 <tr key={fee._id} className="tr-anim border-b"
                   style={{ animationDelay: `${Math.min(i * 40, 300)}ms`, background: selected.has(fee._id) ? '#fffbeb' : '' }}>
                   <td className="p-3">
@@ -237,8 +232,7 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
         </table>
       </div>
 
-      <Pagination page={page} pageSize={pageSize} total={fees.length}
-        onChange={setPage} onPageSizeChange={setPageSize} />
+      <Pagination {...paginationProps} />
 
       <PendingModal
         fee={pendingModal}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { PlusOutlined, DeleteOutlined, DownloadOutlined, PrinterOutlined, PictureOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, DownloadOutlined, PrinterOutlined, PictureOutlined, TranslationOutlined } from '@ant-design/icons';
+import toast from 'react-hot-toast';
 
 async function processImage(file) {
   return new Promise((resolve) => {
@@ -60,87 +61,87 @@ const CLASSES  = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','
 const gold = '#C9A84C';
 const dark = '#1a1a1a';
 
-function PaperPreview({ meta, questions, logoSrc }) {
+const qLangPrefix = (lang) => (lang === 'hi' || lang === 'mr') ? 'प्र' : 'Q';
+
+const ns = { letterSpacing: 0, wordSpacing: 0 }; // no-spacing shorthand
+
+function PaperPreview({ meta, questions, logoSrc, lang = 'en' }) {
+  const devanagari = lang === 'hi' || lang === 'mr';
+  const font = devanagari ? '"Noto Sans Devanagari", sans-serif' : 'Georgia, "Times New Roman", serif';
+  const qPrefix = devanagari ? 'प्र' : 'Q';
   return (
-    <div style={{
-      width: '760px',
-      background: '#fff', fontFamily: 'Georgia, "Times New Roman", serif',
-      padding: '14px 28px 10px',
-      boxSizing: 'border-box', position: 'relative', overflow: 'hidden',
-      border: '1px solid #ccc',
-    }}>
+    <div style={{ width: '760px', background: '#fff', fontFamily: font, padding: '14px 28px 10px', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', border: '1px solid #ccc', ...ns }}>
       {/* Watermark */}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>
-        <img src={logoSrc} alt="" style={{ width: '45%', opacity: 0.03, objectFit: 'contain', userSelect: 'none' }} />
+        <img src={logoSrc} alt="" style={{ width: '45%', opacity: 0.10, objectFit: 'contain', userSelect: 'none' }} />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <div style={{ position: 'relative', zIndex: 1, ...ns }}>
 
         {/* Header */}
         <div style={{ textAlign: 'center', borderBottom: `2px double ${dark}`, paddingBottom: 10, marginBottom: 5 }}>
-          <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: 3, color: dark, textTransform: 'uppercase', lineHeight: 1 }}>
-            Shree Ram Academy
+          <div className="qp-title" style={{ fontSize: 18, fontWeight: 900, letterSpacing: 2, wordSpacing: 2, color: dark, textTransform: 'uppercase', lineHeight: 1.3, fontFamily: 'Georgia, "Times New Roman", serif' }}>
+            * Shree Ram Academy *
           </div>
-          <div style={{ fontSize: 11, color: '#333', marginTop: 6, textAlign: 'left' }}>
-            <div style={{ display: 'flex' }}>
-              <span style={{ flex: 1 }}>Std: <strong>{meta.class || '___'}</strong></span>
-              <span style={{ flex: 1, textAlign: 'center' }}><strong>{meta.examName || '___'}</strong></span>
-              <span style={{ flex: 1, textAlign: 'right' }}>Time: <strong>{meta.time || '___'}</strong></span>
+          <div style={{ fontSize: 14, color: '#333', marginTop: 6, textAlign: 'left', ...ns }}>
+            <div style={{ display: 'flex', ...ns }}>
+              <span style={{ flex: 1, ...ns }}>Max Marks: <strong style={ns}>{meta.maxMarks || '___'}</strong></span>
+              <span style={{ flex: 1, textAlign: 'center', ...ns }}>Exam: <strong style={ns}>{meta.examName || '___'}</strong></span>
+              <span style={{ flex: 1, textAlign: 'right', ...ns }}>Time: <strong style={ns}>{meta.time || '___'}</strong></span>
             </div>
-            <div style={{ display: 'flex', marginTop: 4 }}>
-              <span style={{ flex: 1 }}>Total Marks: <strong>{meta.maxMarks || '___'}</strong></span>
-              <span style={{ flex: 1, textAlign: 'center' }}>Subject: <strong>{meta.subject || '___________'}</strong></span>
-              <span style={{ flex: 1, textAlign: 'right' }}>Date: <strong>{meta.date || '___________'}</strong></span>
+            <div style={{ display: 'flex', marginTop: 4, ...ns }}>
+              <span style={{ flex: 1, ...ns }}>Subject: <strong style={ns}>{meta.subject || '___________'}</strong></span>
+              <span style={{ flex: 1, textAlign: 'center', ...ns }}>Std: <strong style={ns}>{meta.class || '___'}</strong></span>
+              <span style={{ flex: 1, textAlign: 'right', ...ns }}>Date: <strong style={ns}>{meta.date || '___________'}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Instructions */}
         {meta.instructions && (
-          <div style={{ marginBottom: 8, fontSize: 10.5, color: '#333', borderLeft: `3px solid ${gold}`, paddingLeft: 8 }}>
-            <strong>Instructions:</strong> {meta.instructions}
+          <div style={{ marginBottom: 8, fontSize: 13, color: '#333', borderLeft: `3px solid ${gold}`, paddingLeft: 8, ...ns }}>
+            <strong style={ns}>Instructions:</strong> {meta.instructions}
           </div>
         )}
 
         {/* Questions */}
-        <div style={{ fontSize: 12, color: dark }}>
+        <div style={{ fontSize: 15, color: dark, ...ns }}>
           {questions.map((q, qi) => (
-            <div key={q.id} style={{ marginBottom: 9 }}>
-              {/* Question row: number + 60/40 split if image, else full width */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', gap: 6, flex: 1, alignItems: 'flex-start' }}>
-                  <span style={{ fontWeight: 700, flexShrink: 0 }}>Q{qi + 1}.</span>
+            <div key={q.id} style={{ marginBottom: 9, ...ns }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start', ...ns }}>
+                <div style={{ display: 'flex', gap: 6, flex: 1, alignItems: 'flex-start', ...ns }}>
+                  <span style={{ fontWeight: 700, flexShrink: 0, ...ns }}>{qPrefix}{qi + 1}.</span>
                   {q.image ? (
-                    <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                      <div style={{ width: '60%' }}>{q.text || <span style={{ color: '#aaa' }}>Question text...</span>}</div>
+                    <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'flex-start', ...ns }}>
+                      <div style={{ width: '60%', ...ns }}>{q.text || <span style={{ color: '#aaa', ...ns }}>Question text...</span>}</div>
                       <div style={{ width: '40%', display: 'flex', justifyContent: 'flex-end' }}>
                         <img src={q.image} alt="diagram" style={{ width: 90, height: 90, objectFit: 'contain' }} />
                       </div>
                     </div>
                   ) : (
-                    <div style={{ flex: 1 }}>{q.text || <span style={{ color: '#aaa' }}>Question text...</span>}</div>
+                    <div style={{ flex: 1, ...ns }}>{q.text || <span style={{ color: '#aaa', ...ns }}>Question text...</span>}</div>
                   )}
                 </div>
-                {q.marks && <span style={{ fontWeight: 700, flexShrink: 0, color: '#555', fontSize: 10.5 }}>[{q.marks} {Number(q.marks) === 1 ? 'Mark' : 'Marks'}]</span>}
+                {q.marks && <span style={{ fontWeight: 700, flexShrink: 0, color: '#555', fontSize: 13, ...ns }}>[{q.marks} {Number(q.marks) === 1 ? 'Mark' : 'Marks'}]</span>}
               </div>
               {q.subQuestions.filter(s => s.text || s.image).length > 0 && (
-                <div style={{ marginLeft: 22, marginTop: 4 }}>
+                <div style={{ marginLeft: 22, marginTop: 4, ...ns }}>
                   {q.subQuestions.map((sq, si) => (sq.text || sq.image) ? (
-                    <div key={sq.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 3, alignItems: 'flex-start' }}>
-                      <div style={{ display: 'flex', gap: 5, flex: 1, alignItems: 'flex-start' }}>
-                        <span style={{ flexShrink: 0 }}>({String.fromCharCode(97 + si)})</span>
+                    <div key={sq.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 3, alignItems: 'flex-start', ...ns }}>
+                      <div style={{ display: 'flex', gap: 5, flex: 1, alignItems: 'flex-start', ...ns }}>
+                        <span style={{ flexShrink: 0, ...ns }}>({String.fromCharCode(97 + si)})</span>
                         {sq.image ? (
-                          <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                            <div style={{ width: '60%' }}>{sq.text}</div>
+                          <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'flex-start', ...ns }}>
+                            <div style={{ width: '60%', ...ns }}>{sq.text}</div>
                             <div style={{ width: '40%', display: 'flex', justifyContent: 'flex-end' }}>
                               <img src={sq.image} alt="diagram" style={{ width: 90, height: 90, objectFit: 'contain' }} />
                             </div>
                           </div>
                         ) : (
-                          <span>{sq.text}</span>
+                          <span style={ns}>{sq.text}</span>
                         )}
                       </div>
-                      {sq.marks && <span style={{ fontWeight: 700, flexShrink: 0, color: '#555', fontSize: 10.5 }}>[{sq.marks}]</span>}
+                      {sq.marks && <span style={{ fontWeight: 700, flexShrink: 0, color: '#555', fontSize: 10.5, ...ns }}>[{sq.marks}]</span>}
                     </div>
                   ) : null)}
                 </div>
@@ -148,8 +149,8 @@ function PaperPreview({ meta, questions, logoSrc }) {
             </div>
           ))}
           {questions.length === 0 && (
-            <div style={{ color: '#aaa', textAlign: 'center', padding: '12px 0', fontSize: 11 }}>
-              Koi question nahi — left panel se add karein 
+            <div style={{ color: '#aaa', textAlign: 'center', padding: '12px 0', fontSize: 11, ...ns }}>
+              Koi question nahi — left panel se add karein
             </div>
           )}
         </div>
@@ -166,17 +167,53 @@ const newSQ = () => ({ id: idSeq++, text: '', marks: '', image: null });
 export default function QuestionPaper() {
   const logoSrc = '/logo.jpg';
   const [meta, setMeta] = useState({
-    examName: 'Half Yearly Exam', subject: '', class: '6th',
+    examName: 'Half Yearly Exam', subject: 'Maths', class: '6th',
     date: '', time: '3 Hours', maxMarks: '100', instructions: 'All questions are compulsory.',
+    language: 'en',
   });
   const [questions, setQuestions] = useState([newQ()]);
+  const [translatedQuestions, setTranslatedQuestions] = useState({ hi: null, mr: null });
   const [setsPerPage, setSetsPerPage] = useState(1);
 
   const setM = (k, v) => setMeta(p => ({ ...p, [k]: v }));
 
+  const [translating, setTranslating] = useState(false);
+
+  const translateText = async (text, targetLang) => {
+    if (!text || !text.trim()) return text;
+    const langCode = targetLang === 'hi' ? 'hi' : 'mr';
+    const res = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${langCode}&dt=t&q=${encodeURIComponent(text)}`
+    );
+    const data = await res.json();
+    return data?.[0]?.map(d => d?.[0]).filter(Boolean).join('') || text;
+  };
+
+  const handleTranslate = async () => {
+    const lang = meta.language;
+    if (lang === 'en') { toast('English selected — koi translation nahi hoga'); return; }
+    setTranslating(true);
+    const tid = toast.loading('Translating questions...');
+    try {
+      const translated = await Promise.all(questions.map(async (q) => {
+        const text = await translateText(q.text, lang);
+        const subQuestions = await Promise.all(q.subQuestions.map(async (sq) => ({
+          ...sq, text: await translateText(sq.text, lang),
+        })));
+        return { ...q, text, subQuestions };
+      }));
+      setTranslatedQuestions(prev => ({ ...prev, [lang]: translated }));
+      toast.success('Questions translated!', { id: tid });
+    } catch {
+      toast.error('Translation failed. Internet check karein.', { id: tid });
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   const addQ  = () => setQuestions(p => [...p, newQ()]);
   const delQ  = (id) => setQuestions(p => p.filter(q => q.id !== id));
-  const setQ  = (id, k, v) => setQuestions(p => p.map(q => q.id === id ? { ...q, [k]: v } : q));
+  const setQ  = (id, k, v) => { setQuestions(p => p.map(q => q.id === id ? { ...q, [k]: v } : q)); setTranslatedQuestions({ hi: null, mr: null }); };
   const addSQ = (qid) => setQuestions(p => p.map(q => q.id === qid ? { ...q, subQuestions: [...q.subQuestions, newSQ()] } : q));
   const delSQ = (qid, sid) => setQuestions(p => p.map(q => q.id === qid ? { ...q, subQuestions: q.subQuestions.filter(s => s.id !== sid) } : q));
   const setSQ = (qid, sid, k, v) => setQuestions(p => p.map(q => q.id === qid ? {
@@ -191,14 +228,21 @@ export default function QuestionPaper() {
     const A4_W = 210;
     const A4_H = 297;
 
+    const resetTransforms = (_d, c) => {
+      c.style.width = '760px';
+      c.style.minWidth = '0';
+      c.style.transform = 'none';
+      let p = c.parentElement;
+      while (p) { p.style.transform = 'none'; p = p.parentElement; }
+    };
+
     if (setsPerPage === 1) {
-      // Single set → one A4 page, start from top
       const el = document.getElementById('qp-set-0');
       if (!el) return;
       const canvas = await html2canvas(el, {
         scale: 2, useCORS: true, backgroundColor: '#fff',
         scrollX: 0, scrollY: 0,
-        onclone: (_d, c) => { c.style.width = '760px'; c.style.minWidth = '0'; },
+        onclone: resetTransforms,
       });
       const imgW = A4_W;
       const imgH = (canvas.height / canvas.width) * A4_W;
@@ -207,7 +251,6 @@ export default function QuestionPaper() {
       pdf.save(`QuestionPaper_${meta.subject || 'paper'}_Class${meta.class}.pdf`);
 
     } else {
-      // 2 or 3 sets → all on one A4 page, stacked tightly
       const n = setsPerPage;
       const canvases = await Promise.all(
         Array.from({ length: n }, (_, i) => {
@@ -216,7 +259,7 @@ export default function QuestionPaper() {
           return html2canvas(el, {
             scale: 2, useCORS: true, backgroundColor: '#fff',
             scrollX: 0, scrollY: 0,
-            onclone: (_d, c) => { c.style.width = '760px'; c.style.minWidth = '0'; },
+            onclone: resetTransforms,
           });
         })
       );
@@ -244,7 +287,7 @@ export default function QuestionPaper() {
     const el = document.getElementById('qp-all-sets');
     if (!el) return;
     const win = window.open('', '_blank');
-    win.document.write(`<html><head><title>Question Paper</title><style>body{margin:0;padding:0;font-family:Georgia,serif;}@media print{body{margin:0}.cut-line{page-break-after:always;}}</style></head><body>${el.outerHTML}</body></html>`);
+    win.document.write(`<html><head><title>Question Paper</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700;900&display=swap" rel="stylesheet"><style>body{margin:0;padding:0;font-family:Georgia,serif;}@media print{body{margin:0}.cut-line{page-break-after:always;}}</style></head><body>${el.outerHTML}</body></html>`);
     win.document.close();
     win.focus();
     win.print();
@@ -253,16 +296,27 @@ export default function QuestionPaper() {
 
   const [mobileTab, setMobileTab] = useState('form');
   const previewWrapRef = useRef(null);
-  const [previewScale, setPreviewScale] = useState(1);
+  const allSetsRef     = useRef(null);
+  const [previewScale,   setPreviewScale]   = useState(1);
+  const [contentHeight,  setContentHeight]  = useState(0);
 
-  // Scale preview to fit available width on small screens
+  // Scale preview to fit available width
   useEffect(() => {
     const el = previewWrapRef.current;
     if (!el) return;
     const obs = new ResizeObserver(([entry]) => {
       const w = entry.contentRect.width;
-      if (w > 0) setPreviewScale(Math.min(1, (w - 8) / 760));
+      if (w > 0) setPreviewScale((w - 8) / 760);
     });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  // Measure actual content height after render
+  useEffect(() => {
+    const el = allSetsRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver(() => setContentHeight(el.scrollHeight));
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
@@ -316,12 +370,12 @@ export default function QuestionPaper() {
             <div className="text-xs font-black uppercase tracking-widest" style={{ color: gold }}>Paper Details</div>
             <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'Exam Name', key: 'examName', type: 'select', opts: EXAMS, full: true },
+              { label: 'Exam Name', key: 'examName', type: 'select', opts: EXAMS },
+              { label: 'Max Marks', key: 'maxMarks', type: 'number' },
               { label: 'Subject',   key: 'subject',  type: 'select', opts: SUBJECTS },
               { label: 'Class',     key: 'class',    type: 'select', opts: CLASSES  },
               { label: 'Date',      key: 'date',     type: 'date'   },
               { label: 'Time',      key: 'time',     type: 'text', placeholder: 'e.g. 3 Hours' },
-              { label: 'Max Marks', key: 'maxMarks', type: 'number' },
             ].map(({ label, key, type, opts, placeholder, full }) => (
               <div key={key} className={full ? 'col-span-2' : ''}>
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">{label}</label>
@@ -340,6 +394,31 @@ export default function QuestionPaper() {
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Instructions</label>
               <textarea value={meta.instructions} onChange={e => setM('instructions', e.target.value)} rows={2}
                 className={inputCls} style={{ ...inputStyle, resize: 'vertical' }} />
+            </div>
+            <div className="col-span-2">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Language / भाषा</label>
+              <div className="flex gap-2">
+                {[{ v: 'en', l: 'English' }, { v: 'hi', l: 'हिंदी' }, { v: 'mr', l: 'मराठी' }].map(({ v, l }) => (
+                  <button key={v} onClick={() => setM('language', v)}
+                    className="flex-1 py-1.5 rounded-lg text-xs font-black"
+                    style={{
+                      border: `1.5px solid ${meta.language === v ? gold : '#d1d5db'}`,
+                      background: meta.language === v ? dark : '#f9fafb',
+                      color: meta.language === v ? gold : '#374151',
+                      fontFamily: v === 'en' ? 'inherit' : '"Noto Sans Devanagari", sans-serif',
+                    }}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+              {meta.language !== 'en' && (
+                <button onClick={handleTranslate} disabled={translating}
+                  className="mt-2 w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-black"
+                  style={{ background: translating ? '#e5e7eb' : '#fffdf5', border: `1.5px solid ${gold}`, color: translating ? '#9ca3af' : dark }}>
+                  <TranslationOutlined />
+                  {translating ? 'Translating...' : `Translate Questions to ${meta.language === 'hi' ? 'हिंदी' : 'मराठी'}`}
+                </button>
+              )}
             </div>
             <div>
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Sets per Page</label>
@@ -373,7 +452,7 @@ export default function QuestionPaper() {
             {questions.map((q, qi) => (
               <div key={q.id} className="rounded-xl p-3 flex flex-col gap-2" style={{ background: '#fafafa', border: '1px solid #e5e7eb' }}>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-black text-gray-500">Q{qi + 1}</span>
+                  <span className="text-xs font-black text-gray-500">{qLangPrefix(meta.language)}{qi + 1}</span>
                   <input value={q.text} onChange={e => setQ(q.id, 'text', e.target.value)}
                     placeholder="Question text..." className="flex-1 px-2 py-1 rounded-lg text-xs outline-none"
                     style={{ border: '1px solid #d1d5db', background: '#fff' }} />
@@ -437,21 +516,23 @@ export default function QuestionPaper() {
 
         {/* ── Right Panel: Preview ── */}
         <div ref={previewWrapRef}
-          className={`${mobileTab === 'preview' ? 'flex' : 'hidden lg:flex'} flex-1 min-w-0 rounded-2xl overflow-auto flex-col`}
+          className={`${mobileTab === 'preview' ? 'flex' : 'hidden lg:flex'} flex-1 min-w-0 rounded-2xl overflow-x-hidden overflow-y-auto flex-col`}
           style={{ background: '#f0f2f5', padding: 12, border: '1.5px solid #e5e7eb', maxHeight: 'calc(100vh - 160px)' }}>
-          <div id="qp-all-sets"
-            style={{
-              width: 760,
-              transformOrigin: 'top left',
-              transform: `scale(${previewScale})`,
-              marginBottom: previewScale < 1 ? `calc((${previewScale} - 1) * 760px * ${setsPerPage} * 0.5)` : 0,
-              display: 'flex', flexDirection: 'column', gap: 16,
-            }}>
-            {Array.from({ length: setsPerPage }).map((_, i) => (
-              <div key={i} id={`qp-set-${i}`} style={{ width: 760 }}>
-                <PaperPreview meta={meta} questions={questions} logoSrc={logoSrc} />
-              </div>
-            ))}
+          {/* Wrapper sized to scaled height so no empty gap */}
+          <div style={{ width: 760 * previewScale, height: contentHeight ? contentHeight * previewScale : 'auto', flexShrink: 0 }}>
+            <div id="qp-all-sets" ref={allSetsRef}
+              style={{
+                width: 760,
+                transformOrigin: 'top left',
+                transform: `scale(${previewScale})`,
+                display: 'flex', flexDirection: 'column', gap: 16,
+              }}>
+              {Array.from({ length: setsPerPage }).map((_, i) => (
+                <div key={i} id={`qp-set-${i}`} style={{ width: 760 }}>
+                  <PaperPreview meta={meta} questions={translatedQuestions[meta.language] || questions} logoSrc={logoSrc} lang={meta.language} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

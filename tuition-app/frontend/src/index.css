@@ -7,6 +7,12 @@
 /* ─── Base ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
+/* Paper preview — reset all inherited spacing except title */
+#qp-all-sets *:not(.qp-title) {
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+}
+
 body {
   background-color: #f0f2f5;
   font-family: 'Inter', 'Segoe UI', sans-serif;

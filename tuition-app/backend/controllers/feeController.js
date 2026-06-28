@@ -1,7 +1,7 @@
 const Fee              = require('../models/Fee');
 const Student          = require('../models/Student');
-const QRCode           = require('qrcode');
-const { updateOverdue } = require('../utils/fees');
+const { updateOverdue }            = require('../utils/fees');
+const { getPagination, paginateArray } = require('../utils/paginate');
 
 exports.getAll = async (req, res) => {
   try {
@@ -50,7 +50,14 @@ exports.getAll = async (req, res) => {
       return { ...f.toObject(), lastPending, pendingBreakdown };
     });
 
-    res.json(result);
+    const { page, limit } = getPagination(req.query);
+
+    let filtered = result;
+    if (req.query.status && req.query.status !== 'All') filtered = filtered.filter(f => f.status === req.query.status);
+    if (req.query.month)  filtered = filtered.filter(f => f.month === req.query.month);
+    if (req.query.year)   filtered = filtered.filter(f => f.year  === Number(req.query.year));
+
+    res.json(paginateArray(filtered, page, limit));
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
@@ -98,9 +105,35 @@ exports.markPaid = async (req, res) => {
 
     const updated = await Fee.findByIdAndUpdate(
       req.params.id,
-      { status, paidAmount: totalPaid, paidDate: paidOn },
+      { status, paidAmount: Math.min(totalPaid, fee.amount), paidDate: paidOn },
       { new: true }
     );
+
+    // Apply excess to oldest pending/partial fee of same student
+    let excess = totalPaid - fee.amount;
+    if (excess > 0) {
+      const pendingFees = await Fee.find({
+        studentId:  fee.studentId,
+        adminEmail: fee.adminEmail,
+        _id:        { $ne: fee._id },
+        status:     { $in: ['Pending', 'Partial', 'Overdue', 'Upcoming'] },
+      }).sort({ dueDate: 1 }); // oldest first
+
+      for (const pf of pendingFees) {
+        if (excess <= 0) break;
+        const alreadyPaid = pf.paidAmount || 0;
+        const remaining   = pf.amount - alreadyPaid;
+        const apply       = Math.min(excess, remaining);
+        const newPaid     = alreadyPaid + apply;
+        const newStatus   = newPaid >= pf.amount ? 'Paid' : 'Partial';
+        await Fee.findByIdAndUpdate(pf._id, {
+          paidAmount: newPaid,
+          status:     newStatus,
+          paidDate:   paidOn,
+        });
+        excess -= apply;
+      }
+    }
 
     res.json(updated);
   } catch (e) { res.status(400).json({ error: e.message }); }
@@ -120,18 +153,6 @@ exports.updateComments = async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
-exports.getQR = async (req, res) => {
-  try {
-    const fee = await Fee.findById(req.params.id).populate('studentId', 'name std');
-    if (!fee) return res.status(404).json({ error: 'Fee not found' });
-    const upiId   = process.env.UPI_ID   || 'yourname@upi';
-    const upiName = process.env.UPI_NAME || 'Shree Ram Academy';
-    const note    = `${fee.studentId.name} Class ${fee.studentId.std} ${fee.month} ${fee.year} Fee`;
-    const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${fee.amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-    const qrDataUrl = await QRCode.toDataURL(upiLink, { width: 300, margin: 2, color: { dark: '#1a1a1a', light: '#ffffff' } });
-    res.json({ qr: qrDataUrl, upiId, upiName, amount: fee.amount, note });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-};
 
 exports.remove = async (req, res) => {
   try {

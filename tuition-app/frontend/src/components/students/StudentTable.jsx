@@ -1,14 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { PhoneOutlined, EditOutlined, DeleteOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import Pagination from '../common/Pagination';
 
-export default function StudentTable({ students, onEdit, onDelete, onBulkDelete, onCertificate }) {
+export default function StudentTable({ students, onEdit, onDelete, onBulkDelete, onCertificate, paginationProps = {} }) {
   const [selected,  setSelected]  = useState(new Set());
-  const [page,      setPage]      = useState(1);
-  const [pageSize,  setPageSize]  = useState(10);
-
-  useEffect(() => { setPage(1); }, [students.length]);
 
   const allChecked = students.length > 0 && students.every((s) => selected.has(s._id));
 
@@ -39,8 +35,6 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
     });
   };
 
-  const paged = students.slice((page - 1) * pageSize, page * pageSize);
-
   return (
     <div>
       {selected.size > 0 && (
@@ -69,10 +63,10 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
             </tr>
           </thead>
           <tbody>
-            {paged.length === 0 ? (
+            {students.length === 0 ? (
               <tr><td colSpan={12} className="p-6 text-center text-gray-400">No students found</td></tr>
             ) : (
-              paged.map((s, i) => (
+              students.map((s, i) => (
                 <tr key={s._id} className="border-b hover:bg-yellow-50 transition"
                   style={{ background: selected.has(s._id) ? '#fffbeb' : '' }}>
                   <td className="p-3">
@@ -131,8 +125,7 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
           </tbody>
         </table>
       </div>
-      <Pagination page={page} pageSize={pageSize} total={students.length}
-        onChange={setPage} onPageSizeChange={setPageSize} />
+      <Pagination {...paginationProps} />
     </div>
   );
 }
