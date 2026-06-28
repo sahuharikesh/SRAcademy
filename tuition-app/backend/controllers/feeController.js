@@ -105,7 +105,12 @@ exports.markPaid = async (req, res) => {
 
     const updated = await Fee.findByIdAndUpdate(
       req.params.id,
-      { status, paidAmount: Math.min(totalPaid, fee.amount), paidDate: paidOn },
+      {
+        status,
+        paidAmount: Math.min(totalPaid, fee.amount),
+        paidDate: paidOn,
+        $push: { paymentLogs: { amount: Number(payment), date: paidOn } },
+      },
       { new: true }
     );
 
@@ -117,7 +122,7 @@ exports.markPaid = async (req, res) => {
         adminEmail: fee.adminEmail,
         _id:        { $ne: fee._id },
         status:     { $in: ['Pending', 'Partial', 'Overdue', 'Upcoming'] },
-      }).sort({ dueDate: 1 }); // oldest first
+      }).sort({ dueDate: 1 });
 
       for (const pf of pendingFees) {
         if (excess <= 0) break;
@@ -130,6 +135,7 @@ exports.markPaid = async (req, res) => {
           paidAmount: newPaid,
           status:     newStatus,
           paidDate:   paidOn,
+          $push: { paymentLogs: { amount: apply, date: paidOn } },
         });
         excess -= apply;
       }

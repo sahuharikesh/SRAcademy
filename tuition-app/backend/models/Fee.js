@@ -13,6 +13,7 @@ const FeeSchema = new mongoose.Schema(
     notificationSent: { type: Boolean, default: false },
     comments:         { type: String, default: '' },
     adminEmail:       { type: String },
+    paymentLogs:      [{ amount: { type: Number }, date: { type: Date } }],
   },
   { timestamps: true }
 );

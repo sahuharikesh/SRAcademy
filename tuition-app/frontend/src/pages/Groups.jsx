@@ -96,10 +96,10 @@ export default function Groups() {
   const load = async () => {
     setLoading(true);
     try {
-      const [g, f, s] = await Promise.all([getGroups(), getFees().catch(() => []), getStudents().catch(() => [])]);
+      const [g, fRes, sRes] = await Promise.all([getGroups(), getFees({ limit: 1000 }).catch(() => ({})), getStudents({ limit: 1000 }).catch(() => ({}))]);
       setGroups(g);
-      setAllFees(f);
-      setAllStudents(s);
+      setAllFees(fRes.data || fRes);
+      setAllStudents(sRes.data || sRes);
     } catch { toast.error('Failed to load groups'); }
     finally { setLoading(false); }
   };
