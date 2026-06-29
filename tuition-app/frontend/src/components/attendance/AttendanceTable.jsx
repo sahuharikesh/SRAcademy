@@ -33,7 +33,11 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
                 style={{ background: marks[row.student._id] === 'Absent' ? '#fff5f5' : '#fff' }}>
                 <td className="p-3 font-semibold">{row.student.name}</td>
                 <td className="p-3">{row.student.std}</td>
-                <td className="p-3">{row.student.groupNo || '—'}</td>
+                <td className="p-3">
+                  {row.student.groupNo
+                    ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{row.student.groupNo}</span>
+                    : <span className="text-gray-400">—</span>}
+                </td>
                 <td className="p-3">
                   <a href={`tel:${row.student.mobile}`} title="Call"
                     className="w-7 h-7 rounded flex items-center justify-center"

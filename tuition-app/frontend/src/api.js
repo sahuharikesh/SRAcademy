@@ -41,11 +41,11 @@ export const markAttendanceNotified = (id) =>
 export const getMonthlyAttendance = (month, year) =>
   api.get(`/attendance/monthly?month=${month}&year=${year}`).then((r) => r.data);
 
+export const getFeeSummary = () => api.get('/fees/summary').then((r) => r.data);
+
 export const getFees = ({ page = 1, limit = 15, status = '', month = '', year = '' } = {}) =>
   api.get('/fees', { params: { page, limit, status: status || undefined, month: month || undefined, year: year || undefined } })
      .then((r) => r.data); // returns { data, total, page, pages }
-export const getDueFees = () => api.get('/fees/due').then((r) => r.data);
-export const addFee = (data) => api.post('/fees', data).then((r) => r.data);
 export const payFee = (id, data) => api.patch(`/fees/pay/${id}`, data).then((r) => r.data);
 export const markFeeNotified = (id) => api.patch(`/fees/notified/${id}`).then((r) => r.data);
 export const updateFeeComments = (id, comments) => api.patch(`/fees/comments/${id}`, { comments }).then((r) => r.data);

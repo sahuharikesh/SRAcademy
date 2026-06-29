@@ -13,13 +13,19 @@ exports.getStats = async (req, res) => {
 
     const activeStudentIds = await Student.distinct('_id', { isActive: true, adminEmail: req.adminEmail });
 
-    const [totalStudents, dueFees, todayPresent, todayAbsent] = await Promise.all([
+    const [totalStudents, dueFees, todayPresent, todayAbsent, stdAgg] = await Promise.all([
       Student.countDocuments({ isActive: true, adminEmail: req.adminEmail }),
       Fee.countDocuments({ status: { $in: ['Pending', 'Overdue', 'Partial'] }, studentId: { $in: activeStudentIds }, adminEmail: req.adminEmail }),
       Attendance.countDocuments({ date: { $gte: start, $lte: end }, status: 'Present', adminEmail: req.adminEmail }),
       Attendance.countDocuments({ date: { $gte: start, $lte: end }, status: 'Absent', adminEmail: req.adminEmail }),
+      Student.aggregate([
+        { $match: { isActive: true, adminEmail: req.adminEmail } },
+        { $group: { _id: '$std', count: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
     ]);
 
-    res.json({ totalStudents, dueFees, todayPresent, todayAbsent });
+    const stdWiseCount = stdAgg.map(s => ({ std: s._id, count: s.count }));
+    res.json({ totalStudents, dueFees, todayPresent, todayAbsent, stdWiseCount });
   } catch (e) { res.status(500).json({ error: e.message }); }
 };

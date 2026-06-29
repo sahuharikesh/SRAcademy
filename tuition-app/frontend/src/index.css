@@ -146,6 +146,9 @@ input:focus, select:focus, textarea:focus {
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+/* ─── Recharts: remove click outline on bars ─────────── */
+.recharts-wrapper *, .recharts-wrapper *:focus { outline: none !important; }
+
 /* ─── Glass card ─────────────────────────────────────── */
 .glass {
   background: rgba(255,255,255,0.82);

@@ -171,7 +171,7 @@ export default function Groups() {
     <div className="anim-fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-2xl font-black" style={{ color: '#1a1a1a' }}>Family Groups</h1>
+          <h1 className="text-lg font-black" style={{ color: '#1a1a1a' }}>Family Groups</h1>
           <p className="text-xs mt-0.5 font-medium" style={{ color: '#888' }}>Family-wise fee tracking & bulk messaging</p>
         </div>
         <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{groups.length} group(s)</span>

@@ -7,7 +7,7 @@ exports.getAll = async (req, res) => {
   try {
     await updateOverdue(req.adminEmail);
     const fees = await Fee.find({ adminEmail: req.adminEmail })
-      .populate({ path: 'studentId', select: 'name mobile std groupNo feeType isActive', match: { isActive: true } })
+      .populate({ path: 'studentId', select: 'name mobile std groupNo feeType isActive dateOfAdmission', match: { isActive: true } })
       .sort({ dueDate: 1 });
     const active = fees.filter((f) => f.studentId);
 
@@ -52,7 +52,15 @@ exports.getAll = async (req, res) => {
 
     const { page, limit } = getPagination(req.query);
 
+    const next7 = new Date();
+    next7.setDate(next7.getDate() + 7);
+    next7.setHours(23, 59, 59, 999);
+
     let filtered = result;
+    // Only apply 7-day window when Upcoming tab is active, not on All
+    if (!req.query.status || req.query.status === 'All') {
+      filtered = filtered.filter(f => f.status !== 'Upcoming' || new Date(f.dueDate) <= next7);
+    }
     if (req.query.status && req.query.status !== 'All') filtered = filtered.filter(f => f.status === req.query.status);
     if (req.query.month)  filtered = filtered.filter(f => f.month === req.query.month);
     if (req.query.year)   filtered = filtered.filter(f => f.year  === Number(req.query.year));
@@ -61,21 +69,40 @@ exports.getAll = async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
-exports.getDue = async (req, res) => {
+
+exports.getSummary = async (req, res) => {
   try {
-    await updateOverdue(req.adminEmail);
-    const next7days = new Date();
-    next7days.setDate(next7days.getDate() + 7);
-    const fees = await Fee.find({
-      adminEmail: req.adminEmail,
-      $or: [
-        { status: { $in: ['Overdue', 'Pending', 'Partial'] } },
-        { status: 'Upcoming', dueDate: { $lte: next7days } },
-      ],
-    })
-      .populate({ path: 'studentId', select: 'name mobile std groupNo feeType actualFees recommendedFees isActive', match: { isActive: true } })
-      .sort({ dueDate: 1 });
-    res.json(fees.filter((f) => f.studentId));
+    const now       = new Date();
+    const monthName = now.toLocaleString('default', { month: 'long' });
+    const year      = now.getFullYear();
+
+    const [studentAgg, monthFees] = await Promise.all([
+      // Card 1: sum of all active students' recommendedFees
+      Student.aggregate([
+        { $match: { isActive: true, adminEmail: req.adminEmail } },
+        { $group: { _id: null, total: { $sum: '$recommendedFees' } } },
+      ]),
+      // Cards 2-4: current month fee records
+      Fee.aggregate([
+        { $match: { adminEmail: req.adminEmail, month: monthName, year } },
+        { $group: {
+          _id: null,
+          totalDue:       { $sum: '$amount' },
+          totalCollected: { $sum: { $ifNull: ['$paidAmount', 0] } },
+        }},
+      ]),
+    ]);
+
+    const totalDue       = monthFees[0]?.totalDue       || 0;
+    const totalCollected = monthFees[0]?.totalCollected || 0;
+
+    res.json({
+      allStudentsTotal: studentAgg[0]?.total || 0,
+      totalDue,
+      totalCollected,
+      totalPending: totalDue - totalCollected,
+      month: monthName, year,
+    });
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
@@ -84,13 +111,6 @@ exports.getByStudent = async (req, res) => {
     const fees = await Fee.find({ studentId: req.params.studentId, adminEmail: req.adminEmail }).sort({ dueDate: -1 });
     res.json(fees);
   } catch (e) { res.status(500).json({ error: e.message }); }
-};
-
-exports.create = async (req, res) => {
-  try {
-    const fee = await Fee.create({ ...req.body, adminEmail: req.adminEmail });
-    res.status(201).json(fee);
-  } catch (e) { res.status(400).json({ error: e.message }); }
 };
 
 exports.markPaid = async (req, res) => {
@@ -170,27 +190,28 @@ exports.remove = async (req, res) => {
 exports.generate = async (req, res) => {
   try {
     const students = await Student.find({ isActive: true, feeType: 'Monthly', adminEmail: req.adminEmail });
-    const today = new Date(); today.setHours(23, 59, 59, 999);
+    const now    = new Date();
+    const today  = new Date(now); today.setHours(23, 59, 59, 999);
+    const limit  = new Date(now); limit.setDate(limit.getDate() + 30); limit.setHours(23, 59, 59, 999);
     let created = 0;
 
     for (const s of students) {
       const admission = new Date(s.dateOfAdmission);
-      // Due day = admission day - 1 (e.g. admitted 15th → due 14th of next month)
       const dueDay = Math.max(1, admission.getDate() - 1);
 
-      // First expected fee is one month after admission
       let cursor = new Date(admission.getFullYear(), admission.getMonth() + 1, dueDay);
 
-      // Generate ALL missing months from first due date up to today
-      while (cursor <= today) {
+      // Generate past fees (Overdue) + next 30 days (Upcoming)
+      while (cursor <= limit) {
         const monthName = cursor.toLocaleString('default', { month: 'long' });
         const year      = cursor.getFullYear();
         const exists    = await Fee.findOne({ studentId: s._id, month: monthName, year, adminEmail: req.adminEmail });
         if (!exists) {
+          const status = cursor > today ? 'Upcoming' : 'Overdue';
           await Fee.create({
             studentId: s._id, month: monthName, year,
             dueDate: new Date(cursor),
-            amount: s.recommendedFees, status: 'Overdue', adminEmail: req.adminEmail,
+            amount: s.recommendedFees, status, adminEmail: req.adminEmail,
           });
           created++;
         }

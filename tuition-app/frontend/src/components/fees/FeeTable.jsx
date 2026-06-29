@@ -147,7 +147,7 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                 <input type="checkbox" checked={allChecked} onChange={toggleAll}
                   className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
               </th>
-              {['Student', 'Class', 'Group', 'Month', 'Amount', 'Last Pending', 'Due Date', 'Status', 'Actions'].map((h) => (
+              {['Student', 'Class', 'Group', 'Adm Date', 'Amount', 'Last Pending', 'Due Date', 'Status', 'Actions'].map((h) => (
                 <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
               ))}
             </tr>
@@ -165,8 +165,16 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                   </td>
                   <td className="p-3 font-semibold">{fee.studentId?.name}</td>
                   <td className="p-3">{fee.studentId?.std}</td>
-                  <td className="p-3">{fee.studentId?.groupNo || '—'}</td>
-                  <td className="p-3">{fee.month} {fee.year}</td>
+                  <td className="p-3">
+                    {fee.studentId?.groupNo
+                      ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{fee.studentId.groupNo}</span>
+                      : <span className="text-gray-400">—</span>}
+                  </td>
+                  <td className="p-3">
+                    {fee.studentId?.dateOfAdmission
+                      ? new Date(fee.studentId.dateOfAdmission).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                      : '—'}
+                  </td>
                   <td className="p-3 font-semibold">
                     ₹{fee.amount}
                     {fee.status === 'Partial' && (

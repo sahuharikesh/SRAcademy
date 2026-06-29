@@ -91,10 +91,16 @@ export default function Students() {
     <div className="anim-fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-2xl font-black" style={{ color: '#1a1a1a' }}>Students</h1>
+          <h1 className="text-lg font-black" style={{ color: '#1a1a1a' }}>Students</h1>
           <p className="text-xs mt-0.5 font-medium" style={{ color: '#888' }}>Manage admissions & student records</p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => { setForm(EMPTY); setEditId(null); setShowForm((v) => !v); }}
+            className="btn-shine px-3 py-1.5 rounded-lg font-bold text-xs"
+            style={{ background: 'linear-gradient(135deg, #C9A84C, #f0d080)', color: '#000' }}>
+            {showForm ? 'Cancel' : '+ Admission'}
+          </button>
           <button onClick={async () => {
               setHistoryOpen(true);
               if (allFees.length === 0) {
@@ -107,18 +113,12 @@ export default function Students() {
             }}
             className="btn-shine px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5"
             style={{ background: '#eff6ff', color: '#1d4ed8', border: '1.5px solid #bfdbfe' }}>
-            <HistoryOutlined /> Payment History
+            <HistoryOutlined /> Payment
           </button>
           <button onClick={() => setShowWaGroup(true)}
             className="btn-shine px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5"
             style={{ background: 'linear-gradient(135deg,#25D366,#1ead52)', color: '#fff' }}>
             <WhatsAppOutlined /> Groups
-          </button>
-          <button
-            onClick={() => { setForm(EMPTY); setEditId(null); setShowForm((v) => !v); }}
-            className="btn-shine px-3 py-1.5 rounded-lg font-bold text-xs"
-            style={{ background: 'linear-gradient(135deg, #C9A84C, #f0d080)', color: '#000' }}>
-            {showForm ? 'Cancel' : '+ New Admission'}
           </button>
         </div>
       </div>
@@ -305,7 +305,7 @@ export default function Students() {
                                 Adm: {new Date(s.dateOfAdmission).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                               </div>
                             )}
-                            <div className="text-gray-400 text-[10px]">Class {s.std}{s.groupNo ? ` · Grp ${s.groupNo}` : ''}</div>
+                            <div className="text-gray-400 text-[10px] flex items-center gap-1">Class {s.std}{s.groupNo && <span className="px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{s.groupNo}</span>}</div>
                           </td>
                           {monthsRange.map(({ month, year }) => {
                             const fee = allFees.find(f =>

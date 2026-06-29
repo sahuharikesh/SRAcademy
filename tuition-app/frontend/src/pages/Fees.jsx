@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getFees, payFee, sendWhatsApp, markFeeNotified, getStudents, addFee, deleteFee, generateFees } from '../api';
+import { getFees, getFeeSummary, payFee, sendWhatsApp, markFeeNotified, deleteFee, generateFees } from '../api';
 import { buildFeeMsg, buildUpiQrUrl } from '../utils/messages';
 import { GOLD, DARK } from '../utils/constants';
-import AddFeeForm    from '../components/fees/AddFeeForm';
 import FeeFilterTabs from '../components/fees/FeeFilterTabs';
 import FeeTable      from '../components/fees/FeeTable';
 import AppModal      from '../components/common/AppModal';
@@ -112,12 +111,10 @@ function ConfirmModal({ open, message, onConfirm, onClose }) {
 
 export default function Fees() {
   const [fees,         setFees]         = useState([]);
-  const [students,     setStudents]     = useState([]);
+  const [summary,      setSummary]      = useState(null);
   const [filter,       setFilter]       = useState('All');
   const [filterMonth,  setFilterMonth]  = useState('');
-  const [filterYear,   setFilterYear]   = useState('');
   const { page, setPage, setTotal, reset: resetPage, paginationProps } = usePagination(15);
-  const [showAddFee,   setShowAddFee]   = useState(false);
   const [waModal,      setWaModal]      = useState(null);
   const [payModal,     setPayModal]     = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
@@ -127,27 +124,20 @@ export default function Fees() {
     setLoading(true);
     try {
       const [res, s] = await Promise.all([
-        getFees({ page: p, limit: 15, status: filter, month: filterMonth, year: filterYear }),
-        getStudents().catch(() => ({ data: [] })),
+        getFees({ page: p, limit: 15, status: filter, month: filterMonth }),
+        p === 1 ? getFeeSummary().catch(() => null) : Promise.resolve(null),
       ]);
       setFees(res.data);
       setTotal(res.total);
-      setStudents(Array.isArray(s) ? s : (s.data || []));
+      if (s) setSummary(s);
     } catch { toast.error('Failed to load fees'); }
     finally { setLoading(false); }
-  }, [filter, filterMonth, filterYear]);
+  }, [filter, filterMonth]);
 
-  useEffect(() => { resetPage(); load(1); }, [filter, filterMonth, filterYear]);
+  useEffect(() => { resetPage(); load(1); }, [filter, filterMonth]);
   useEffect(() => { if (page > 1) load(page); }, [page]);
 
   const handlePay = (fee) => setPayModal(fee);
-
-  const handleAddFee = async (formData, resetForm) => {
-    try {
-      await addFee(formData); toast.success('Fee record added!');
-      setShowAddFee(false); resetForm(); load(page);
-    } catch (err) { toast.error(err.response?.data?.error || 'Something went wrong'); }
-  };
 
   const handleGenerate = () => {
     setConfirmModal({
@@ -191,8 +181,6 @@ export default function Fees() {
   };
 
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   if (loading) return <PageSpinner />;
 
@@ -200,23 +188,33 @@ export default function Fees() {
     <div className="anim-fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-2xl font-black" style={{ color: '#1a1a1a' }}>Fees Management</h1>
+          <h1 className="text-lg font-black" style={{ color: '#1a1a1a' }}>Fees Management</h1>
           <p className="text-xs mt-0.5 font-medium" style={{ color: '#888' }}>Track, collect & manage student payments</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setShowAddFee((v) => !v)}
-            className="btn-shine px-3 py-1 rounded-lg text-xs font-bold" style={GOLD}>
-            + Add Fee
-          </button>
           <button onClick={handleGenerate}
             className="btn-shine px-3 py-1 rounded-lg text-xs font-bold" style={DARK}>
-            Generate Monthly Fees
+            Generate Fees
           </button>
         </div>
       </div>
 
-      {showAddFee && (
-        <AddFeeForm students={students} onSubmit={handleAddFee} onCancel={() => setShowAddFee(false)} />
+      {/* Monthly Revenue Summary */}
+      {summary && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          {[
+            { label: 'Total Fees',        value: summary.allStudentsTotal, color: '#6d28d9', bg: '#f5f3ff', border: '#ddd6fe', sub: 'All active students'                            },
+            { label: 'Monthly Revenue',   value: summary.totalDue,         color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe', sub: `${summary.month} ${summary.year} generated`    },
+            { label: 'Paid',              value: summary.totalCollected,   color: '#065f46', bg: '#d1fae5', border: '#6ee7b7', sub: 'Collected this month'                          },
+            { label: 'Still Pending',     value: summary.totalPending,     color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', sub: 'Yet to collect this month'                     },
+          ].map(({ label, value, color, bg, border, sub }) => (
+            <div key={label} className="rounded-xl px-4 py-3" style={{ background: bg, border: `1.5px solid ${border}` }}>
+              <div className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{ color }}>{label}</div>
+              <div className="text-2xl font-black" style={{ color }}>₹{Math.max(0, value).toLocaleString('en-IN')}</div>
+              <div className="text-[10px] mt-0.5" style={{ color, opacity: 0.7 }}>{sub}</div>
+            </div>
+          ))}
+        </div>
       )}
 
       <FeeFilterTabs fees={fees} active={filter} onChange={setFilter} />
@@ -228,14 +226,8 @@ export default function Fees() {
           <option value="">All Months</option>
           {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
         </select>
-        <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)}
-          className="rounded-md px-2 py-1.5 text-xs focus:outline-none"
-          style={{ border: '1px solid #C9A84C', background: '#fff' }}>
-          <option value="">All Years</option>
-          {years.map((y) => <option key={y} value={y}>{y}</option>)}
-        </select>
-        {(filterMonth || filterYear) && (
-          <button onClick={() => { setFilterMonth(''); setFilterYear(''); }}
+        {filterMonth && (
+          <button onClick={() => setFilterMonth('')}
             className="text-xs px-2 py-1.5 rounded-md"
             style={{ border: '1px solid #C9A84C', color: '#7a6020', background: '#f5f0e8' }}>
             Clear
