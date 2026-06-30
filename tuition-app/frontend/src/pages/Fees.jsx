@@ -109,6 +109,8 @@ function ConfirmModal({ open, message, onConfirm, onClose }) {
   );
 }
 
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
 export default function Fees() {
   const [fees,         setFees]         = useState([]);
   const [summary,      setSummary]      = useState(null);
@@ -125,7 +127,7 @@ export default function Fees() {
     try {
       const [res, s] = await Promise.all([
         getFees({ page: p, limit: 15, status: filter, month: filterMonth }),
-        p === 1 ? getFeeSummary().catch(() => null) : Promise.resolve(null),
+        p === 1 ? getFeeSummary(filterMonth).catch(() => null) : Promise.resolve(null),
       ]);
       setFees(res.data);
       setTotal(res.total);
@@ -179,8 +181,6 @@ export default function Fees() {
     setWaModal(null);
     toast.success('WhatsApp opened!');
   };
-
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   if (loading) return <PageSpinner />;
 

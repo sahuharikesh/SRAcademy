@@ -73,16 +73,14 @@ exports.getAll = async (req, res) => {
 exports.getSummary = async (req, res) => {
   try {
     const now       = new Date();
-    const monthName = now.toLocaleString('default', { month: 'long' });
+    const monthName = req.query.month || now.toLocaleString('default', { month: 'long' });
     const year      = now.getFullYear();
 
     const [studentAgg, monthFees] = await Promise.all([
-      // Card 1: sum of all active students' recommendedFees
       Student.aggregate([
         { $match: { isActive: true, adminEmail: req.adminEmail } },
         { $group: { _id: null, total: { $sum: '$recommendedFees' } } },
       ]),
-      // Cards 2-4: current month fee records
       Fee.aggregate([
         { $match: { adminEmail: req.adminEmail, month: monthName, year } },
         { $group: {

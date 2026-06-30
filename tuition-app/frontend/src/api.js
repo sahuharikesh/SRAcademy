@@ -41,7 +41,7 @@ export const markAttendanceNotified = (id) =>
 export const getMonthlyAttendance = (month, year) =>
   api.get(`/attendance/monthly?month=${month}&year=${year}`).then((r) => r.data);
 
-export const getFeeSummary = () => api.get('/fees/summary').then((r) => r.data);
+export const getFeeSummary = (month) => api.get('/fees/summary', { params: month ? { month } : {} }).then((r) => r.data);
 
 export const getFees = ({ page = 1, limit = 15, status = '', month = '', year = '' } = {}) =>
   api.get('/fees', { params: { page, limit, status: status || undefined, month: month || undefined, year: year || undefined } })
@@ -53,6 +53,10 @@ export const deleteFee    = (id) => api.delete(`/fees/${id}`).then((r) => r.data
 export const generateFees = (data) => api.post('/fees/generate', data).then((r) => r.data);
 
 export const getDashboard = () => api.get('/dashboard').then((r) => r.data);
+
+export const saveStudentMarks = (data) => api.post('/results/save', data).then((r) => r.data);
+export const getStudentResults = (studentId) => api.get(`/results/student/${studentId}`).then((r) => r.data);
+export const deleteStudentExam = (data) => api.delete('/results/delete', { data }).then((r) => r.data);
 
 export const sendWhatsApp = (mobile, message) => {
   const cleaned = mobile.replace(/\D/g, '');

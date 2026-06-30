@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { PlusOutlined, DeleteOutlined, DownloadOutlined, PrinterOutlined, PictureOutlined, TranslationOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
+import { SUBJECTS, EXAMS, ALL_CLASSES } from '../utils/constants';
 
 async function processImage(file) {
   return new Promise((resolve) => {
@@ -55,9 +56,7 @@ async function processImage(file) {
   });
 }
 
-const SUBJECTS = ['Maths','Maths-1','Maths-2','Science','Science-1','Science-2','English','Marathi','Hindi','History/Civics','Geography','Sanskrit'];
-const EXAMS    = ['Half Yearly Exam', 'Annual Exam', 'Unit Test 1', 'Unit Test 2', 'Unit Test 3', 'Final Exam', 'Monthly Test', 'Weekly Test'];
-const CLASSES  = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'];
+const CLASSES = ALL_CLASSES;
 const gold = '#C9A84C';
 const dark = '#1a1a1a';
 
@@ -451,21 +450,21 @@ export default function QuestionPaper() {
 
             {questions.map((q, qi) => (
               <div key={q.id} className="rounded-xl p-3 flex flex-col gap-2" style={{ background: '#fafafa', border: '1px solid #e5e7eb' }}>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black text-gray-500">{qLangPrefix(meta.language)}{qi + 1}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs font-black text-gray-500 flex-shrink-0">{qLangPrefix(meta.language)}{qi + 1}</span>
                   <input value={q.text} onChange={e => setQ(q.id, 'text', e.target.value)}
-                    placeholder="Question text..." className="flex-1 px-2 py-1 rounded-lg text-xs outline-none"
+                    placeholder="Question text..." className="flex-1 min-w-0 px-2 py-1 rounded-lg text-xs outline-none"
                     style={{ border: '1px solid #d1d5db', background: '#fff' }} />
                   <input type="number" value={q.marks} onChange={e => setQ(q.id, 'marks', e.target.value)}
-                    placeholder="Marks" className="w-14 px-2 py-1 rounded-lg text-xs outline-none"
+                    placeholder="Marks" className="w-12 flex-shrink-0 px-2 py-1 rounded-lg text-xs outline-none"
                     style={{ border: '1px solid #d1d5db', background: '#fff' }} />
-                  <label title="Add diagram image" className="cursor-pointer text-xs" style={{ color: q.image ? '#25D366' : gold }}>
+                  <label title="Add diagram image" className="cursor-pointer text-xs flex-shrink-0" style={{ color: q.image ? '#25D366' : gold }}>
                     <PictureOutlined />
                     <input type="file" accept="image/*" className="hidden" onChange={async e => {
                       if (e.target.files[0]) { const img = await processImage(e.target.files[0]); setQ(q.id, 'image', img); e.target.value = ''; }
                     }} />
                   </label>
-                  <button onClick={() => delQ(q.id)} className="text-red-400 hover:text-red-600 text-xs"><DeleteOutlined /></button>
+                  <button onClick={() => delQ(q.id)} className="text-red-400 hover:text-red-600 text-xs flex-shrink-0"><DeleteOutlined /></button>
                 </div>
 
                 {/* Image preview in form */}
@@ -479,21 +478,21 @@ export default function QuestionPaper() {
                 {/* Sub-questions */}
                 {q.subQuestions.map((sq, si) => (
                   <div key={sq.id} className="flex flex-col gap-1 pl-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-gray-400">({String.fromCharCode(97 + si)})</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-[10px] text-gray-400 flex-shrink-0">({String.fromCharCode(97 + si)})</span>
                       <input value={sq.text} onChange={e => setSQ(q.id, sq.id, 'text', e.target.value)}
-                        placeholder="Sub-question..." className="flex-1 px-2 py-1 rounded-lg text-[11px] outline-none"
+                        placeholder="Sub-question..." className="flex-1 min-w-0 px-2 py-1 rounded-lg text-[11px] outline-none"
                         style={{ border: '1px solid #e5e7eb', background: '#fff' }} />
                       <input type="number" value={sq.marks} onChange={e => setSQ(q.id, sq.id, 'marks', e.target.value)}
-                        placeholder="Marks" className="w-12 px-2 py-1 rounded-lg text-[11px] outline-none"
+                        placeholder="Marks" className="w-12 flex-shrink-0 px-2 py-1 rounded-lg text-[11px] outline-none"
                         style={{ border: '1px solid #e5e7eb', background: '#fff' }} />
-                      <label title="Add diagram image" className="cursor-pointer text-xs" style={{ color: sq.image ? '#25D366' : gold }}>
+                      <label title="Add diagram image" className="cursor-pointer text-xs flex-shrink-0" style={{ color: sq.image ? '#25D366' : gold }}>
                         <PictureOutlined />
                         <input type="file" accept="image/*" className="hidden" onChange={async e => {
                           if (e.target.files[0]) { const img = await processImage(e.target.files[0]); setSQ(q.id, sq.id, 'image', img); e.target.value = ''; }
                         }} />
                       </label>
-                      <button onClick={() => delSQ(q.id, sq.id)} className="text-red-300 hover:text-red-500 text-xs"><DeleteOutlined /></button>
+                      <button onClick={() => delSQ(q.id, sq.id)} className="text-red-300 hover:text-red-500 text-xs flex-shrink-0"><DeleteOutlined /></button>
                     </div>
                     {sq.image && (
                       <div className="flex items-center gap-2 pl-4">

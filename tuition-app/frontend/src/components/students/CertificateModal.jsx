@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import AppModal from '../common/AppModal';
 import { DownloadOutlined } from '@ant-design/icons';
+import { STD_OPTIONS, EXAMS, MONTHS } from '../../utils/constants';
 
 const WhatsAppIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
@@ -8,9 +9,7 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
-const RANKS  = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const EXAMS  = ['Half Yearly Exam','Annual Exam','Unit Test 1','Unit Test 2','Unit Test 3','Final Exam','Monthly Test'];
+const RANKS = STD_OPTIONS;
 
 /* ── Inline certificate HTML (also used for print) ── */
 function CertificateView({ student, form, percentage, autoGrade, logoSrc }) {
@@ -70,27 +69,27 @@ function CertificateView({ student, form, percentage, autoGrade, logoSrc }) {
       {/* ── Content ── */}
       <div style={{ position: 'relative', zIndex: 2, padding: '24px 52px 30px' }}>
 
-        {/* Header — academy name only, like navbar */}
+        {/* Header — matches app navbar */}
         <div style={{
-          background: dark,
+          background: 'linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 50%,#0a0a0a 100%)',
           margin: '-24px -52px 0',
-          borderBottom: `3px solid ${gold}`,
-          display: 'flex', alignItems: 'center', padding: '12px 28px',
+          borderBottom: `2px solid ${gold}`,
+          display: 'flex', alignItems: 'center', padding: '14px 28px', gap: 16,
           position: 'relative',
         }}>
           {/* Logo — left */}
           <img src={logoSrc} alt="Shree Ram Academy"
-            style={{ width: 86, height: 86, borderRadius: '50%', border: `2px solid ${gold}`, objectFit: 'contain', background: '#fff', flexShrink: 0 }} />
+            style={{ width: 72, height: 72, borderRadius: '50%', border: `2px solid ${gold}`, objectFit: 'cover', flexShrink: 0 }} />
 
           {/* Academy name — absolute center */}
           <div style={{ position: 'absolute', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 30, fontWeight: 900, color: gold, letterSpacing: 4, fontFamily: '"Palatino Linotype", "Palatino", "Book Antiqua", Georgia, serif', lineHeight: 1, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 28, fontWeight: 900, color: gold, letterSpacing: '0.18em', fontFamily: 'Georgia, serif', lineHeight: 1 }}>
                 SHREE RAM ACADEMY
               </div>
-              <div style={{ width: '100%', height: 1, background: `linear-gradient(to right, transparent, ${gold}, transparent)`, margin: '6px 0 5px' }} />
-              <div style={{ fontSize: 12, color: '#fff', letterSpacing: 3, fontFamily: 'Georgia, serif', textTransform: 'uppercase' }}>
-                Since 2016
+              <div style={{ height: 1, background: `linear-gradient(90deg,transparent,${gold}88,transparent)`, margin: '7px auto', width: '80%' }} />
+              <div style={{ fontSize: 10, letterSpacing: '0.28em', color: 'rgba(255,255,255,0.65)', fontFamily: 'sans-serif', fontWeight: 600 }}>
+                SINCE 2016  ·  EXCELLENCE IN EDUCATION
               </div>
             </div>
           </div>

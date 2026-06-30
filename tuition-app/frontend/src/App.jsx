@@ -9,6 +9,7 @@ import Attendance from './pages/Attendance';
 import Fees       from './pages/Fees';
 import Groups        from './pages/Groups';
 import QuestionPaper from './pages/QuestionPaper';
+import Result        from './pages/Result';
 
 function PrivateRoute({ children }) {
   return localStorage.getItem('adminToken') ? children : <Navigate to="/login" replace />;
@@ -33,6 +34,7 @@ export default function App() {
                     <Route path="/fees"       element={<Fees />}       />
                     <Route path="/groups"          element={<Groups />}        />
                     <Route path="/question-paper" element={<QuestionPaper />} />
+                    <Route path="/result"         element={<Result />}        />
                   </Routes>
                 </main>
               </div>

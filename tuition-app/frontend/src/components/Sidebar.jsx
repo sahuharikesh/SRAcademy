@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { DashboardOutlined, TeamOutlined, CalendarOutlined, DollarOutlined, UsergroupAddOutlined, FileTextOutlined } from '@ant-design/icons';
+import { DashboardOutlined, TeamOutlined, CalendarOutlined, DollarOutlined, UsergroupAddOutlined, FileTextOutlined, TrophyOutlined } from '@ant-design/icons';
 
 const links = [
   { to: '/',                label: 'Dashboard',      icon: <DashboardOutlined />    },
@@ -8,9 +8,10 @@ const links = [
   { to: '/fees',            label: 'Fees',           icon: <DollarOutlined />       },
   { to: '/groups',          label: 'Groups',         icon: <UsergroupAddOutlined /> },
   { to: '/question-paper',  label: 'Set Paper',      icon: <FileTextOutlined />     },
+  { to: '/result',          label: 'Result',         icon: <TrophyOutlined />       },
 ];
 
-const delays = [0, 75, 150, 225, 300, 375];
+const delays = [0, 75, 150, 225, 300, 375, 450];
 
 export default function Sidebar() {
   return (

@@ -56,7 +56,8 @@ const links = [
   { to: '/attendance',      label: 'Attendance'     },
   { to: '/fees',            label: 'Fees'           },
   { to: '/groups',          label: 'Groups'         },
-  { to: '/question-paper',  label: 'Set Paper' },
+  { to: '/question-paper',  label: 'Set Paper'      },
+  { to: '/result',          label: 'Result'         },
 ];
 
 export default function Navbar() {

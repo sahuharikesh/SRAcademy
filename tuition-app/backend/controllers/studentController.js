@@ -18,7 +18,7 @@ exports.getAll = async (req, res) => {
     if (req.query.group)  filter.groupNo = req.query.group;
     if (req.query.medium) filter.medium  = req.query.medium;
 
-    res.json(await paginateQuery(Student, filter, { createdAt: -1 }, page, limit));
+    res.json(await paginateQuery(Student, filter, { name: 1 }, page, limit));
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
@@ -29,13 +29,13 @@ exports.getGroups = async (req, res) => {
       adminEmail: req.adminEmail,
       groupNo: { $nin: ['', null] },
     });
-    res.json(groups);
+    res.json(groups.sort());
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
 exports.getByGroup = async (req, res) => {
   try {
-    const students = await Student.find({ groupNo: req.params.groupNo, isActive: true, adminEmail: req.adminEmail });
+    const students = await Student.find({ groupNo: req.params.groupNo, isActive: true, adminEmail: req.adminEmail }).sort({ name: 1 });
     res.json(students);
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
