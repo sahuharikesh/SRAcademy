@@ -19,7 +19,7 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
       <table className="w-full text-xs">
         <thead>
           <tr style={{ background: '#1a1a1a' }}>
-            {['Student','Class','Group','Call','Status'].map((h) => (
+            {['Student','Class','Status','Call','Group'].map((h) => (
               <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
             ))}
           </tr>
@@ -33,18 +33,6 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
                 style={{ background: marks[row.student._id] === 'Absent' ? '#fff5f5' : '#fff' }}>
                 <td className="p-3 font-semibold">{row.student.name}</td>
                 <td className="p-3">{row.student.std}</td>
-                <td className="p-3">
-                  {row.student.groupNo
-                    ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{row.student.groupNo}</span>
-                    : <span className="text-gray-400">—</span>}
-                </td>
-                <td className="p-3">
-                  <a href={`tel:${row.student.mobile}`} title="Call"
-                    className="w-7 h-7 rounded flex items-center justify-center"
-                    style={{ background: '#d4edda', color: '#155724' }}>
-                    <PhoneOutlined />
-                  </a>
-                </td>
                 <td className="p-3">
                   <div className="flex gap-2">
                     {[
@@ -61,6 +49,18 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
                       </button>
                     ))}
                   </div>
+                </td>
+                <td className="p-3">
+                  <a href={`tel:${row.student.mobile}`} title="Call"
+                    className="w-7 h-7 rounded flex items-center justify-center"
+                    style={{ background: '#d4edda', color: '#155724' }}>
+                    <PhoneOutlined />
+                  </a>
+                </td>
+                <td className="p-3">
+                  {row.student.groupNo
+                    ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{row.student.groupNo}</span>
+                    : <span className="text-gray-400">—</span>}
                 </td>
               </tr>
             ))

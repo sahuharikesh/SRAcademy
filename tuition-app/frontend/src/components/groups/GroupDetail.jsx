@@ -2,18 +2,21 @@ import { useState } from 'react';
 import StatusBadge from '../common/StatusBadge';
 import AppModal from '../common/AppModal';
 import Pagination from '../common/Pagination';
-import { WhatsAppOutlined, PhoneOutlined, CheckOutlined } from '@ant-design/icons';
+import GroupReceiptModal from '../fees/GroupReceiptModal';
+import { WhatsAppOutlined, PhoneOutlined, CheckOutlined, FileTextOutlined } from '@ant-design/icons';
 
 export default function GroupDetail({ selected, groupStudents, groupFees, totalDue, allFees, onWhatsApp, onPay, onPayAll }) {
   const [showPicker, setShowPicker] = useState(false);
   const [search,     setSearch]     = useState('');
   const [page,       setPage]       = useState(1);
+  const [showGroupReceipt, setShowGroupReceipt] = useState(false);
 
   if (!selected) return null;
 
   const pageSize = 10;
 
   const unpaidFees = groupFees.filter((f) => f.status !== 'Paid');
+  const paidFees   = groupFees.filter((f) => f.status === 'Paid');
   const filteredUnpaid = unpaidFees.filter((f) => {
     const stu = groupStudents.find((s) => s._id === (f.studentId?._id || f.studentId));
     const name = (stu?.name || f.studentId?.name || '').toLowerCase();
@@ -50,6 +53,13 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
               className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
               style={{ background: 'linear-gradient(135deg,#25D366,#1ead52)', color: '#fff' }}>
               <WhatsAppOutlined />
+            </button>
+          )}
+          {paidFees.length > 0 && (
+            <button onClick={() => setShowGroupReceipt(true)} title="Group Receipt"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold"
+              style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+              <FileTextOutlined /> Receipt
             </button>
           )}
         </div>
@@ -118,6 +128,14 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
           Total Pending: Rs. {totalDue}
         </div>
       )}
+
+      <GroupReceiptModal
+        open={showGroupReceipt}
+        onClose={() => setShowGroupReceipt(false)}
+        groupNo={selected}
+        groupStudents={groupStudents}
+        paidFees={paidFees.map((f) => ({ ...f, studentId: groupStudents.find((s) => s._id === (f.studentId?._id || f.studentId)) || f.studentId }))}
+      />
 
       {/* Fee picker modal */}
       <AppModal open={showPicker} onClose={() => { setShowPicker(false); setSearch(''); }}

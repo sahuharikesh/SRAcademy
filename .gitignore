@@ -16,3 +16,9 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Deployment notes
+DEPLOYMENT.txt
+
+# Claude Code
+.claude/

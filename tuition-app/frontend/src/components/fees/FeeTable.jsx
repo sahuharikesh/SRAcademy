@@ -4,9 +4,10 @@ import { updateFeeComments } from '../../api';
 import { GOLD } from '../../utils/constants';
 import AppModal from '../common/AppModal';
 import Pagination from '../common/Pagination';
+import FeeReceiptModal from './FeeReceiptModal';
 import { Modal } from 'antd';
 import toast from 'react-hot-toast';
-import { PhoneOutlined, CheckOutlined, WhatsAppOutlined, DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { PhoneOutlined, CheckOutlined, WhatsAppOutlined, DeleteOutlined, InfoCircleOutlined, FileTextOutlined } from '@ant-design/icons';
 
 function PendingModal({ fee, open, onClose, onCommentSaved }) {
   const [comment, setComment] = useState(fee?.comments || '');
@@ -105,9 +106,9 @@ function PendingModal({ fee, open, onClose, onCommentSaved }) {
   );
 }
 
-export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDelete, onCommentSaved, paginationProps = {} }) {
+export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDelete, onCommentSaved, paginationProps = {}, selected, setSelected }) {
   const [pendingModal, setPendingModal] = useState(null);
-  const [selected,     setSelected]     = useState(new Set());
+  const [receiptFee,   setReceiptFee]   = useState(null);
 
   const allChecked = fees.length > 0 && fees.every((f) => selected.has(f._id));
 
@@ -128,27 +129,16 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
 
   return (
     <>
-      {selected.size > 0 && (
-        <div className="flex items-center gap-3 mb-2 px-1">
-          <span className="text-xs text-gray-500">{selected.size} selected</span>
-          <button onClick={handleBulkDelete}
-            className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold"
-            style={{ background: '#fee2e2', color: '#dc2626' }}>
-            <DeleteOutlined /> Delete Selected
-          </button>
-          <button onClick={() => setSelected(new Set())} className="text-xs text-gray-400 underline">Clear</button>
-        </div>
-      )}
       <div className="rounded-xl shadow-md overflow-x-auto" style={{ border: '1px solid #C9A84C' }}>
         <table className="w-full text-xs">
           <thead>
             <tr style={{ background: '#1a1a1a' }}>
-              <th className="p-3">
+              <th className="p-2">
                 <input type="checkbox" checked={allChecked} onChange={toggleAll}
                   className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
               </th>
               {['Student', 'Class', 'Group', 'Adm Date', 'Amount', 'Last Pending', 'Due Date', 'Status', 'Actions'].map((h) => (
-                <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -159,23 +149,23 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
               fees.map((fee, i) => (
                 <tr key={fee._id} className="tr-anim border-b"
                   style={{ animationDelay: `${Math.min(i * 40, 300)}ms`, background: selected.has(fee._id) ? '#fffbeb' : '' }}>
-                  <td className="p-3">
+                  <td className="p-2">
                     <input type="checkbox" checked={selected.has(fee._id)} onChange={() => toggle(fee._id)}
                       className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
                   </td>
-                  <td className="p-3 font-semibold">{fee.studentId?.name}</td>
-                  <td className="p-3">{fee.studentId?.std}</td>
-                  <td className="p-3">
+                  <td className="p-2 font-semibold">{fee.studentId?.name}</td>
+                  <td className="p-2">{fee.studentId?.std}</td>
+                  <td className="p-2">
                     {fee.studentId?.groupNo
                       ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{fee.studentId.groupNo}</span>
                       : <span className="text-gray-400">—</span>}
                   </td>
-                  <td className="p-3">
+                  <td className="p-2">
                     {fee.studentId?.dateOfAdmission
                       ? new Date(fee.studentId.dateOfAdmission).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
                       : '—'}
                   </td>
-                  <td className="p-3 font-semibold">
+                  <td className="p-2 font-semibold">
                     ₹{fee.amount}
                     {fee.status === 'Partial' && (
                       <div className="text-xs font-normal" style={{ color: '#b45309' }}>
@@ -183,7 +173,7 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                       </div>
                     )}
                   </td>
-                  <td className="p-3">
+                  <td className="p-2">
                     <div className="flex items-center gap-1.5">
                       {fee.lastPending > 0 ? (
                         <span className="font-bold" style={{ color: '#dc2626' }}>₹{fee.lastPending}</span>
@@ -199,14 +189,16 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                       </button>
                     </div>
                   </td>
-                  <td className="p-3">{new Date(fee.dueDate).toLocaleDateString('en-IN')}</td>
-                  <td className="p-3"><StatusBadge status={fee.status} dueDate={fee.dueDate} /></td>
-                  <td className="p-3">
+                  <td className="p-2">{new Date(fee.dueDate).toLocaleDateString('en-IN')}</td>
+                  <td className="p-2"><StatusBadge status={fee.status} dueDate={fee.dueDate} paidDate={fee.paidDate} /></td>
+                  <td className="p-2">
                     <div className="flex gap-1 flex-nowrap">
                       {fee.status === 'Paid' ? (
-                        <span className="text-xs text-gray-400">
-                          Paid on {fee.paidDate ? new Date(fee.paidDate).toLocaleDateString('en-IN') : '—'}
-                        </span>
+                        <button onClick={() => setReceiptFee(fee)} title="Generate Receipt"
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold"
+                          style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+                          <FileTextOutlined /> Receipt
+                        </button>
                       ) : (
                         <>
                           <button onClick={() => onPay(fee)} title={fee.status === 'Partial' ? `Pay ₹${fee.amount - (fee.paidAmount || 0)} left` : 'Pay'}
@@ -247,6 +239,12 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
         open={!!pendingModal}
         onClose={() => setPendingModal(null)}
         onCommentSaved={onCommentSaved}
+      />
+
+      <FeeReceiptModal
+        open={!!receiptFee}
+        onClose={() => setReceiptFee(null)}
+        fee={receiptFee}
       />
     </>
   );

@@ -19,30 +19,24 @@ exports.getAll = async (req, res) => {
       studentMap[sid].push(f);
     });
 
-    // Latest fee per student (by dueDate) — only this row shows lastPending
-    const latestFeeId = {};
-    Object.entries(studentMap).forEach(([sid, sfees]) => {
-      const latest = sfees.reduce((a, b) => new Date(a.dueDate) >= new Date(b.dueDate) ? a : b);
-      latestFeeId[sid] = latest._id.toString();
-    });
-
     const result = active.map((f) => {
-      const sid      = f.studentId._id.toString();
-      const isLatest = f._id.toString() === latestFeeId[sid];
+      const sid = f.studentId._id.toString();
 
       let lastPending = 0;
       const pendingBreakdown = [];
 
-      if (isLatest) {
+      // For every unpaid fee, show all OLDER fees that still have a balance
+      if (f.status !== 'Paid') {
         (studentMap[sid] || []).forEach((sf) => {
-          const isSelf = sf._id.toString() === f._id.toString();
-          if ((sf.status === 'Upcoming' || sf.status === 'Pending' || sf.status === 'Overdue') && !isSelf) {
+          if (sf._id.toString() === f._id.toString()) return; // skip self
+          if (new Date(sf.dueDate) >= new Date(f.dueDate)) return; // only older
+          if (sf.status === 'Upcoming' || sf.status === 'No Due' || sf.status === 'Overdue') {
             lastPending += sf.amount;
-            pendingBreakdown.push({ month: sf.month, year: sf.year, amount: sf.amount, paidAmount: 0, pending: sf.amount, status: sf.status });
+            pendingBreakdown.push({ _id: sf._id, month: sf.month, year: sf.year, amount: sf.amount, paidAmount: 0, pending: sf.amount, status: sf.status });
           } else if (sf.status === 'Partial') {
             const diff = sf.amount - (sf.paidAmount || 0);
             lastPending += diff;
-            pendingBreakdown.push({ month: sf.month, year: sf.year, amount: sf.amount, paidAmount: sf.paidAmount || 0, pending: diff, status: 'Partial' });
+            pendingBreakdown.push({ _id: sf._id, month: sf.month, year: sf.year, amount: sf.amount, paidAmount: sf.paidAmount || 0, pending: diff, status: 'Partial' });
           }
         });
       }
@@ -57,13 +51,12 @@ exports.getAll = async (req, res) => {
     next7.setHours(23, 59, 59, 999);
 
     let filtered = result;
-    // Only apply 7-day window when Upcoming tab is active, not on All
-    if (!req.query.status || req.query.status === 'All') {
-      filtered = filtered.filter(f => f.status !== 'Upcoming' || new Date(f.dueDate) <= next7);
-    }
+    // Always apply the 7-day window to Upcoming fees (both on All tab and Upcoming tab)
+    filtered = filtered.filter(f => f.status !== 'Upcoming' || new Date(f.dueDate) <= next7);
     if (req.query.status && req.query.status !== 'All') filtered = filtered.filter(f => f.status === req.query.status);
     if (req.query.month)  filtered = filtered.filter(f => f.month === req.query.month);
     if (req.query.year)   filtered = filtered.filter(f => f.year  === Number(req.query.year));
+    if (req.query.std)    filtered = filtered.filter(f => f.studentId?.std === req.query.std);
 
     res.json(paginateArray(filtered, page, limit));
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -76,29 +69,78 @@ exports.getSummary = async (req, res) => {
     const monthName = req.query.month || now.toLocaleString('default', { month: 'long' });
     const year      = now.getFullYear();
 
-    const [studentAgg, monthFees] = await Promise.all([
+    const [studentAgg, monthFees, allFees] = await Promise.all([
       Student.aggregate([
         { $match: { isActive: true, adminEmail: req.adminEmail } },
         { $group: { _id: null, total: { $sum: '$recommendedFees' } } },
       ]),
+      // current month — for Monthly Collection card
       Fee.aggregate([
         { $match: { adminEmail: req.adminEmail, month: monthName, year } },
+        { $group: { _id: null, totalDue: { $sum: '$amount' } } },
+      ]),
+      // all months — for cards 2, 3, 4
+      Fee.aggregate([
+        { $match: { adminEmail: req.adminEmail } },
         { $group: {
           _id: null,
-          totalDue:       { $sum: '$amount' },
-          totalCollected: { $sum: { $ifNull: ['$paidAmount', 0] } },
+          // Card 2: Overdue (full) + Partial (remaining) + Upcoming within 7 days (full)
+          totalUpcomingOverdue: {
+            $sum: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: ['$status', 'Overdue'] },
+                    then: '$amount'
+                  },
+                  {
+                    case: { $eq: ['$status', 'Partial'] },
+                    then: { $subtract: ['$amount', { $ifNull: ['$paidAmount', 0] }] }
+                  },
+                  {
+                    case: { $and: [
+                      { $eq: ['$status', 'Upcoming'] },
+                      { $lte: ['$dueDate', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)] }
+                    ]},
+                    then: '$amount'
+                  }
+                ],
+                default: 0
+              }
+            }
+          },
+          // Card 3: Total collected = fully paid + partial payments made
+          totalPaid: {
+            $sum: {
+              $cond: [
+                { $in: ['$status', ['Paid', 'Partial']] },
+                { $ifNull: ['$paidAmount', 0] },
+                0
+              ]
+            }
+          },
+          // Card 4: Still pending = remaining unpaid on Overdue + Partial only
+          totalStillPending: {
+            $sum: {
+              $cond: [
+                { $in: ['$status', ['Overdue', 'Partial']] },
+                { $subtract: ['$amount', { $ifNull: ['$paidAmount', 0] }] },
+                0
+              ]
+            }
+          },
         }},
       ]),
     ]);
 
-    const totalDue       = monthFees[0]?.totalDue       || 0;
-    const totalCollected = monthFees[0]?.totalCollected || 0;
+    const all = allFees[0] || {};
 
     res.json({
-      allStudentsTotal: studentAgg[0]?.total || 0,
-      totalDue,
-      totalCollected,
-      totalPending: totalDue - totalCollected,
+      allStudentsTotal:     studentAgg[0]?.total || 0,
+      totalDue:             monthFees[0]?.totalDue || 0,
+      totalUpcomingOverdue: all.totalUpcomingOverdue || 0,
+      totalPaid:            all.totalPaid            || 0,
+      totalStillPending:    all.totalStillPending    || 0,
       month: monthName, year,
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -113,7 +155,8 @@ exports.getByStudent = async (req, res) => {
 
 exports.markPaid = async (req, res) => {
   try {
-    const { payment, paidDate } = req.body;
+    // previousFees: [{ id, month, year, amount }] — fees cleared in same session
+    const { payment, paidDate, previousFees = [] } = req.body;
     const fee = await Fee.findById(req.params.id);
     if (!fee) return res.status(404).json({ error: 'Fee not found' });
 
@@ -121,13 +164,39 @@ exports.markPaid = async (req, res) => {
     const status    = totalPaid >= fee.amount ? 'Paid' : 'Partial';
     const paidOn    = paidDate || new Date();
 
+    // Pay previous fees and collect their details for current fee's log
+    const clearedPrevious = [];
+    for (const pf of previousFees) {
+      const prevFee = await Fee.findById(pf.id);
+      if (!prevFee) continue;
+      const prevTotal  = (prevFee.paidAmount || 0) + Number(pf.amount);
+      const prevStatus = prevTotal >= prevFee.amount ? 'Paid' : 'Partial';
+      await Fee.findByIdAndUpdate(pf.id, {
+        paidAmount: Math.min(prevTotal, prevFee.amount),
+        status: prevStatus,
+        paidDate: paidOn,
+        $push: { paymentLogs: { amount: Number(pf.amount), date: paidOn } },
+      });
+      clearedPrevious.push({ month: pf.month, year: pf.year, amount: Number(pf.amount) });
+    }
+
+    const prevTotal      = clearedPrevious.reduce((s, p) => s + p.amount, 0);
+    const totalCollected = Number(payment) + prevTotal;
+
     const updated = await Fee.findByIdAndUpdate(
       req.params.id,
       {
         status,
         paidAmount: Math.min(totalPaid, fee.amount),
         paidDate: paidOn,
-        $push: { paymentLogs: { amount: Number(payment), date: paidOn } },
+        $push: {
+          paymentLogs: {
+            amount: Number(payment),
+            date: paidOn,
+            totalCollected: clearedPrevious.length > 0 ? totalCollected : undefined,
+            clearedPrevious: clearedPrevious.length > 0 ? clearedPrevious : undefined,
+          },
+        },
       },
       { new: true }
     );
@@ -139,7 +208,7 @@ exports.markPaid = async (req, res) => {
         studentId:  fee.studentId,
         adminEmail: fee.adminEmail,
         _id:        { $ne: fee._id },
-        status:     { $in: ['Pending', 'Partial', 'Overdue', 'Upcoming'] },
+        status:     { $in: ['No Due', 'Partial', 'Overdue', 'Upcoming'] },
       }).sort({ dueDate: 1 });
 
       for (const pf of pendingFees) {
@@ -190,6 +259,7 @@ exports.generate = async (req, res) => {
     const students = await Student.find({ isActive: true, feeType: 'Monthly', adminEmail: req.adminEmail });
     const now    = new Date();
     const today  = new Date(now); today.setHours(23, 59, 59, 999);
+    const next7  = new Date(now); next7.setDate(next7.getDate() + 7); next7.setHours(23, 59, 59, 999);
     const limit  = new Date(now); limit.setDate(limit.getDate() + 30); limit.setHours(23, 59, 59, 999);
     let created = 0;
 
@@ -199,13 +269,14 @@ exports.generate = async (req, res) => {
 
       let cursor = new Date(admission.getFullYear(), admission.getMonth() + 1, dueDay);
 
-      // Generate past fees (Overdue) + next 30 days (Upcoming)
+      // Generate past fees (Overdue) + next 30 days (Pending/Upcoming)
       while (cursor <= limit) {
         const monthName = cursor.toLocaleString('default', { month: 'long' });
         const year      = cursor.getFullYear();
         const exists    = await Fee.findOne({ studentId: s._id, month: monthName, year, adminEmail: req.adminEmail });
         if (!exists) {
-          const status = cursor > today ? 'Upcoming' : 'Overdue';
+          // Upcoming = future AND within 7 days; Pending = future AND >7 days; Overdue = past
+          const status = cursor <= today ? 'Overdue' : cursor <= next7 ? 'Upcoming' : 'No Due';
           await Fee.create({
             studentId: s._id, month: monthName, year,
             dueDate: new Date(cursor),

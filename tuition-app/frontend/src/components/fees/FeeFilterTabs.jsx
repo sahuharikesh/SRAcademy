@@ -1,11 +1,11 @@
 import { GOLD } from '../../utils/constants';
 
-const TABS = ['All', 'Upcoming', 'Pending', 'Partial', 'Overdue', 'Paid'];
+const TABS = ['All', 'Upcoming', 'No Due', 'Partial', 'Overdue', 'Paid'];
 
 const tabColors = {
   All:      null,
   Upcoming: { inactive: { background: '#fff7ed', color: '#c2410c', borderColor: '#fdba74' } },
-  Pending:  { inactive: { background: '#f9fafb', color: '#374151', borderColor: '#d1d5db' } },
+  'No Due': { inactive: { background: '#f9fafb', color: '#374151', borderColor: '#d1d5db' } },
   Partial:  { inactive: { background: '#fef3c7', color: '#b45309', borderColor: '#fcd34d' } },
   Overdue:  { inactive: { background: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' } },
   Paid:     { inactive: { background: '#dcfce7', color: '#15803d', borderColor: '#86efac' } },

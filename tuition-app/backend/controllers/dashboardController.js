@@ -15,7 +15,7 @@ exports.getStats = async (req, res) => {
 
     const [totalStudents, dueFees, todayPresent, todayAbsent, stdAgg] = await Promise.all([
       Student.countDocuments({ isActive: true, adminEmail: req.adminEmail }),
-      Fee.countDocuments({ status: { $in: ['Pending', 'Overdue', 'Partial'] }, studentId: { $in: activeStudentIds }, adminEmail: req.adminEmail }),
+      Fee.countDocuments({ status: { $in: ['Overdue', 'Partial'] }, studentId: { $in: activeStudentIds }, adminEmail: req.adminEmail }),
       Attendance.countDocuments({ date: { $gte: start, $lte: end }, status: 'Present', adminEmail: req.adminEmail }),
       Attendance.countDocuments({ date: { $gte: start, $lte: end }, status: 'Absent', adminEmail: req.adminEmail }),
       Student.aggregate([

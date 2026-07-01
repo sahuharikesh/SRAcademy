@@ -43,13 +43,14 @@ export const getMonthlyAttendance = (month, year) =>
 
 export const getFeeSummary = (month) => api.get('/fees/summary', { params: month ? { month } : {} }).then((r) => r.data);
 
-export const getFees = ({ page = 1, limit = 15, status = '', month = '', year = '' } = {}) =>
-  api.get('/fees', { params: { page, limit, status: status || undefined, month: month || undefined, year: year || undefined } })
+export const getFees = ({ page = 1, limit = 15, status = '', month = '', year = '', std = '' } = {}) =>
+  api.get('/fees', { params: { page, limit, status: status || undefined, month: month || undefined, year: year || undefined, std: std || undefined } })
      .then((r) => r.data); // returns { data, total, page, pages }
 export const payFee = (id, data) => api.patch(`/fees/pay/${id}`, data).then((r) => r.data);
 export const markFeeNotified = (id) => api.patch(`/fees/notified/${id}`).then((r) => r.data);
 export const updateFeeComments = (id, comments) => api.patch(`/fees/comments/${id}`, { comments }).then((r) => r.data);
-export const deleteFee    = (id) => api.delete(`/fees/${id}`).then((r) => r.data);
+export const deleteFee         = (id) => api.delete(`/fees/${id}`).then((r) => r.data);
+export const getFeesByStudent  = (studentId) => api.get(`/fees/student/${studentId}`).then((r) => r.data);
 export const generateFees = (data) => api.post('/fees/generate', data).then((r) => r.data);
 
 export const getDashboard = () => api.get('/dashboard').then((r) => r.data);

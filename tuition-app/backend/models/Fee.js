@@ -9,11 +9,16 @@ const FeeSchema = new mongoose.Schema(
     amount:           { type: Number, required: true },
     paidDate:         { type: Date },
     paidAmount:       { type: Number },
-    status:           { type: String, enum: ['Upcoming', 'Pending', 'Partial', 'Paid', 'Overdue'], default: 'Upcoming' },
+    status:           { type: String, enum: ['Upcoming', 'No Due', 'Partial', 'Paid', 'Overdue'], default: 'Upcoming' },
     notificationSent: { type: Boolean, default: false },
     comments:         { type: String, default: '' },
     adminEmail:       { type: String },
-    paymentLogs:      [{ amount: { type: Number }, date: { type: Date } }],
+    paymentLogs: [{
+      amount:           { type: Number },
+      date:             { type: Date },
+      totalCollected:   { type: Number },   // total cash taken in this session
+      clearedPrevious:  [{ month: String, year: Number, amount: Number }],
+    }],
   },
   { timestamps: true }
 );

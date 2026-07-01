@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AppModal from '../common/AppModal';
-import { WhatsAppOutlined, CheckOutlined, SendOutlined, LinkOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
+import { WhatsAppOutlined, CheckOutlined, SendOutlined, LinkOutlined, EyeOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 
 function getAcademicYear(dateStr) {
@@ -29,6 +29,7 @@ export default function WaGroupModal({ open, onClose, students }) {
   const [added,        setAdded]        = useState(new Set());
   const [showAll,      setShowAll]      = useState(false);
   const [seqIndex,     setSeqIndex]     = useState(null); // sequential send mode
+  const [search,       setSearch]       = useState('');
 
   const byYear = students.reduce((acc, s) => {
     const yr = getAcademicYear(s.dateOfAdmission);
@@ -41,15 +42,17 @@ export default function WaGroupModal({ open, onClose, students }) {
     parseInt(b.split(' ')[1]) - parseInt(a.split(' ')[1])
   );
 
-  const activeYear     = selectedYear || years[0] || '';
-  const allStudents    = byYear[activeYear] || [];
+  const ALL_KEY = '__all__';
+  const activeYear      = selectedYear || ALL_KEY;
+  const allStudents     = activeYear === ALL_KEY ? students : (byYear[activeYear] || []);
   const pendingStudents = allStudents.filter((s) => !added.has(s._id));
   const visibleStudents = showAll ? allStudents : pendingStudents;
 
   // Load added set when active year changes
   useEffect(() => {
-    setAdded(loadAdded(activeYear));
+    setAdded(activeYear === ALL_KEY ? loadAdded(ALL_KEY) : loadAdded(activeYear));
     setShowAll(false);
+    setSearch('');
   }, [activeYear]);
 
   const markAdded = (ids) => {
@@ -106,6 +109,22 @@ export default function WaGroupModal({ open, onClose, students }) {
 
         {/* Academic year tabs */}
         <div className="flex flex-wrap gap-2">
+          {/* All tab */}
+          {(() => {
+            const allPending = students.filter((s) => !loadAdded(ALL_KEY).has(s._id)).length;
+            return (
+              <button onClick={() => setSelectedYear(ALL_KEY)}
+                className="px-3 py-1 rounded-full text-xs font-bold"
+                style={activeYear === ALL_KEY
+                  ? { background: '#1a1a1a', color: '#C9A84C', border: '1.5px solid #C9A84C' }
+                  : { background: '#f3f4f6', color: '#374151', border: '1.5px solid #e5e7eb' }}>
+                All Students
+                <span className="ml-1.5" style={{ color: activeYear === ALL_KEY ? '#C9A84C' : allPending > 0 ? '#dc2626' : '#15803d' }}>
+                  ({students.length})
+                </span>
+              </button>
+            );
+          })()}
           {years.map((yr) => {
             const pending = (byYear[yr] || []).filter((s) => !loadAdded(yr).has(s._id)).length;
             return (
@@ -204,15 +223,36 @@ export default function WaGroupModal({ open, onClose, students }) {
           </div>
         )}
 
+        {/* Search */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+          style={{ border: '1.5px solid #e5e7eb', background: '#f9fafb' }}>
+          <SearchOutlined style={{ color: '#9ca3af', flexShrink: 0 }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search student name or number…"
+            className="flex-1 text-xs outline-none bg-transparent" style={{ color: '#1a1a1a' }} />
+          {search && (
+            <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
+          )}
+        </div>
+
         {/* Student list */}
         <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto pr-1">
-          {visibleStudents.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="text-sm font-semibold text-green-600">All students added to group!</p>
-              <p className="text-xs text-gray-400 mt-1">New admissions will appear here automatically</p>
-            </div>
-          ) : (
-            visibleStudents.map((s) => {
+          {(() => {
+            const q = search.toLowerCase().trim();
+            const filtered = q ? visibleStudents.filter((s) => s.name.toLowerCase().includes(q) || (s.mobile || '').includes(q)) : visibleStudents;
+            if (filtered.length === 0) return (
+              <div className="text-center py-6">
+                {q ? (
+                  <p className="text-sm font-semibold text-gray-400">No students match "{search}"</p>
+                ) : (
+                  <>
+                    <p className="text-sm font-semibold text-green-600">All students added to group!</p>
+                    <p className="text-xs text-gray-400 mt-1">New admissions will appear here automatically</p>
+                  </>
+                )}
+              </div>
+            );
+            return filtered.map((s) => {
               const isAdded = added.has(s._id);
               return (
                 <div key={s._id} className="flex items-center justify-between px-3 py-2 rounded-lg"
@@ -241,8 +281,8 @@ export default function WaGroupModal({ open, onClose, students }) {
                   </button>
                 </div>
               );
-            })
-          )}
+            });
+          })()}
         </div>
 
       </div>

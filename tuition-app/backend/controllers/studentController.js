@@ -2,6 +2,7 @@ const Student    = require('../models/Student');
 const Fee        = require('../models/Fee');
 const Attendance = require('../models/Attendance');
 const { getPagination, paginateQuery } = require('../utils/paginate');
+const { clearOverdueCache } = require('../utils/fees');
 
 const isValidMobile = (mobile) => /^[6-9][0-9]{9}$/.test((mobile || '').trim());
 
@@ -89,16 +90,20 @@ exports.create = async (req, res) => {
     const admission = new Date(student.dateOfAdmission);
     const dueDay    = Math.max(1, admission.getDate() - 1);
     const dueDate   = new Date(admission.getFullYear(), admission.getMonth() + 1, dueDay);
+    const _now      = new Date();
+    const _next7    = new Date(_now); _next7.setDate(_next7.getDate() + 7); _next7.setHours(23, 59, 59, 999);
+    const _feeStatus = dueDate < _now ? 'Overdue' : dueDate <= _next7 ? 'Upcoming' : 'No Due';
     await Fee.create({
       studentId:  student._id,
       month:      dueDate.toLocaleString('default', { month: 'long' }),
       year:       dueDate.getFullYear(),
       dueDate,
       amount:     student.recommendedFees,
-      status:     dueDate < new Date() ? 'Overdue' : 'Pending',
+      status:     _feeStatus,
       adminEmail: req.adminEmail,
     });
 
+    clearOverdueCache(req.adminEmail);
     res.status(201).json(student);
   } catch (e) {
     if (e.code === 11000) {

@@ -46,7 +46,10 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
             <DeleteOutlined /> Delete Selected
           </button>
           <button onClick={() => setSelected(new Set())}
-            className="text-xs text-gray-400 underline">Clear</button>
+            className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold"
+            style={{ background: '#f3f4f6', color: '#6b7280', border: '1.5px solid #9ca3af' }}>
+            Clear
+          </button>
         </div>
       )}
       <div className="rounded-xl shadow-md overflow-x-auto" style={{ border: '1px solid #C9A84C' }}>

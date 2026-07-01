@@ -34,12 +34,16 @@ export default function Attendance() {
   // ── WA preview state ──
   const [waPreview, setWaPreview] = useState(null); // { row, msg }
 
+  // ── Daily std filter ──
+  const [filterStds,  setFilterStds]  = useState([]); // multi-select for daily view
+
   // ── Modal state ──
   const [showModal,   setShowModal]   = useState(false);
   const [filterStd,   setFilterStd]   = useState('');
   const [filterName,  setFilterName]  = useState('');
   const [allStudents, setAllStudents] = useState([]);
   const [modalStep,   setModalStep]   = useState(1); // 1=pick std, 2=pick student
+  const [generating,  setGenerating]  = useState(false);
 
   // ── Daily logic ──
   const load = async (d) => {
@@ -104,11 +108,21 @@ export default function Attendance() {
     toast.success(`Sending ${absentList.length} WhatsApp messages...`);
   };
 
-  const absentList = data.filter((r) => marks[r.student._id] === 'Absent');
+  // daily std options from loaded data
+  const dailyStdOptions = [...new Set(data.map((r) => r.student.std))].sort((a, b) => parseInt(b) - parseInt(a));
+  const toggleStd = (std) =>
+    setFilterStds((prev) => prev.includes(std) ? prev.filter((s) => s !== std) : [...prev, std]);
+
+  // apply daily std filter
+  const displayData = filterStds.length > 0
+    ? data.filter((r) => filterStds.includes(r.student.std))
+    : data;
+
+  const absentList = displayData.filter((r) => marks[r.student._id] === 'Absent');
   const stats = {
-    present: Object.values(marks).filter((v) => v === 'Present').length,
-    absent:  Object.values(marks).filter((v) => v === 'Absent').length,
-    late:    Object.values(marks).filter((v) => v === 'Late').length,
+    present: displayData.filter((r) => marks[r.student._id] === 'Present').length,
+    absent:  displayData.filter((r) => marks[r.student._id] === 'Absent').length,
+    late:    displayData.filter((r) => marks[r.student._id] === 'Late').length,
   };
 
   // ── Monthly logic ──
@@ -141,10 +155,12 @@ export default function Attendance() {
     openModal();
   };
 
-  const handleModalSearch = () => {
-    setShowModal(false);
+  const handleModalSearch = async () => {
+    setGenerating(true);
     setSearched(true);
-    loadMonthly();
+    await loadMonthly();
+    setGenerating(false);
+    setShowModal(false);
   };
 
   const handleCancel = () => {
@@ -242,12 +258,44 @@ export default function Attendance() {
       {tab === 'daily' && (
         <>
           <AttendanceControls date={date} onDateChange={setDate} onSetAll={handleSetAll} onSave={handleSave} />
+
+          {/* Multi-select std filter */}
+          {dailyStdOptions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-xs font-semibold" style={{ color: '#7a6020' }}>Filter Class:</span>
+              {dailyStdOptions.map((std) => {
+                const active = filterStds.includes(std);
+                return (
+                  <button key={std} onClick={() => toggleStd(std)}
+                    className="px-3 py-1 rounded-full text-xs font-bold transition-all"
+                    style={active
+                      ? { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000', border: '1.5px solid #C9A84C' }
+                      : { background: '#1a1a1a', color: '#888', border: '1.5px solid #333' }}>
+                    Class {std}
+                  </button>
+                );
+              })}
+              {filterStds.length > 0 && (
+                <button onClick={() => setFilterStds([])}
+                  className="px-2 py-1 rounded-full text-xs font-bold"
+                  style={{ background: '#fee2e2', color: '#dc2626', border: '1.5px solid #fca5a5' }}>
+                  Clear
+                </button>
+              )}
+              {filterStds.length > 0 && (
+                <span className="text-xs text-gray-400">
+                  Showing {displayData.length} of {data.length} students
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 sm:gap-3 sm:mb-6">
             <StatCard label="Present" value={stats.present} variant="green"  icon={<CheckCircleOutlined />} />
             <StatCard label="Absent"  value={stats.absent}  variant="red"    icon={<CloseCircleOutlined />} />
             <StatCard label="Late"    value={stats.late}    variant="purple" icon={<ClockCircleOutlined />} />
           </div>
-          <AttendanceTable data={data} marks={marks} onMark={handleMark} loading={loading} />
+          <AttendanceTable data={displayData} marks={marks} onMark={handleMark} loading={loading} />
           <div className="mt-4">
             <AbsentNotifyPanel absentList={absentList} onSendOne={handleSendOne} onSendAll={handleSendAll} />
           </div>
@@ -465,13 +513,23 @@ export default function Attendance() {
         </div>
 
         <div className="px-6 pb-5 flex gap-3">
-          <button onClick={handleCancel}
+          <button onClick={handleCancel} disabled={generating}
             className="flex-1 py-1.5 rounded-lg text-xs font-bold"
-            style={{ background: '#f3f4f6', color: '#666' }}>Cancel</button>
-          <button onClick={handleModalSearch}
-            className="flex-1 py-1.5 rounded-lg text-xs font-black"
-            style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
-            Search
+            style={{ background: '#f3f4f6', color: generating ? '#bbb' : '#666', cursor: generating ? 'not-allowed' : 'pointer' }}>
+            Cancel
+          </button>
+          <button onClick={handleModalSearch} disabled={generating}
+            className="flex-1 py-1.5 rounded-lg text-xs font-black flex items-center justify-center gap-2"
+            style={generating
+              ? { background: '#9ca3af', color: '#fff', cursor: 'not-allowed' }
+              : { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+            {generating && (
+              <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+            )}
+            {generating ? 'Generating...' : 'Generate Attendance'}
           </button>
         </div>
       </AppModal>

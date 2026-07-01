@@ -112,84 +112,290 @@ function calcPct(obtained, max) {
 const newSubjectRow = () => ({ id: Date.now() + Math.random(), subject: SUBJECTS[0], maxMarks: '100', obtainedMarks: '', absent: false });
 
 // ── Print Card ──────────────────────────────────────────────────────────────
-function PrintCard({ student, examRecords, cardRef: externalRef }) {
-  const internalRef = useRef(null);
-  const cardRef     = externalRef || internalRef;
-  const logoSrc     = useLogoB64();
-
-  const total      = examRecords.reduce((s, r) => s + (r.obtainedMarks ?? 0), 0);
-  const maxTotal   = examRecords.reduce((s, r) => s + r.maxMarks, 0);
-  const overallPct = calcPct(total, maxTotal);
-  const g          = gradeInfo(overallPct);
-
+// Template 1 — Classic (dark header, cream body)
+function PrintCardT1({ student, examRecords, cardRef }) {
+  const logoSrc  = useLogoB64();
+  const total    = examRecords.reduce((s, r) => s + (r.obtainedMarks ?? 0), 0);
+  const maxTotal = examRecords.reduce((s, r) => s + r.maxMarks, 0);
+  const pct      = calcPct(total, maxTotal);
+  const g        = gradeInfo(pct);
   return (
-    <div ref={cardRef} style={{ border: `2px solid ${gold}`, borderRadius: 10, overflow: 'hidden', position: 'relative' }}>
-        {/* Navbar-style header */}
-        <div style={{ background: 'linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 50%,#0a0a0a 100%)', borderBottom: `3px solid ${gold}`, padding: '10px 20px', display: 'flex', alignItems: 'center' }}>
-          <img src="/logo.jpg" alt="logo" style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${gold}`, flexShrink: 0 }} />
-          <div style={{ flex: 1, textAlign: 'center', lineHeight: 1 }}>
-            <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '0.15em', color: gold, fontFamily: 'Georgia, serif' }}>SHREE RAM ACADEMY</div>
-            <hr style={{ border: 'none', borderTop: `1px solid rgba(201,168,76,0.5)`, margin: '4px auto', width: '80%' }} />
-            <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.65)', letterSpacing: '0.2em' }}>SINCE 2016  ·  EXCELLENCE IN EDUCATION</div>
-          </div>
+    <div ref={cardRef} style={{ border: `2px solid ${gold}`, borderRadius: 10, overflow: 'hidden', background: '#fdf8ee' }}>
+      <div style={{ background: 'linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 50%,#0a0a0a 100%)', borderBottom: `3px solid ${gold}`, padding: '10px 20px', display: 'flex', alignItems: 'center' }}>
+        <img src="/logo.jpg" alt="logo" style={{ width: 58, height: 58, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${gold}`, flexShrink: 0 }} />
+        <div style={{ flex: 1, textAlign: 'center', lineHeight: 1 }}>
+          <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '0.15em', color: gold, fontFamily: 'Georgia, serif' }}>SHREE RAM ACADEMY</div>
+          <hr style={{ border: 'none', borderTop: `1px solid rgba(201,168,76,0.5)`, margin: '4px auto', width: '80%' }} />
+          <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.65)', letterSpacing: '0.2em' }}>SINCE 2016 · EXCELLENCE IN EDUCATION</div>
         </div>
-
-        {/* Body with watermark */}
-        <div style={{ padding: '8px 20px 16px', position: 'relative' }}>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>
-            <img src={logoSrc} alt="" style={{ width: '45%', opacity: 0.08, objectFit: 'contain' }} />
-          </div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ textAlign: 'center', fontWeight: 900, fontSize: 13, letterSpacing: '0.2em', textTransform: 'uppercase', color: dark, marginBottom: 8, paddingBottom: 6, borderBottom: `2px solid ${gold}`, display: 'inline-block', width: '100%' }}>Result</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 8, color: '#333' }}>
-              <span><strong>Name:</strong> {student.name}</span>
-              <span><strong>Std:</strong> {student.std}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 12, color: '#333' }}>
-              <span><strong>Exam:</strong> {examRecords[0]?.examName}</span>
-              <span><strong>Date:</strong> {examRecords[0]?.date ? new Date(examRecords[0].date).toLocaleDateString('en-IN') : '—'}</span>
-            </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead>
-                <tr style={{ background: dark }}>
-                  <th style={{ color: gold, padding: '7px 10px', textAlign: 'left' }}>Subject</th>
-                  <th style={{ color: gold, padding: '7px 10px', textAlign: 'center' }}>Max</th>
-                  <th style={{ color: gold, padding: '7px 10px', textAlign: 'center' }}>Obtained</th>
-                  <th style={{ color: gold, padding: '7px 10px', textAlign: 'center' }}>Grade</th>
-                </tr>
-              </thead>
-              <tbody>
-                {examRecords.map((r, i) => {
-                  const p  = r.absent ? null : calcPct(r.obtainedMarks, r.maxMarks);
-                  const gr = gradeInfo(p);
-                  return (
-                    <tr key={i} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '7px 10px' }}>{r.subject}</td>
-                      <td style={{ padding: '7px 10px', textAlign: 'center' }}>{r.maxMarks}</td>
-                      <td style={{ padding: '7px 10px', textAlign: 'center' }}>{r.absent ? 'AB' : (r.obtainedMarks ?? '—')}</td>
-                      <td style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 900, color: gr.color }}>{gr.label}</td>
-                    </tr>
-                  );
-                })}
-                <tr style={{ background: '#fafafa', fontWeight: 700 }}>
-                  <td style={{ padding: '8px 10px' }}>Total</td>
-                  <td style={{ padding: '8px 10px', textAlign: 'center' }}>{maxTotal}</td>
-                  <td style={{ padding: '8px 10px', textAlign: 'center' }}>{total}</td>
-                  <td style={{ padding: '8px 10px', textAlign: 'center' }}>—</td>
-                </tr>
-              </tbody>
-            </table>
-            <div className="overall-section" style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 24, fontSize: 13 }}>
-              <span style={{ fontWeight: 700 }}>Overall: <strong style={{ color: g.color }}>{overallPct != null ? `${overallPct}%` : '—'}</strong></span>
-              <span style={{ fontWeight: 700 }}>Grade: <strong style={{ fontSize: 16, color: g.color }}>{g.label}</strong></span>
-            </div>
-            <div style={{ marginTop: 12, textAlign: 'center', fontSize: 10, color: '#888' }}>
-              © {new Date().getFullYear()} Shree Ram Academy · Generated {new Date().toLocaleDateString('en-IN')}
-            </div>
-          </div>
+      </div>
+      <div style={{ padding: '8px 20px 16px', position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>
+          <img src={logoSrc} alt="" style={{ width: '45%', opacity: 0.08, objectFit: 'contain' }} />
         </div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', fontWeight: 900, fontSize: 13, letterSpacing: '0.2em', textTransform: 'uppercase', color: dark, marginBottom: 8, paddingBottom: 6, borderBottom: `2px solid ${gold}`, width: '100%' }}>Result</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6, color: '#333' }}>
+            <span><strong>Name:</strong> {student.name}</span>
+            <span><strong>Std:</strong> {student.std}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 10, color: '#333' }}>
+            <span><strong>Exam:</strong> {examRecords[0]?.examName}</span>
+            <span><strong>Date:</strong> {examRecords[0]?.date ? new Date(examRecords[0].date).toLocaleDateString('en-IN') : '—'}</span>
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: dark }}>
+                {['Subject','Max','Obtained','Grade'].map((h, i) => (
+                  <th key={h} style={{ color: gold, padding: '7px 10px', textAlign: i === 0 ? 'left' : 'center' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {examRecords.map((r, i) => {
+                const p = r.absent ? null : calcPct(r.obtainedMarks, r.maxMarks);
+                const gr = gradeInfo(p);
+                return (
+                  <tr key={i} style={{ borderBottom: '1px solid #e5e7eb', background: i % 2 === 0 ? '#fff' : '#fffdf5' }}>
+                    <td style={{ padding: '7px 10px' }}>{r.subject}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center' }}>{r.maxMarks}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center' }}>{r.absent ? 'AB' : (r.obtainedMarks ?? '—')}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 900, color: gr.color }}>{gr.label}</td>
+                  </tr>
+                );
+              })}
+              <tr style={{ background: '#f5f0e0', fontWeight: 700, borderTop: `2px solid ${gold}` }}>
+                <td style={{ padding: '8px 10px' }}>Total</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center' }}>{maxTotal}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center' }}>{total}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center' }}>—</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style={{ marginTop: 12, background: 'linear-gradient(135deg,#0a0a0a,#1a1a1a,#0a0a0a)', borderRadius: 8, padding: '10px 16px', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(201,168,76,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Total Marks</div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: '#fff' }}>{total}/{maxTotal}</div>
+            </div>
+            <div style={{ width: 1, height: 36, background: `${gold}44` }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(201,168,76,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Percentage</div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: gold }}>{pct != null ? `${pct}%` : '—'}</div>
+            </div>
+            <div style={{ width: 1, height: 36, background: `${gold}44` }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(201,168,76,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Grade</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: g.color, background: '#fff', borderRadius: 6, padding: '0 12px', lineHeight: 1.4 }}>{g.label}</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 10, textAlign: 'center', fontSize: 10, color: '#888' }}>© {new Date().getFullYear()} Shree Ram Academy · Generated {new Date().toLocaleDateString('en-IN')}</div>
+        </div>
+      </div>
     </div>
   );
+}
+
+// Template 2 — Modern (navy/blue)
+function PrintCardT2({ student, examRecords, cardRef }) {
+  const logoSrc  = useLogoB64();
+  const navy     = '#1e3a5f';
+  const accent   = '#2d6a9f';
+  const total    = examRecords.reduce((s, r) => s + (r.obtainedMarks ?? 0), 0);
+  const maxTotal = examRecords.reduce((s, r) => s + r.maxMarks, 0);
+  const pct      = calcPct(total, maxTotal);
+  const g        = gradeInfo(pct);
+  return (
+    <div ref={cardRef} style={{ border: `3px solid ${navy}`, borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+      {/* Header */}
+      <div style={{ background: `linear-gradient(135deg, ${navy}, ${accent})`, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <img src="/logo.jpg" alt="logo" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', flexShrink: 0 }} />
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 17, fontWeight: 900, color: '#fff', letterSpacing: '0.12em', fontFamily: 'Helvetica, Arial, sans-serif' }}>SHREE RAM ACADEMY</div>
+          <div style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.18em', marginTop: 3 }}>SINCE 2016 · EXCELLENCE IN EDUCATION</div>
+        </div>
+      </div>
+      {/* Blue title bar */}
+      <div style={{ background: `${navy}18`, borderBottom: `2px solid ${navy}22`, padding: '7px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, fontWeight: 900, color: navy, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Academic Result</span>
+        <span style={{ fontSize: 10, color: accent, fontWeight: 700 }}>{examRecords[0]?.date ? new Date(examRecords[0].date).toLocaleDateString('en-IN') : '—'}</span>
+      </div>
+      {/* Info */}
+      <div style={{ padding: '10px 20px 0', position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+          <img src={logoSrc} alt="" style={{ width: '40%', opacity: 0.06, objectFit: 'contain' }} />
+        </div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 12, fontSize: 12 }}>
+            {[['Name', student.name], ['Class', student.std], ['Exam', examRecords[0]?.examName], ['Date', examRecords[0]?.date ? new Date(examRecords[0].date).toLocaleDateString('en-IN') : '—']].map(([l, v]) => (
+              <div key={l} style={{ background: `${navy}08`, borderRadius: 6, padding: '5px 10px', border: `1px solid ${navy}18` }}>
+                <span style={{ fontSize: 9, color: accent, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>{l}</span>
+                <div style={{ fontSize: 12, fontWeight: 700, color: navy, marginTop: 1 }}>{v}</div>
+              </div>
+            ))}
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ background: navy }}>
+                {['Subject','Max Marks','Obtained','%','Grade'].map((h, i) => (
+                  <th key={h} style={{ color: '#fff', padding: '8px 10px', textAlign: i === 0 ? 'left' : 'center', fontWeight: 700, fontSize: 11 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {examRecords.map((r, i) => {
+                const p = r.absent ? null : calcPct(r.obtainedMarks, r.maxMarks);
+                const gr = gradeInfo(p);
+                return (
+                  <tr key={i} style={{ borderBottom: `1px solid ${navy}15`, background: i % 2 === 0 ? '#fff' : `${navy}05` }}>
+                    <td style={{ padding: '7px 10px', color: navy, fontWeight: 600 }}>{r.subject}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', color: '#555' }}>{r.maxMarks}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 700, color: navy }}>{r.absent ? 'AB' : (r.obtainedMarks ?? '—')}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', color: '#555' }}>{p != null ? `${p}%` : '—'}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 900, color: gr.color }}>{gr.label}</td>
+                  </tr>
+                );
+              })}
+              <tr style={{ background: navy, fontWeight: 700 }}>
+                <td style={{ padding: '8px 10px', color: '#fff' }}>Total</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center', color: '#fff' }}>{maxTotal}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center', color: gold, fontWeight: 900 }}>{total}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center', color: gold, fontWeight: 900 }}>{pct != null ? `${pct}%` : '—'}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center', color: gold, fontWeight: 900 }}>{g.label}</td>
+              </tr>
+            </tbody>
+          </table>
+          {/* Overall strip */}
+          <div style={{ marginTop: 12, background: `linear-gradient(135deg,${navy},${accent})`, borderRadius: 8, padding: '10px 20px', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase' }}>Total Marks</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: '#fff' }}>{total}/{maxTotal}</div>
+            </div>
+            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.3)' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase' }}>Percentage</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: gold }}>{pct != null ? `${pct}%` : '—'}</div>
+            </div>
+            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.3)' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase' }}>Grade</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: g.color, background: '#fff', borderRadius: 6, padding: '0 12px', lineHeight: 1.4 }}>{g.label}</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 8, marginBottom: 12, textAlign: 'center', fontSize: 9.5, color: '#aaa' }}>© {new Date().getFullYear()} Shree Ram Academy · Generated {new Date().toLocaleDateString('en-IN')}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Template 3 — Emerald / Green
+function PrintCardT3({ student, examRecords, cardRef }) {
+  const logoSrc  = useLogoB64();
+  const green    = '#1a7a4a';
+  const light    = '#e8f5ee';
+  const mid      = '#2ea866';
+  const total    = examRecords.reduce((s, r) => s + (r.obtainedMarks ?? 0), 0);
+  const maxTotal = examRecords.reduce((s, r) => s + r.maxMarks, 0);
+  const pct      = calcPct(total, maxTotal);
+  const g        = gradeInfo(pct);
+  return (
+    <div ref={cardRef} style={{ border: `3px solid ${green}`, borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+
+      {/* Header */}
+      <div style={{ background: `linear-gradient(135deg, ${green}, ${mid})`, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <img src="/logo.jpg" alt="logo" style={{ width: 58, height: 58, borderRadius: '50%', objectFit: 'cover', border: '3px solid #fff', flexShrink: 0 }} />
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 17, fontWeight: 900, color: '#fff', letterSpacing: '0.14em', fontFamily: 'Georgia, serif' }}>SHREE RAM ACADEMY</div>
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.4)', margin: '5px auto', width: '65%' }} />
+          <div style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.18em' }}>SINCE 2016 · EXCELLENCE IN EDUCATION</div>
+        </div>
+      </div>
+
+      {/* Green title bar */}
+      <div style={{ background: light, borderBottom: `2px solid ${green}33`, padding: '6px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, fontWeight: 900, color: green, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Academic Result</span>
+        <span style={{ fontSize: 10, color: mid, fontWeight: 700 }}>{examRecords[0]?.date ? new Date(examRecords[0].date).toLocaleDateString('en-IN') : '—'}</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '10px 20px 0', position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+          <img src={logoSrc} alt="" style={{ width: '40%', opacity: 0.05, objectFit: 'contain' }} />
+        </div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          {/* Info grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 12, fontSize: 12 }}>
+            {[['Name', student.name], ['Class', student.std], ['Exam', examRecords[0]?.examName], ['Date', examRecords[0]?.date ? new Date(examRecords[0].date).toLocaleDateString('en-IN') : '—']].map(([l, v]) => (
+              <div key={l} style={{ background: light, borderRadius: 6, padding: '5px 10px', border: `1px solid ${green}22` }}>
+                <span style={{ fontSize: 9, color: mid, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>{l}</span>
+                <div style={{ fontSize: 12, fontWeight: 700, color: green, marginTop: 1 }}>{v}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Table */}
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ background: green }}>
+                {['Subject', 'Max', 'Obtained', '%', 'Grade'].map((h, i) => (
+                  <th key={h} style={{ color: '#fff', padding: '8px 10px', textAlign: i === 0 ? 'left' : 'center', fontWeight: 700, fontSize: 11 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {examRecords.map((r, i) => {
+                const p = r.absent ? null : calcPct(r.obtainedMarks, r.maxMarks);
+                const gr = gradeInfo(p);
+                return (
+                  <tr key={i} style={{ borderBottom: `1px solid ${green}18`, background: i % 2 === 0 ? '#fff' : light }}>
+                    <td style={{ padding: '7px 10px', color: '#222', fontWeight: 600, borderLeft: `3px solid ${mid}` }}>{r.subject}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', color: '#666' }}>{r.maxMarks}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 700, color: green }}>{r.absent ? 'AB' : (r.obtainedMarks ?? '—')}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', color: '#555' }}>{p != null ? `${p}%` : '—'}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 900, color: gr.color }}>{gr.label}</td>
+                  </tr>
+                );
+              })}
+              <tr style={{ background: green, fontWeight: 700 }}>
+                <td style={{ padding: '8px 10px', color: '#fff' }}>Total</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center', color: '#fff' }}>{maxTotal}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center', color: '#fff', fontWeight: 900 }}>{total}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center', color: '#fff', fontWeight: 900 }}>{pct != null ? `${pct}%` : '—'}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'center', color: '#fff', fontWeight: 900 }}>{g.label}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Summary strip */}
+          <div style={{ marginTop: 12, background: `linear-gradient(135deg, ${green}, ${mid})`, borderRadius: 8, padding: '10px 16px', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Total Marks</div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: '#fff' }}>{total}/{maxTotal}</div>
+            </div>
+            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.3)' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Percentage</div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: '#fff' }}>{pct != null ? `${pct}%` : '—'}</div>
+            </div>
+            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.3)' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Grade</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: g.color, background: '#fff', borderRadius: 6, padding: '0 12px', lineHeight: 1.4 }}>{g.label}</div>
+            </div>
+          </div>
+          <div style={{ margin: '8px 0 12px', textAlign: 'center', fontSize: 9.5, color: '#aaa' }}>© {new Date().getFullYear()} Shree Ram Academy · Generated {new Date().toLocaleDateString('en-IN')}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PrintCard({ student, examRecords, cardRef: externalRef, template }) {
+  const internalRef = useRef(null);
+  const cardRef     = externalRef || internalRef;
+  if (template === 2) return <PrintCardT2 student={student} examRecords={examRecords} cardRef={cardRef} />;
+  if (template === 3) return <PrintCardT3 student={student} examRecords={examRecords} cardRef={cardRef} />;
+  return <PrintCardT1 student={student} examRecords={examRecords} cardRef={cardRef} />;
 }
 
 // ── Student Modal ────────────────────────────────────────────────────────────
@@ -212,6 +418,7 @@ function StudentModal({ student, defaultExam, onClose, students, studentIndex, o
   const [deleting, setDeleting]       = useState(null);
   const [allResults, setAllResults]   = useState([]);
   const [isEditing, setIsEditing]     = useState(false); // kept for Edit button in history
+  const [cardTemplate, setCardTemplate] = useState(1);
   const prevStudentId                 = useRef(student._id);
 
   const defaultRows = (std) => {
@@ -665,7 +872,22 @@ function StudentModal({ student, defaultExam, onClose, students, studentIndex, o
                         </button>
                       </div>
                     </div>
-                    <PrintCard student={student} examRecords={printData.records} cardRef={pcRef} />
+                    {/* Template selector */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Design:</span>
+                      {[1, 2, 3].map(t => (
+                        <button key={t} onClick={() => setCardTemplate(t)}
+                          className="px-3 py-1 rounded-lg text-[10px] font-black transition-all"
+                          style={{
+                            background: cardTemplate === t ? dark : '#f3f4f6',
+                            color:      cardTemplate === t ? gold : '#6b7280',
+                            border:     `1.5px solid ${cardTemplate === t ? gold : '#e5e7eb'}`,
+                          }}>
+                          T{t}
+                        </button>
+                      ))}
+                    </div>
+                    <PrintCard student={student} examRecords={printData.records} cardRef={pcRef} template={cardTemplate} />
                   </div>
                 );
               })()}
