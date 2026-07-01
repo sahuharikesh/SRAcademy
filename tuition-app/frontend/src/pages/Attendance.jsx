@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { todayISO, formatFull } from '../utils/dates';
 import { getAttendance, saveAttendance, sendWhatsApp, markAttendanceNotified, getMonthlyAttendance, getStudents } from '../api';
 import { MONTHS } from '../utils/constants';
 import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, TeamOutlined, SendOutlined, WhatsAppOutlined } from '@ant-design/icons';
@@ -11,7 +12,7 @@ import AbsentNotifyPanel  from '../components/attendance/AbsentNotifyPanel';
 import StatCard           from '../components/common/StatCard';
 import toast from 'react-hot-toast';
 
-const today = new Date().toISOString().split('T')[0];
+const today = todayISO();
 
 export default function Attendance() {
   const [tab, setTab] = useState('daily');
@@ -34,8 +35,19 @@ export default function Attendance() {
   // ── WA preview state ──
   const [waPreview, setWaPreview] = useState(null); // { row, msg }
 
+  // ── Monthly sequential send ──
+  const [monthlySeqIdx, setMonthlySeqIdx] = useState(null);
+
   // ── Daily std filter ──
-  const [filterStds,  setFilterStds]  = useState([]); // multi-select for daily view
+  const [filterStds,     setFilterStds]     = useState([]); // multi-select for daily view
+  const [stdDropOpen,    setStdDropOpen]    = useState(false);
+  const stdDropRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (stdDropRef.current && !stdDropRef.current.contains(e.target)) setStdDropOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // ── Modal state ──
   const [showModal,   setShowModal]   = useState(false);
@@ -71,7 +83,7 @@ export default function Attendance() {
 
   const buildAbsentMsg = (row) => {
     const s = row.student;
-    const dateStr = new Date(date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const dateStr = formatFull(date);
     return (
       `*Shree Ram Academy*\n` +
       `*--------------------*\n` +
@@ -214,8 +226,19 @@ export default function Attendance() {
 
   const handleSendMonthlyAll = () => {
     if (filteredData.length === 0) return toast.error('No students to notify');
-    filteredData.forEach((row, i) => setTimeout(() => handleSendMonthlyOne(row), i * 600));
-    toast.success(`Sending report to ${filteredData.length} parents...`);
+    setMonthlySeqIdx(0);
+  };
+
+  const handleMonthlySeqSend = () => {
+    const row = filteredData[monthlySeqIdx];
+    handleSendMonthlyOne(row);
+    if (monthlySeqIdx + 1 < filteredData.length) setMonthlySeqIdx(monthlySeqIdx + 1);
+    else { setMonthlySeqIdx(null); toast.success('All reports sent!'); }
+  };
+
+  const handleMonthlySeqSkip = () => {
+    if (monthlySeqIdx + 1 < filteredData.length) setMonthlySeqIdx(monthlySeqIdx + 1);
+    else { setMonthlySeqIdx(null); toast('Done!'); }
   };
 
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -257,38 +280,42 @@ export default function Attendance() {
       {/* ── DAILY TAB ── */}
       {tab === 'daily' && (
         <>
-          <AttendanceControls date={date} onDateChange={setDate} onSetAll={handleSetAll} onSave={handleSave} />
-
-          {/* Multi-select std filter */}
-          {dailyStdOptions.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className="text-xs font-semibold" style={{ color: '#7a6020' }}>Filter Class:</span>
-              {dailyStdOptions.map((std) => {
-                const active = filterStds.includes(std);
-                return (
-                  <button key={std} onClick={() => toggleStd(std)}
-                    className="px-3 py-1 rounded-full text-xs font-bold transition-all"
-                    style={active
-                      ? { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000', border: '1.5px solid #C9A84C' }
-                      : { background: '#1a1a1a', color: '#888', border: '1.5px solid #333' }}>
-                    Class {std}
-                  </button>
-                );
-              })}
-              {filterStds.length > 0 && (
-                <button onClick={() => setFilterStds([])}
-                  className="px-2 py-1 rounded-full text-xs font-bold"
-                  style={{ background: '#fee2e2', color: '#dc2626', border: '1.5px solid #fca5a5' }}>
-                  Clear
+          <AttendanceControls date={date} onDateChange={setDate} onSetAll={handleSetAll} onSave={handleSave}
+            filterSlot={dailyStdOptions.length > 0 && (
+              <div ref={stdDropRef} className="relative">
+                <button onClick={() => setStdDropOpen(v => !v)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold"
+                  style={{ background: filterStds.length > 0 ? '#fffdf5' : '#f9fafb', border: `1.5px solid ${filterStds.length > 0 ? '#C9A84C' : '#d1d5db'}`, color: filterStds.length > 0 ? '#7a6020' : '#374151' }}>
+                  {filterStds.length === 0 ? 'All Classes' : filterStds.length === 1 ? `Class ${filterStds[0]}` : `${filterStds.length} Classes`}
+                  <svg width="10" height="10" viewBox="0 0 12 12" style={{ transform: stdDropOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round"/></svg>
                 </button>
-              )}
-              {filterStds.length > 0 && (
-                <span className="text-xs text-gray-400">
-                  Showing {displayData.length} of {data.length} students
-                </span>
-              )}
-            </div>
-          )}
+                {stdDropOpen && (
+                  <div className="absolute left-0 top-full mt-1 z-50 rounded-xl shadow-lg py-1.5 min-w-[150px]"
+                    style={{ background: '#fff', border: '1.5px solid #e5e7eb' }}>
+                    {dailyStdOptions.map(std => (
+                      <label key={std} className="flex items-center gap-2.5 px-3 py-1.5 cursor-pointer text-xs font-semibold"
+                        style={{ color: '#1a1a1a' }}
+                        onMouseEnter={e => e.currentTarget.style.background='#fffdf5'}
+                        onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                        <input type="checkbox" checked={filterStds.includes(std)} onChange={() => toggleStd(std)}
+                          className="accent-yellow-500 w-3.5 h-3.5 cursor-pointer" />
+                        Class {std}
+                      </label>
+                    ))}
+                    {filterStds.length > 0 && (
+                      <div className="border-t mt-1 pt-1 px-2">
+                        <button onClick={() => { setFilterStds([]); setStdDropOpen(false); }}
+                          className="w-full text-xs font-bold py-1 rounded"
+                          style={{ color: '#dc2626', background: '#fee2e2' }}>
+                          Clear
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 sm:gap-3 sm:mb-6">
             <StatCard label="Present" value={stats.present} variant="green"  icon={<CheckCircleOutlined />} />
@@ -339,6 +366,44 @@ export default function Attendance() {
             <StatCard label="Total Present" value={totalPresent}        variant="green" icon={<CheckCircleOutlined />}   />
             <StatCard label="Total Absent"  value={totalAbsent}         variant="red"   icon={<CloseCircleOutlined />}   />
           </div>
+
+          {/* Sequential send overlay */}
+          {monthlySeqIdx !== null && (
+            <div className="rounded-xl p-4 flex flex-col gap-3 mb-4"
+              style={{ background: '#f0fdf4', border: '2px solid #25D366' }}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-green-700">
+                  Sending {monthlySeqIdx + 1} of {filteredData.length}
+                </span>
+                <button onClick={() => setMonthlySeqIdx(null)}
+                  className="text-xs px-2 py-0.5 rounded" style={{ background: '#fee2e2', color: '#dc2626' }}>
+                  Cancel
+                </button>
+              </div>
+              <div className="rounded-lg px-3 py-2" style={{ background: '#fff', border: '1px solid #86efac' }}>
+                <p className="text-sm font-black" style={{ color: '#1a1a1a' }}>{filteredData[monthlySeqIdx]?.student.name}</p>
+                <p className="text-xs text-gray-500">
+                  {filteredData[monthlySeqIdx]?.student.mobile} &nbsp;·&nbsp; Class {filteredData[monthlySeqIdx]?.student.std}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={handleMonthlySeqSend}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-black"
+                  style={{ background: 'linear-gradient(135deg,#25D366,#1ead52)', color: '#fff' }}>
+                  <WhatsAppOutlined /> Tap to Send
+                </button>
+                <button onClick={handleMonthlySeqSkip}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold"
+                  style={{ background: '#f3f4f6', color: '#6b7280', border: '1px solid #e5e7eb' }}>
+                  Skip
+                </button>
+              </div>
+              <div className="w-full rounded-full overflow-hidden" style={{ background: '#dcfce7', height: 6 }}>
+                <div className="h-full rounded-full transition-all"
+                  style={{ background: '#25D366', width: `${((monthlySeqIdx) / filteredData.length) * 100}%` }} />
+              </div>
+            </div>
+          )}
 
           {mLoading ? (
             <div className="text-center py-16 text-gray-400 text-sm">Loading...</div>

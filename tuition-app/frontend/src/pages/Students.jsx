@@ -1,12 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getStudents, addStudent, updateStudent, deleteStudent, getGroups } from '../api';
+import { todayISO, toInputDate, formatDDMMYYYY } from '../utils/dates';
+import { downloadCSV } from '../utils/csv';
 import StudentForm, { EMPTY }   from '../components/students/StudentForm';
 import StudentTable              from '../components/students/StudentTable';
 import WaGroupModal              from '../components/students/WaGroupModal';
 import CertificateModal          from '../components/students/CertificateModal';
 import AppModal                  from '../components/common/AppModal';
 import { STD_OPTIONS, MEDIUM_OPTIONS } from '../utils/constants';
-import { WhatsAppOutlined } from '@ant-design/icons';
+import { WhatsAppOutlined, DownloadOutlined } from '@ant-design/icons';
 import usePagination from '../hooks/usePagination';
 import toast from 'react-hot-toast';
 
@@ -59,7 +61,7 @@ export default function Students() {
   const handleEdit = (s) => {
     setForm({
       name: s.name, mobile: s.mobile, std: s.std,
-      dateOfAdmission: s.dateOfAdmission?.split('T')[0] || '',
+      dateOfAdmission: toInputDate(s.dateOfAdmission),
       feeType: s.feeType, actualFees: s.actualFees,
       recommendedFees: s.recommendedFees, groupNo: s.groupNo || '',
       medium: Array.isArray(s.medium) ? (s.medium[0] || '') : (s.medium || ''),
@@ -83,6 +85,27 @@ export default function Students() {
 
   const handleCancel = () => { setShowForm(false); setForm(EMPTY); setEditId(null); };
 
+  const handleDownloadCSV = async () => {
+    try {
+      const res = await getStudents({ limit: 5000, search, std: filterStd, group: filterGroup, medium: filterMedium });
+      const rows = res.data;
+      if (!rows.length) { toast.error('No students to export'); return; }
+      downloadCSV(
+        ['Name', 'Mobile', 'Class', 'Medium', 'Group', 'School', 'Fee Type', 'Actual Fees', 'Recommended Fees', 'Date of Admission', 'Comment'],
+        rows.map(s => [
+          s.name, s.mobile, s.std,
+          Array.isArray(s.medium) ? s.medium.join('/') : (s.medium || ''),
+          s.groupNo || '', s.schoolName || '',
+          s.feeType || '', s.actualFees || '', s.recommendedFees || '',
+          formatDDMMYYYY(s.dateOfAdmission),
+          s.comment || '',
+        ]),
+        `students_${todayISO()}.csv`,
+      );
+      toast.success(`Exported ${rows.length} students`);
+    } catch { toast.error('Export failed'); }
+  };
+
   return (
     <div className="anim-fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -96,6 +119,11 @@ export default function Students() {
             className="btn-shine px-3 py-1.5 rounded-lg font-bold text-xs"
             style={{ background: 'linear-gradient(135deg, #C9A84C, #f0d080)', color: '#000' }}>
             {showForm ? 'Cancel' : '+ Admission'}
+          </button>
+          <button onClick={handleDownloadCSV}
+            className="px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5"
+            style={{ background: '#f0fdf4', border: '1.5px solid #86efac', color: '#15803d' }}>
+            <DownloadOutlined /> CSV
           </button>
           <button onClick={() => setShowWaGroup(true)}
             className="btn-shine px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5"

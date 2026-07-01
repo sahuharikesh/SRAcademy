@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatDate } from '../../utils/dates';
 import { PhoneOutlined, EditOutlined, DeleteOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import Pagination from '../common/Pagination';
@@ -97,7 +98,7 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
                   </td>
                   <td className="p-3 text-gray-600">{s.feeType}</td>
                   <td className="p-3 font-semibold" style={{ color: '#1a1a1a' }}>Rs. {s.recommendedFees}</td>
-                  <td className="p-3 text-gray-600">{new Date(s.dateOfAdmission).toLocaleDateString('en-IN')}</td>
+                  <td className="p-3 text-gray-600">{formatDate(s.dateOfAdmission)}</td>
                   <td className="p-3">
                     <div className="flex gap-2">
                       <a href={`tel:${s.mobile}`} title="Call"

@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { HistoryOutlined, ThunderboltOutlined, DeleteOutlined } from '@ant-design/icons';
+import { HistoryOutlined, ThunderboltOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import { getFees, getFeeSummary, payFee, sendWhatsApp, markFeeNotified, deleteFee, generateFees, getFeesByStudent, getStudents } from '../api';
+import { todayISO, formatShort, formatDDMMYYYY } from '../utils/dates';
+import { downloadCSV } from '../utils/csv';
 import { buildFeeMsg, buildUpiQrUrl } from '../utils/messages';
 import { GOLD, DARK, STD_OPTIONS } from '../utils/constants';
 import FeeFilterTabs from '../components/fees/FeeFilterTabs';
@@ -333,9 +335,7 @@ function PaymentHistoryModal({ open, onClose }) {
                             {displayLogs.map((log, i) => {
                               const prev = log.clearedPrevious || [];
                               const total = log.totalCollected || log.amount;
-                              const dateStr = log.date
-                                ? new Date(log.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-                                : '—';
+                              const dateStr = formatShort(log.date);
                               return (
                                 <div key={i}>
                                   {/* Main row: date + total collected */}
@@ -474,6 +474,25 @@ export default function Fees() {
     } catch { toast.error('Failed to delete some records'); }
   };
 
+  const handleDownloadCSV = async () => {
+    try {
+      const res = await getFees({ page: 1, limit: 10000, status: filter, month: filterMonth, std: filterStd });
+      const rows = res.data;
+      if (!rows.length) { toast.error('No records to export'); return; }
+      downloadCSV(
+        ['Student', 'Mobile', 'Class', 'Month', 'Year', 'Amount', 'Paid', 'Pending', 'Status', 'Due Date'],
+        rows.map(f => {
+          const paid    = f.paidAmount || 0;
+          const pending = Math.max(0, (f.amount || 0) - paid);
+          return [f.studentId?.name || '', f.studentId?.mobile || '', f.studentId?.std || '',
+            f.month, f.year, f.amount, paid, pending, f.status, formatDDMMYYYY(f.dueDate)];
+        }),
+        `fees_${filterMonth || 'all'}_${todayISO()}.csv`,
+      );
+      toast.success(`Exported ${rows.length} records`);
+    } catch { toast.error('Export failed'); }
+  };
+
   const handleWhatsApp = (fee) => {
     setWaModal({ fee, msg: buildFeeMsg(fee), qrUrl: buildUpiQrUrl(fee), amount: fee.amount });
   };
@@ -497,6 +516,11 @@ export default function Fees() {
           <p className="text-xs mt-0.5 font-medium" style={{ color: '#888' }}>Track, collect & manage student payments</p>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <button onClick={handleDownloadCSV}
+            className="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5"
+            style={{ background: '#f0fdf4', border: '1.5px solid #86efac', color: '#15803d' }}>
+            <DownloadOutlined /> CSV
+          </button>
           <button onClick={handleGenerate}
             className="btn-shine px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5" style={DARK}>
             <ThunderboltOutlined /> Generate Fees

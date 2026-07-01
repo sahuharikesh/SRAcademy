@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatShort, formatDate } from '../../utils/dates';
 import StatusBadge from '../common/StatusBadge';
 import { updateFeeComments } from '../../api';
 import { GOLD } from '../../utils/constants';
@@ -161,9 +162,7 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                       : <span className="text-gray-400">—</span>}
                   </td>
                   <td className="p-2">
-                    {fee.studentId?.dateOfAdmission
-                      ? new Date(fee.studentId.dateOfAdmission).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-                      : '—'}
+                    {formatShort(fee.studentId?.dateOfAdmission)}
                   </td>
                   <td className="p-2 font-semibold">
                     ₹{fee.amount}
@@ -189,7 +188,7 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                       </button>
                     </div>
                   </td>
-                  <td className="p-2">{new Date(fee.dueDate).toLocaleDateString('en-IN')}</td>
+                  <td className="p-2">{formatDate(fee.dueDate)}</td>
                   <td className="p-2"><StatusBadge status={fee.status} dueDate={fee.dueDate} paidDate={fee.paidDate} /></td>
                   <td className="p-2">
                     <div className="flex gap-1 flex-nowrap">

@@ -9,6 +9,8 @@ const styles = {
   Late:     { background: '#fef9c3', color: '#854d0e', border: '1px solid #fef08a' },
 };
 
+import { formatShort } from '../../utils/dates';
+
 export default function StatusBadge({ status, paidDate }) {
   const s = styles[status] || { background: '#e5e7eb', color: '#374151', border: '1px solid #d1d5db' };
   return (
@@ -19,9 +21,7 @@ export default function StatusBadge({ status, paidDate }) {
         {status}
       </span>
       {status === 'Paid' && paidDate && (
-        <span className="text-[10px] text-gray-400">
-          {new Date(paidDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-        </span>
+        <span className="text-[10px] text-gray-400">{formatShort(paidDate)}</span>
       )}
     </div>
   );

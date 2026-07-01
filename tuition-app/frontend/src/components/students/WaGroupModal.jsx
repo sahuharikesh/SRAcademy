@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react';
+import { getAcademicYear } from '../../utils/dates';
 import AppModal from '../common/AppModal';
 import { WhatsAppOutlined, CheckOutlined, SendOutlined, LinkOutlined, EyeOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
-
-function getAcademicYear(dateStr) {
-  if (!dateStr) return 'Unknown';
-  const d = new Date(dateStr);
-  const month = d.getMonth();
-  const year  = d.getFullYear();
-  const startYear = month >= 5 ? year : year - 1;
-  return `June ${startYear} – April ${startYear + 1}`;
-}
 
 const storageKey = (yr) => `wa_group_added_${yr}`;
 

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import AppModal from '../common/AppModal';
 import { DownloadOutlined, PrinterOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
+import { formatLong } from '../../utils/dates';
 
 function mergeFees(paidFees) {
   const map = {};
@@ -26,7 +27,7 @@ function GroupReceiptView({ groupNo, groupStudents, paidFees, receiptRef }) {
 
   const totalPaid  = paidFees.reduce((s, f) => s + (f.paidAmount || f.amount || 0), 0);
   const receiptNo  = `GRP-${groupNo}-${Date.now().toString().slice(-6)}`;
-  const today      = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+  const today      = formatLong(new Date());
 
   return (
     <div ref={receiptRef} style={{

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import AppModal from '../common/AppModal';
 import { DownloadOutlined, PrinterOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
+import { formatLong } from '../../utils/dates';
 
 function ReceiptView({ fee, receiptRef }) {
   const gold  = '#C9A84C';
@@ -9,7 +10,7 @@ function ReceiptView({ fee, receiptRef }) {
   const cream = '#fdf8ee';
 
   const student   = fee.studentId || {};
-  const paidDate  = fee.paidDate ? new Date(fee.paidDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
+  const paidDate  = formatLong(fee.paidDate);
   const receiptNo = fee._id?.slice(-8).toUpperCase();
 
   return (

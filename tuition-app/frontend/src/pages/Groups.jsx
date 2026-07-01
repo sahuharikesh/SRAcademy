@@ -222,7 +222,7 @@ export default function Groups() {
                         : <span className="text-green-600 font-medium">Clear</span>}
                     </td>
                     <td className="p-3">
-                      <div className="flex justify-center gap-2 flex-wrap">
+                      <div className="flex justify-center gap-2">
                         <button title={selected === g ? 'Hide' : 'View'}
                           onClick={(e) => { e.stopPropagation(); handleSelect(g); }}
                           className="w-7 h-7 rounded flex items-center justify-center"

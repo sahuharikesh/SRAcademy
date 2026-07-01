@@ -1,14 +1,22 @@
 import { UPI_ID, UPI_NAME, SCHOOL } from './constants';
+import { formatDate } from './dates';
+
+function buildQrUrl(amount, note) {
+  const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
+}
 
 export function buildUpiQrUrl(fee) {
-  const note    = `${fee.studentId?.name} Class ${fee.studentId?.std} ${fee.month} ${fee.year} Fee`;
-  const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${fee.amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
+  return buildQrUrl(fee.amount, `${fee.studentId?.name} Class ${fee.studentId?.std} ${fee.month} ${fee.year} Fee`);
+}
+
+export function buildGroupUpiQrUrl(totalDue, groupNo) {
+  return buildQrUrl(totalDue, `Group ${groupNo} Family Fees`);
 }
 
 export function buildFeeMsg(fee) {
   const s   = fee.studentId;
-  const due = new Date(fee.dueDate).toLocaleDateString('en-IN');
+  const due = formatDate(fee.dueDate);
   return (
     `*${SCHOOL}*\n` +
     `*--------------------*\n` +
@@ -28,12 +36,6 @@ export function buildFeeMsg(fee) {
     `Contact : *${UPI_ID.split('@')[0]}*\n` +
     `-- *${SCHOOL}*`
   );
-}
-
-export function buildGroupUpiQrUrl(totalDue, groupNo) {
-  const note    = `Group ${groupNo} Family Fees`;
-  const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${totalDue}&cu=INR&tn=${encodeURIComponent(note)}`;
-  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
 }
 
 export function buildGroupFeeMsg(students, fees) {
