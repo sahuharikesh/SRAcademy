@@ -92,7 +92,11 @@ exports.create = async (req, res) => {
     const dueDate   = new Date(admission.getFullYear(), admission.getMonth() + 1, dueDay);
     const _now      = new Date();
     const _next7    = new Date(_now); _next7.setDate(_next7.getDate() + 7); _next7.setHours(23, 59, 59, 999);
-    const _feeStatus = dueDate < _now ? 'Overdue' : dueDate <= _next7 ? 'Upcoming' : 'No Due';
+    // Yearly-plan students skip the Monthly Upcoming/No Due/Overdue date-window states —
+    // their fee is simply unpaid ("Pending") until settled.
+    const _feeStatus = student.feeType === 'Yearly'
+      ? 'Pending'
+      : dueDate < _now ? 'Overdue' : dueDate <= _next7 ? 'Upcoming' : 'No Due';
     await Fee.create({
       studentId:  student._id,
       month:      dueDate.toLocaleString('default', { month: 'long' }),

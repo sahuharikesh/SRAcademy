@@ -41,10 +41,11 @@ export const markAttendanceNotified = (id) =>
 export const getMonthlyAttendance = (month, year) =>
   api.get(`/attendance/monthly?month=${month}&year=${year}`).then((r) => r.data);
 
-export const getFeeSummary = (month) => api.get('/fees/summary', { params: month ? { month } : {} }).then((r) => r.data);
+export const getFeeSummary = (month, period = 'monthly') =>
+  api.get('/fees/summary', { params: { ...(month ? { month } : {}), period } }).then((r) => r.data);
 
-export const getFees = ({ page = 1, limit = 15, status = '', month = '', year = '', std = '' } = {}) =>
-  api.get('/fees', { params: { page, limit, status: status || undefined, month: month || undefined, year: year || undefined, std: std || undefined } })
+export const getFees = ({ page = 1, limit = 15, status = '', month = '', year = '', std = '', feeType = '' } = {}) =>
+  api.get('/fees', { params: { page, limit, status: status || undefined, month: month || undefined, year: year || undefined, std: std || undefined, feeType: feeType || undefined } })
      .then((r) => r.data); // returns { data, total, page, pages }
 export const payFee = (id, data) => api.patch(`/fees/pay/${id}`, data).then((r) => r.data);
 export const markFeeNotified = (id) => api.patch(`/fees/notified/${id}`).then((r) => r.data);

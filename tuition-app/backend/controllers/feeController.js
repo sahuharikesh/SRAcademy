@@ -57,6 +57,7 @@ exports.getAll = async (req, res) => {
     if (req.query.month)  filtered = filtered.filter(f => f.month === req.query.month);
     if (req.query.year)   filtered = filtered.filter(f => f.year  === Number(req.query.year));
     if (req.query.std)    filtered = filtered.filter(f => f.studentId?.std === req.query.std);
+    if (req.query.feeType) filtered = filtered.filter(f => f.studentId?.feeType === req.query.feeType);
 
     res.json(paginateArray(filtered, page, limit));
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -68,23 +69,38 @@ exports.getSummary = async (req, res) => {
     const now       = new Date();
     const monthName = req.query.month || now.toLocaleString('default', { month: 'long' });
     const year      = now.getFullYear();
+    const period    = req.query.period === 'yearly' ? 'yearly' : 'monthly';
+    const planType  = period === 'yearly' ? 'Yearly' : 'Monthly';
 
-    const [studentAgg, monthFees, allFees] = await Promise.all([
+    // Each period only concerns students on the matching fee plan.
+    const planStudents  = await Student.find({ adminEmail: req.adminEmail, feeType: planType }, '_id');
+    const planStudentIds = planStudents.map((s) => s._id);
+
+    // Yearly mode scopes every card to the current year + Yearly-plan students;
+    // monthly mode keeps card 1 scoped to the month while cards 2-4 stay
+    // all-time, both restricted to Monthly-plan students.
+    const periodMatch = period === 'yearly'
+      ? { adminEmail: req.adminEmail, year, studentId: { $in: planStudentIds } }
+      : { adminEmail: req.adminEmail, studentId: { $in: planStudentIds } };
+
+    const [studentAgg, dueFees, aggFees] = await Promise.all([
       Student.aggregate([
         { $match: { isActive: true, adminEmail: req.adminEmail } },
         { $group: { _id: null, total: { $sum: '$recommendedFees' } } },
       ]),
-      // current month — for Monthly Collection card
+      // Monthly Collection / Yearly Collection card
       Fee.aggregate([
-        { $match: { adminEmail: req.adminEmail, month: monthName, year } },
+        { $match: period === 'yearly'
+          ? { adminEmail: req.adminEmail, year, studentId: { $in: planStudentIds } }
+          : { adminEmail: req.adminEmail, month: monthName, year, studentId: { $in: planStudentIds } } },
         { $group: { _id: null, totalDue: { $sum: '$amount' } } },
       ]),
-      // all months — for cards 2, 3, 4
+      // Paid / Still Pending (+ Upcoming & Overdue for monthly only)
       Fee.aggregate([
-        { $match: { adminEmail: req.adminEmail } },
+        { $match: periodMatch },
         { $group: {
           _id: null,
-          // Card 2: Overdue (full) + Partial (remaining) + Upcoming within 7 days (full)
+          // Overdue (full) + Partial (remaining) + Upcoming within 7 days (full) — monthly only
           totalUpcomingOverdue: {
             $sum: {
               $switch: {
@@ -109,7 +125,7 @@ exports.getSummary = async (req, res) => {
               }
             }
           },
-          // Card 3: Total collected = fully paid + partial payments made
+          // Total collected = fully paid + partial payments made
           totalPaid: {
             $sum: {
               $cond: [
@@ -119,11 +135,12 @@ exports.getSummary = async (req, res) => {
               ]
             }
           },
-          // Card 4: Still pending = remaining unpaid on Overdue + Partial only
+          // Still pending = remaining unpaid on Overdue + Partial, plus flat
+          // Pending (Yearly-plan cycles, which never move to Overdue/Upcoming)
           totalStillPending: {
             $sum: {
               $cond: [
-                { $in: ['$status', ['Overdue', 'Partial']] },
+                { $in: ['$status', ['Overdue', 'Partial', 'Pending']] },
                 { $subtract: ['$amount', { $ifNull: ['$paidAmount', 0] }] },
                 0
               ]
@@ -133,15 +150,15 @@ exports.getSummary = async (req, res) => {
       ]),
     ]);
 
-    const all = allFees[0] || {};
+    const agg = aggFees[0] || {};
 
     res.json({
       allStudentsTotal:     studentAgg[0]?.total || 0,
-      totalDue:             monthFees[0]?.totalDue || 0,
-      totalUpcomingOverdue: all.totalUpcomingOverdue || 0,
-      totalPaid:            all.totalPaid            || 0,
-      totalStillPending:    all.totalStillPending    || 0,
-      month: monthName, year,
+      totalDue:             dueFees[0]?.totalDue || 0,
+      totalUpcomingOverdue: agg.totalUpcomingOverdue || 0,
+      totalPaid:            agg.totalPaid            || 0,
+      totalStillPending:    agg.totalStillPending    || 0,
+      month: monthName, year, period,
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
@@ -254,37 +271,72 @@ exports.remove = async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
+// Creates the fee cycle if it's missing, or refreshes amount/dueDate/status
+// on an existing *unpaid, untouched* cycle (e.g. recommendedFees changed).
+// Never touches a cycle that already has payment progress (Paid/Partial).
+// The filter+upsert is atomic, so running this twice at once (or twice in a
+// row) can never create two rows for the same studentId+month+year.
+async function upsertFeeCycle({ studentId, month, year, dueDate, amount, status, adminEmail }) {
+  try {
+    const result = await Fee.findOneAndUpdate(
+      { studentId, month, year, adminEmail, status: { $nin: ['Paid', 'Partial'] } },
+      {
+        $setOnInsert: { studentId, month, year, adminEmail },
+        $set: { dueDate, amount, status },
+      },
+      { upsert: true, includeResultMetadata: true }
+    );
+    return !result.lastErrorObject.updatedExisting;
+  } catch (e) {
+    if (e.code === 11000) return false; // already exists (paid/partial, or lost a race) — leave it alone
+    throw e;
+  }
+}
+
 exports.generate = async (req, res) => {
   try {
-    const students = await Student.find({ isActive: true, feeType: 'Monthly', adminEmail: req.adminEmail });
     const now    = new Date();
     const today  = new Date(now); today.setHours(23, 59, 59, 999);
     const next7  = new Date(now); next7.setDate(next7.getDate() + 7); next7.setHours(23, 59, 59, 999);
     const limit  = new Date(now); limit.setDate(limit.getDate() + 30); limit.setHours(23, 59, 59, 999);
     let created = 0;
 
-    for (const s of students) {
+    const monthlyStudents = await Student.find({ isActive: true, feeType: 'Monthly', adminEmail: req.adminEmail });
+    for (const s of monthlyStudents) {
       const admission = new Date(s.dateOfAdmission);
       const dueDay = Math.max(1, admission.getDate() - 1);
 
       let cursor = new Date(admission.getFullYear(), admission.getMonth() + 1, dueDay);
 
-      // Generate past fees (Overdue) + next 30 days (Pending/Upcoming)
+      // Refresh past cycles (Overdue) + next 30 days (Pending/Upcoming)
       while (cursor <= limit) {
         const monthName = cursor.toLocaleString('default', { month: 'long' });
         const year      = cursor.getFullYear();
-        const exists    = await Fee.findOne({ studentId: s._id, month: monthName, year, adminEmail: req.adminEmail });
-        if (!exists) {
-          // Upcoming = future AND within 7 days; Pending = future AND >7 days; Overdue = past
-          const status = cursor <= today ? 'Overdue' : cursor <= next7 ? 'Upcoming' : 'No Due';
-          await Fee.create({
-            studentId: s._id, month: monthName, year,
-            dueDate: new Date(cursor),
-            amount: s.recommendedFees, status, adminEmail: req.adminEmail,
-          });
-          created++;
-        }
+        // Upcoming = future AND within 7 days; Pending = future AND >7 days; Overdue = past
+        const status = cursor <= today ? 'Overdue' : cursor <= next7 ? 'Upcoming' : 'No Due';
+        if (await upsertFeeCycle({
+          studentId: s._id, month: monthName, year, dueDate: new Date(cursor),
+          amount: s.recommendedFees, status, adminEmail: req.adminEmail,
+        })) created++;
         cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, dueDay);
+      }
+    }
+
+    // Yearly-plan students: one cycle due at admission, renewing every 12
+    // months. Status is always flat 'Pending' — no Overdue/Upcoming
+    // date-window tracking (see utils/fees.js updateOverdue).
+    const yearlyStudents = await Student.find({ isActive: true, feeType: 'Yearly', adminEmail: req.adminEmail });
+    for (const s of yearlyStudents) {
+      const admission = new Date(s.dateOfAdmission);
+      let cursor = new Date(admission.getFullYear(), admission.getMonth(), admission.getDate());
+
+      while (cursor <= limit) {
+        const year = cursor.getFullYear();
+        if (await upsertFeeCycle({
+          studentId: s._id, month: 'Yearly', year, dueDate: new Date(cursor),
+          amount: s.recommendedFees, status: 'Pending', adminEmail: req.adminEmail,
+        })) created++;
+        cursor = new Date(cursor.getFullYear() + 1, cursor.getMonth(), cursor.getDate());
       }
     }
 

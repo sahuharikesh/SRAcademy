@@ -1,4 +1,5 @@
-const Fee = require('../models/Fee');
+const Fee     = require('../models/Fee');
+const Student = require('../models/Student');
 
 // Cache: skip updateOverdue if already ran today for this admin
 const _lastRun = {};
@@ -6,6 +7,16 @@ const _lastRun = {};
 async function updateOverdue(adminEmail) {
   const todayKey = new Date().toISOString().slice(0, 10);
   if (_lastRun[adminEmail] === todayKey) return;
+
+  // Yearly-plan students never have date-window statuses — normalize any
+  // legacy/stray Upcoming/No Due/Overdue records to a flat Pending.
+  const yearlyStudents = await Student.find({ adminEmail, feeType: 'Yearly' }, '_id');
+  if (yearlyStudents.length) {
+    await Fee.updateMany(
+      { adminEmail, studentId: { $in: yearlyStudents.map((s) => s._id) }, status: { $in: ['Upcoming', 'No Due', 'Overdue'] } },
+      { $set: { status: 'Pending' } }
+    );
+  }
 
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);

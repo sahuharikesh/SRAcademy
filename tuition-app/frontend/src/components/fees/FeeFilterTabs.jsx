@@ -1,17 +1,20 @@
 import { GOLD } from '../../utils/constants';
 
-const TABS = ['All', 'Upcoming', 'No Due', 'Partial', 'Overdue', 'Paid'];
+const MONTHLY_TABS = ['All', 'Upcoming', 'No Due', 'Partial', 'Overdue', 'Paid'];
+const YEARLY_TABS   = ['All', 'Pending', 'Partial', 'Paid'];
 
 const tabColors = {
   All:      null,
   Upcoming: { inactive: { background: '#fff7ed', color: '#c2410c', borderColor: '#fdba74' } },
   'No Due': { inactive: { background: '#f9fafb', color: '#374151', borderColor: '#d1d5db' } },
+  Pending:  { inactive: { background: '#f9fafb', color: '#374151', borderColor: '#d1d5db' } },
   Partial:  { inactive: { background: '#fef3c7', color: '#b45309', borderColor: '#fcd34d' } },
   Overdue:  { inactive: { background: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' } },
   Paid:     { inactive: { background: '#dcfce7', color: '#15803d', borderColor: '#86efac' } },
 };
 
-export default function FeeFilterTabs({ fees, active, onChange }) {
+export default function FeeFilterTabs({ fees, active, onChange, yearly = false }) {
+  const TABS = yearly ? YEARLY_TABS : MONTHLY_TABS;
   return (
     <div className="flex gap-2 mb-4 flex-wrap">
       {TABS.map((tab) => {

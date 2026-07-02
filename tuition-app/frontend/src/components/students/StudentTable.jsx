@@ -3,9 +3,13 @@ import { formatDate } from '../../utils/dates';
 import { PhoneOutlined, EditOutlined, DeleteOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import Pagination from '../common/Pagination';
+import SortableHeader from '../common/SortableHeader';
+import useSort from '../../hooks/useSort';
 
 export default function StudentTable({ students, onEdit, onDelete, onBulkDelete, onCertificate, paginationProps = {} }) {
   const [selected,  setSelected]  = useState(new Set());
+  const { sortField, sortDir, toggleSort, sortBy } = useSort();
+  const sortedStudents = sortBy(students, 'dateOfAdmission', (s) => s.dateOfAdmission);
 
   const allChecked = students.length > 0 && students.every((s) => selected.has(s._id));
 
@@ -61,16 +65,19 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
                 <input type="checkbox" checked={allChecked} onChange={toggleAll}
                   className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
               </th>
-              {['Name','Class','Mobile','School','Medium','Group','Fee Type','Fees (Rs.)','Admission Date','Actions'].map((h) => (
+              {['Name','Class','Mobile','School','Medium','Group','Fee Type','Fees (Rs.)'].map((h) => (
                 <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
               ))}
+              <SortableHeader label="Admission Date" field="dateOfAdmission"
+                sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+              <th className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {students.length === 0 ? (
+            {sortedStudents.length === 0 ? (
               <tr><td colSpan={12} className="p-6 text-center text-gray-400">No students found</td></tr>
             ) : (
-              students.map((s, i) => (
+              sortedStudents.map((s, i) => (
                 <tr key={s._id} className="border-b hover:bg-yellow-50 transition"
                   style={{ background: selected.has(s._id) ? '#fffbeb' : '' }}>
                   <td className="p-3">

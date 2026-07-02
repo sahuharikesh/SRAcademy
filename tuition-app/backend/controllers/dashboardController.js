@@ -11,11 +11,13 @@ exports.getStats = async (req, res) => {
     const start = new Date(today); start.setHours(0, 0, 0, 0);
     const end   = new Date(today); end.setHours(23, 59, 59, 999);
 
-    const activeStudentIds = await Student.distinct('_id', { isActive: true, adminEmail: req.adminEmail });
+    // Yearly-plan fees never carry a "due" date-window status (Upcoming/No
+    // Due/Overdue) — only Monthly-plan students count towards Fees Due.
+    const monthlyStudentIds = await Student.distinct('_id', { isActive: true, adminEmail: req.adminEmail, feeType: 'Monthly' });
 
-    const [totalStudents, dueFees, todayPresent, todayAbsent, stdAgg] = await Promise.all([
+    const [totalStudents, dueFees, todayPresent, todayAbsent, stdAgg, totalGroups] = await Promise.all([
       Student.countDocuments({ isActive: true, adminEmail: req.adminEmail }),
-      Fee.countDocuments({ status: { $in: ['Overdue', 'Partial'] }, studentId: { $in: activeStudentIds }, adminEmail: req.adminEmail }),
+      Fee.countDocuments({ status: { $in: ['Overdue', 'Partial'] }, studentId: { $in: monthlyStudentIds }, adminEmail: req.adminEmail }),
       Attendance.countDocuments({ date: { $gte: start, $lte: end }, status: 'Present', adminEmail: req.adminEmail }),
       Attendance.countDocuments({ date: { $gte: start, $lte: end }, status: 'Absent', adminEmail: req.adminEmail }),
       Student.aggregate([
@@ -23,9 +25,11 @@ exports.getStats = async (req, res) => {
         { $group: { _id: '$std', count: { $sum: 1 } } },
         { $sort: { _id: 1 } },
       ]),
+      Student.distinct('groupNo', { isActive: true, adminEmail: req.adminEmail, groupNo: { $ne: '' } })
+        .then((groups) => groups.length),
     ]);
 
     const stdWiseCount = stdAgg.map(s => ({ std: s._id, count: s.count }));
-    res.json({ totalStudents, dueFees, todayPresent, todayAbsent, stdWiseCount });
+    res.json({ totalStudents, dueFees, todayPresent, todayAbsent, stdWiseCount, totalGroups });
   } catch (e) { res.status(500).json({ error: e.message }); }
 };

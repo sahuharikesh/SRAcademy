@@ -9,6 +9,8 @@ import FeeReceiptModal from './FeeReceiptModal';
 import { Modal } from 'antd';
 import toast from 'react-hot-toast';
 import { PhoneOutlined, CheckOutlined, WhatsAppOutlined, DeleteOutlined, InfoCircleOutlined, FileTextOutlined } from '@ant-design/icons';
+import SortableHeader from '../common/SortableHeader';
+import useSort from '../../hooks/useSort';
 
 function PendingModal({ fee, open, onClose, onCommentSaved }) {
   const [comment, setComment] = useState(fee?.comments || '');
@@ -110,6 +112,11 @@ function PendingModal({ fee, open, onClose, onCommentSaved }) {
 export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDelete, onCommentSaved, paginationProps = {}, selected, setSelected }) {
   const [pendingModal, setPendingModal] = useState(null);
   const [receiptFee,   setReceiptFee]   = useState(null);
+  const { sortField, sortDir, toggleSort, sortBy } = useSort();
+  const sortedFees = sortBy(
+    sortBy(fees, 'dueDate', (f) => f.dueDate),
+    'dateOfAdmission', (f) => f.studentId?.dateOfAdmission,
+  );
 
   const allChecked = fees.length > 0 && fees.every((f) => selected.has(f._id));
 
@@ -138,16 +145,26 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                 <input type="checkbox" checked={allChecked} onChange={toggleAll}
                   className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
               </th>
-              {['Student', 'Class', 'Group', 'Adm Date', 'Amount', 'Last Pending', 'Due Date', 'Status', 'Actions'].map((h) => (
+              {['Student', 'Class', 'Group', 'Fee Type'].map((h) => (
+                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+              ))}
+              <SortableHeader label="Adm Date" field="dateOfAdmission" className="p-2"
+                sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+              {['Amount', 'Last Pending'].map((h) => (
+                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+              ))}
+              <SortableHeader label="Due Date" field="dueDate" className="p-2"
+                sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+              {['Status', 'Actions'].map((h) => (
                 <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {fees.length === 0 ? (
-              <tr><td colSpan={10} className="p-6 text-center text-gray-400">No records found</td></tr>
+            {sortedFees.length === 0 ? (
+              <tr><td colSpan={11} className="p-6 text-center text-gray-400">No records found</td></tr>
             ) : (
-              fees.map((fee, i) => (
+              sortedFees.map((fee, i) => (
                 <tr key={fee._id} className="tr-anim border-b"
                   style={{ animationDelay: `${Math.min(i * 40, 300)}ms`, background: selected.has(fee._id) ? '#fffbeb' : '' }}>
                   <td className="p-2">
@@ -159,6 +176,11 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                   <td className="p-2">
                     {fee.studentId?.groupNo
                       ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{fee.studentId.groupNo}</span>
+                      : <span className="text-gray-400">—</span>}
+                  </td>
+                  <td className="p-2">
+                    {fee.studentId?.feeType
+                      ? <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: '#fff3cd', color: '#856404' }}>{fee.studentId.feeType}</span>
                       : <span className="text-gray-400">—</span>}
                   </td>
                   <td className="p-2">

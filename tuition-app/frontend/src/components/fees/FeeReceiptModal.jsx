@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import AppModal from '../common/AppModal';
 import { DownloadOutlined, PrinterOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
-import { formatLong } from '../../utils/dates';
+import { formatLong, formatShort } from '../../utils/dates';
 
 function ReceiptView({ fee, receiptRef }) {
   const gold  = '#C9A84C';
@@ -72,6 +72,7 @@ function ReceiptView({ fee, receiptRef }) {
               ['Name', student.name || '—'],
               ['Class', student.std ? `Class ${student.std}` : '—'],
               ['Mobile', student.mobile || '—'],
+              ['Date of Admission', student.dateOfAdmission ? formatShort(student.dateOfAdmission) : '—'],
             ].map(([label, val]) => (
               <div key={label} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e5e7eb', paddingBottom: 4 }}>
                 <span style={{ color: '#666', fontFamily: 'Arial', fontSize: 11 }}>{label}</span>

@@ -9,7 +9,7 @@ const FeeSchema = new mongoose.Schema(
     amount:           { type: Number, required: true },
     paidDate:         { type: Date },
     paidAmount:       { type: Number },
-    status:           { type: String, enum: ['Upcoming', 'No Due', 'Partial', 'Paid', 'Overdue'], default: 'Upcoming' },
+    status:           { type: String, enum: ['Upcoming', 'No Due', 'Partial', 'Paid', 'Overdue', 'Pending'], default: 'Upcoming' },
     notificationSent: { type: Boolean, default: false },
     comments:         { type: String, default: '' },
     adminEmail:       { type: String },
@@ -22,5 +22,9 @@ const FeeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Prevents two concurrent/duplicate refresh calls from ever creating two
+// fee cycles for the same student + month + year.
+FeeSchema.index({ studentId: 1, month: 1, year: 1, adminEmail: 1 }, { unique: true });
 
 module.exports = mongoose.model('Fee', FeeSchema);

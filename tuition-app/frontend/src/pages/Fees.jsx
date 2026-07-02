@@ -137,15 +137,26 @@ function PayModal({ fee, open, onClose, onSuccess }) {
 }
 
 function ConfirmModal({ open, message, onConfirm, onClose }) {
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { if (!open) setBusy(false); }, [open]);
+
+  const handleConfirm = async () => {
+    setBusy(true);
+    try { await onConfirm(); } finally { setBusy(false); onClose(); }
+  };
+
   return (
     <AppModal open={open} onClose={onClose} title="Confirm Action">
       <div className="px-5 py-5 text-sm text-center" style={{ color: '#1a1a1a' }}>{message}</div>
       <div className="px-5 pb-5 flex gap-2">
-        <button onClick={onClose} className="flex-1 py-1.5 rounded-lg text-xs font-black"
+        <button onClick={onClose} disabled={busy} className="flex-1 py-1.5 rounded-lg text-xs font-black"
           style={{ background: '#e5e7eb', color: '#374151' }}>Cancel</button>
-        <button onClick={() => { onConfirm(); onClose(); }}
+        <button onClick={handleConfirm} disabled={busy}
           className="flex-1 py-1.5 rounded-lg text-xs font-black"
-          style={{ background: '#fee2e2', color: '#dc2626' }}>Confirm</button>
+          style={{ background: '#fee2e2', color: '#dc2626', opacity: busy ? 0.6 : 1 }}>
+          {busy ? 'Processing…' : 'Confirm'}
+        </button>
       </div>
     </AppModal>
   );
@@ -287,13 +298,14 @@ function PaymentHistoryModal({ open, onClose }) {
                     <div className="text-sm font-black" style={{ color: '#dc2626' }}>₹{totalPending.toLocaleString('en-IN')}</div>
                   </div>
                 </div>
-                {/* Monthly fee note if all months have same fee */}
+                {/* Fee note if all records have same fee */}
                 {(() => {
                   const amounts = dueHistory.map(f => f.amount);
                   const allSame = amounts.length > 0 && amounts.every(a => a === amounts[0]);
+                  const isYearly = selStu?.feeType === 'Yearly';
                   return allSame ? (
                     <p className="text-[10px] font-bold mb-2" style={{ color: '#9ca3af' }}>
-                      Monthly Fee: <span style={{ color: '#374151' }}>₹{amounts[0]}</span> (same for all months)
+                      {isYearly ? 'Yearly Fee' : 'Monthly Fee'}: <span style={{ color: '#374151' }}>₹{amounts[0]}</span> {isYearly ? '(same for all years)' : '(same for all months)'}
                     </p>
                   ) : null;
                 })()}
@@ -301,8 +313,7 @@ function PaymentHistoryModal({ open, onClose }) {
                 {/* Records */}
                 {(() => {
                   const relevant  = dueHistory;
-                  const feeAmounts = relevant.map(f => f.amount);
-                  const allSameFee = feeAmounts.length > 0 && feeAmounts.every(a => a === feeAmounts[0]);
+                  const isYearly  = selStu?.feeType === 'Yearly';
                   return (
                   <div className="flex flex-col gap-2 overflow-y-auto pr-1" style={{ maxHeight: 300 }}>
                   {relevant.map(f => {
@@ -324,7 +335,7 @@ function PaymentHistoryModal({ open, onClose }) {
 
                         {/* 3-equal-column header row */}
                         <div className="grid px-3 py-2" style={{ gridTemplateColumns: '1fr 1fr 1fr', background: '#f9fafb', borderBottom: displayLogs.length > 0 ? '1px dashed #e5e7eb' : 'none' }}>
-                          <span className="text-xs font-bold" style={{ color: '#1a1a1a' }}>{f.month} {f.year}</span>
+                          <span className="text-xs font-bold" style={{ color: '#1a1a1a' }}>{isYearly ? f.year : `${f.month} ${f.year}`}</span>
                           <span className="text-[10px] font-bold text-center" style={{ color: '#059669' }}>Pd ₹{paid}</span>
                           <span className="text-[10px] font-bold text-right" style={{ color: remaining > 0 ? '#dc2626' : '#9ca3af' }}>Rem ₹{remaining}</span>
                         </div>
@@ -387,6 +398,7 @@ export default function Fees() {
   const [filter,       setFilter]       = useState('All');
   const [filterMonth,  setFilterMonth]  = useState('');
   const [filterStd,    setFilterStd]    = useState('');
+  const [periodMode,   setPeriodMode]   = useState('Monthly');
   const { page, setPage, setTotal, reset: resetPage, paginationProps } = usePagination(15);
   const [waModal,      setWaModal]      = useState(null);
   const [payModal,     setPayModal]     = useState(null);
@@ -394,14 +406,15 @@ export default function Fees() {
   const [loading,      setLoading]      = useState(true);
   const [histModal,    setHistModal]    = useState(false);
   const [selected,     setSelected]     = useState(new Set());
-  const autoGenDone = useRef(false);
+  const [refreshing,   setRefreshing]   = useState(false);
+  const refreshingRef = useRef(false);
 
   const load = useCallback(async (p = 1) => {
     setLoading(true);
     try {
       const [res, s] = await Promise.all([
-        getFees({ page: p, limit: 15, status: filter, month: filterMonth, std: filterStd }),
-        getFeeSummary(filterMonth).catch(() => null),
+        getFees({ page: p, limit: 15, status: filter, month: filterMonth, std: filterStd, feeType: periodMode }),
+        getFeeSummary(filterMonth, periodMode === 'Yearly' ? 'yearly' : 'monthly').catch(() => null),
       ]);
       setFees(res.data);
       setTotal(res.total);
@@ -409,30 +422,13 @@ export default function Fees() {
       return res.total;
     } catch { toast.error('Failed to load fees'); return 0; }
     finally { setLoading(false); }
-  }, [filter, filterMonth, filterStd]);
-
-  useEffect(() => {
-    autoGenDone.current = false;
-  }, []);
+  }, [filter, filterMonth, filterStd, periodMode]);
 
   useEffect(() => {
     resetPage();
     setSelected(new Set());
-    (async () => {
-      const total = await load(1);
-      // Auto-generate fees when page loads with 0 records (e.g. after deleting all)
-      if (total === 0 && !autoGenDone.current) {
-        autoGenDone.current = true;
-        try {
-          const res = await generateFees({});
-          if (res.message && res.message !== 'No Future Data Available') {
-            toast.success(`Auto-generated: ${res.message}`);
-            await load(1);
-          }
-        } catch { /* silent — manual generate button still available */ }
-      }
-    })();
-  }, [filter, filterMonth, filterStd]);
+    load(1);
+  }, [filter, filterMonth, filterStd, periodMode]);
 
   useEffect(() => { if (page > 1) load(page); }, [page]);
 
@@ -446,12 +442,21 @@ export default function Fees() {
     load(1);
   }, [load]);
 
+  // Refreshes every student's (Monthly + Yearly) fee cycles: creates
+  // whatever's missing (e.g. a newly admitted student) and updates amounts
+  // on existing unpaid cycles — never touches Paid/Partial records, and
+  // never creates a duplicate for a cycle that already exists.
   const handleGenerate = () => {
+    if (refreshingRef.current) { toast.error('Refresh already in progress'); return; }
     setConfirmModal({
-      message: 'Generate fees for students whose due date is within next 30 days?',
+      message: 'Refresh fees for all Monthly & Yearly students? This fills in missing records and updates amounts on unpaid ones — existing payments are untouched.',
       onConfirm: async () => {
+        if (refreshingRef.current) { toast.error('Refresh already in progress'); return; }
+        refreshingRef.current = true;
+        setRefreshing(true);
         try { const res = await generateFees({}); toast.success(res.message); reload(); }
-        catch { toast.error('Failed to generate fees'); }
+        catch { toast.error('Failed to refresh fees'); }
+        finally { refreshingRef.current = false; setRefreshing(false); }
       },
     });
   };
@@ -476,7 +481,7 @@ export default function Fees() {
 
   const handleDownloadCSV = async () => {
     try {
-      const res = await getFees({ page: 1, limit: 10000, status: filter, month: filterMonth, std: filterStd });
+      const res = await getFees({ page: 1, limit: 10000, status: filter, month: filterMonth, std: filterStd, feeType: periodMode });
       const rows = res.data;
       if (!rows.length) { toast.error('No records to export'); return; }
       downloadCSV(
@@ -521,9 +526,10 @@ export default function Fees() {
             style={{ background: '#f0fdf4', border: '1.5px solid #86efac', color: '#15803d' }}>
             <DownloadOutlined /> CSV
           </button>
-          <button onClick={handleGenerate}
-            className="btn-shine px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5" style={DARK}>
-            <ThunderboltOutlined /> Generate Fees
+          <button onClick={handleGenerate} disabled={refreshing}
+            className="btn-shine px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5"
+            style={{ ...DARK, opacity: refreshing ? 0.6 : 1, cursor: refreshing ? 'not-allowed' : 'pointer' }}>
+            <ThunderboltOutlined /> {refreshing ? 'Refreshing…' : 'Refresh Fees'}
           </button>
           <button onClick={() => setHistModal(true)}
             className="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5" style={{ background:'#fffdf5', border:'1.5px solid #C9A84C', color:'#7a6020' }}>
@@ -532,15 +538,19 @@ export default function Fees() {
         </div>
       </div>
 
-      {/* Monthly Revenue Summary */}
+      {/* Revenue Summary */}
       {summary && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-          {[
+        <div className={`grid grid-cols-2 ${periodMode === 'Yearly' ? 'sm:grid-cols-3' : 'sm:grid-cols-4'} gap-3 mb-5`}>
+          {(periodMode === 'Yearly' ? [
+            { label: 'Yearly Collection',    value: summary.totalDue,             color: '#6d28d9', bg: '#f5f3ff', border: '#ddd6fe', sub: `${summary.year} — total due` },
+            { label: 'Paid',                 value: summary.totalPaid,            color: '#065f46', bg: '#d1fae5', border: '#6ee7b7', sub: `Total collected in ${summary.year}` },
+            { label: 'Still Pending',        value: summary.totalStillPending,    color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', sub: `Overdue + partial dues in ${summary.year}` },
+          ] : [
             { label: 'Monthly Collection',   value: summary.totalDue,             color: '#6d28d9', bg: '#f5f3ff', border: '#ddd6fe', sub: `${summary.month} ${summary.year} — total due`     },
             { label: 'Upcoming & Overdue',   value: summary.totalUpcomingOverdue, color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe', sub: 'Overdue + partial remaining + upcoming (7 days)'   },
             { label: 'Paid',                 value: summary.totalPaid,            color: '#065f46', bg: '#d1fae5', border: '#6ee7b7', sub: 'Total collected (all months)'       },
             { label: 'Still Pending',        value: summary.totalStillPending,    color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', sub: 'Overdue + partial dues'   },
-          ].map(({ label, value, color, bg, border, sub }) => (
+          ]).map(({ label, value, color, bg, border, sub }) => (
             <div key={label} className="rounded-xl px-4 py-3" style={{ background: bg, border: `1.5px solid ${border}` }}>
               <div className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{ color }}>{label}</div>
               <div className="text-2xl font-black" style={{ color }}>₹{Math.max(0, value).toLocaleString('en-IN')}</div>
@@ -550,7 +560,7 @@ export default function Fees() {
         </div>
       )}
 
-      <FeeFilterTabs fees={fees} active={filter} onChange={setFilter} />
+      <FeeFilterTabs fees={fees} active={filter} onChange={setFilter} yearly={periodMode === 'Yearly'} />
 
       <div className="flex flex-wrap gap-2 mb-4 items-center">
         <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}
@@ -582,7 +592,7 @@ export default function Fees() {
               })}
               className="flex items-center gap-1 px-3 rounded-lg text-xs font-bold"
               style={{ background: '#fee2e2', color: '#dc2626', height: 25 }}>
-              <DeleteOutlined /> Delete Selected
+              <DeleteOutlined /> Selected
             </button>
             <span className="text-xs font-bold px-2.5 rounded-full flex items-center"
               style={{ background: '#1a1a1a', color: '#C9A84C', height: 25 }}>
@@ -590,6 +600,17 @@ export default function Fees() {
             </span>
           </>
         )}
+        <div className="flex gap-1.5 ml-auto">
+          {['Monthly', 'Yearly'].map((mode) => (
+            <button key={mode} onClick={() => { setPeriodMode(mode); setFilter('All'); }}
+              className="px-3 rounded-md text-xs font-bold"
+              style={periodMode === mode
+                ? { background: '#1a1a1a', color: '#C9A84C', height: 25 }
+                : { background: '#fff', color: '#6b7280', border: '1.5px solid #e5e7eb', height: 25 }}>
+              {mode}
+            </button>
+          ))}
+        </div>
       </div>
 
       <FeeTable

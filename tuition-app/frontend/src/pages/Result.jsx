@@ -6,6 +6,7 @@ import {
 import toast from 'react-hot-toast';
 import { getStudents, saveStudentMarks, getStudentResults, deleteStudentExam } from '../api';
 import { SUBJECTS, EXAMS, STD_OPTIONS, getSubjectsForStd } from '../utils/constants';
+import useSort from '../hooks/useSort';
 
 const gold = '#C9A84C';
 const dark = '#1a1a1a';
@@ -420,6 +421,7 @@ function StudentModal({ student, defaultExam, onClose, students, studentIndex, o
   const [isEditing, setIsEditing]     = useState(false); // kept for Edit button in history
   const [cardTemplate, setCardTemplate] = useState(1);
   const prevStudentId                 = useRef(student._id);
+  const { sortField: histSortField, sortDir: histSortDir, toggleSort: toggleHistSort, sortBy: sortHistBy } = useSort();
 
   const defaultRows = (std) => {
     const cfg = loadStdConfig(std);
@@ -731,13 +733,20 @@ function StudentModal({ student, defaultExam, onClose, students, studentIndex, o
                     <thead>
                       <tr style={{ background: dark }}>
                         <th style={{ color: gold, padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Exam</th>
-                        <th className="hidden sm:table-cell" style={{ color: gold, padding: '8px 10px', textAlign: 'center', fontSize: 10, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Date</th>
+                        <th className="hidden sm:table-cell" onClick={() => toggleHistSort('date')}
+                          style={{ color: gold, padding: '8px 10px', textAlign: 'center', fontSize: 10, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}>
+                          Date{' '}
+                          <span style={{ fontSize: 9, opacity: histSortField === 'date' ? 1 : 0.4 }}>
+                            {histSortField === 'date' ? (histSortDir === 'asc' ? '▲' : '▼') : '⇅'}
+                          </span>
+                        </th>
                         <th className="hidden sm:table-cell" style={{ color: gold, padding: '8px 10px', textAlign: 'center', fontSize: 10, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Grade</th>
                         <th style={{ color: gold, padding: '8px 12px', textAlign: 'center', fontSize: 10, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {Object.entries(history).map(([en, { records, date: d }], idx, arr) => {
+                      {sortHistBy(Object.entries(history), 'date', ([, { date: d }]) => d)
+                        .map(([en, { records, date: d }], idx, arr) => {
                         const total    = records.reduce((s, r) => s + (r.obtainedMarks ?? 0), 0);
                         const maxTotal = records.reduce((s, r) => s + r.maxMarks, 0);
                         const p        = calcPct(total, maxTotal);

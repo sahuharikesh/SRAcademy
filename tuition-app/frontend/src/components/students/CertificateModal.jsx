@@ -314,10 +314,10 @@ function ModernView({ student, form, percentage, autoGrade, logoSrc }) {
             <p style={{ fontSize: 9, color: '#888', letterSpacing: 3, textTransform: 'uppercase', fontFamily: 'Arial,sans-serif', marginBottom: 10 }}>
               THIS CERTIFICATE IS AWARDED TO
             </p>
-            <p style={{ fontSize: 38, fontWeight: 700, color: navy, margin: '0 0 2px', lineHeight: 1.2, fontFamily: 'Helvetica, Arial, sans-serif' }}>
+            <p style={{ fontSize: 28, fontWeight: 700, color: navy, margin: '0 0 2px', lineHeight: 1.2, fontFamily: 'Helvetica, Arial, sans-serif' }}>
               {student.name}
             </p>
-            <div style={{ width: 200, height: 2, background: gold, margin: '10px auto 14px' }} />
+            <div style={{ width: 200, height: 2, background: gold, margin: '8px auto 10px' }} />
           </div>
 
           {/* Body text */}
@@ -368,7 +368,7 @@ function ModernView({ student, form, percentage, autoGrade, logoSrc }) {
 /* ── RoyalView ── */
 function RoyalView({ student, form, percentage, autoGrade, logoSrc }) {
   const gold = '#C9A84C';
-  const bg = '#0d0d0d';
+  const bg = '#2b2b2b';
 
   return (
     <div style={{
@@ -474,8 +474,10 @@ function RoyalView({ student, form, percentage, autoGrade, logoSrc }) {
               style={{ width: 56, height: 56, borderRadius: '50%', opacity: 0.3, marginBottom: 4, objectFit: 'contain' }} />
           </div>
           <div style={{ textAlign: 'center' }}>
-            <img src="/signature.png" alt="Signature"
-              style={{ height: 48, maxWidth: 140, objectFit: 'contain', marginBottom: 2, display: 'block', margin: '0 auto 2px' }} />
+            <div style={{ background: '#fff', borderRadius: 6, padding: '4px 10px', display: 'inline-block', marginBottom: 2 }}>
+              <img src="/signature.png" alt="Signature"
+                style={{ height: 40, maxWidth: 120, objectFit: 'contain', display: 'block' }} />
+            </div>
             <div style={{ width: 140, borderBottom: `2px solid ${gold}`, margin: '0 auto 4px' }} />
             <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontFamily: 'Arial', textTransform: 'uppercase', letterSpacing: 1 }}>
               Owner / Director
