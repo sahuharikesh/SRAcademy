@@ -26,15 +26,15 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 60%,#0a0a0a 100%)' }}>
+      style={{ background: 'linear-gradient(135deg,color-mix(in srgb, var(--brand-dark, #1a1a1a) 75%, black) 0%,var(--brand-dark, #1a1a1a) 60%,color-mix(in srgb, var(--brand-dark, #1a1a1a) 75%, black) 100%)' }}>
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
           <img src="/logo.jpg" alt="logo"
             className="w-20 h-20 rounded-full object-cover mb-4"
-            style={{ border: '3px solid #C9A84C', boxShadow: '0 0 24px rgba(201,168,76,0.4)' }} />
+            style={{ border: '3px solid var(--brand-gold, #C9A84C)', boxShadow: '0 0 24px rgba(201,168,76,0.4)' }} />
           <div className="text-center leading-none">
             <div className="font-black tracking-widest"
-              style={{ fontSize: '1.4rem', background: 'linear-gradient(90deg,#FFD700,#C9A84C,#FFF5CC,#C9A84C,#FFD700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontFamily: 'Georgia, serif' }}>
+              style={{ fontSize: '1.4rem', color: 'var(--brand-gold, #C9A84C)', background: 'linear-gradient(90deg,color-mix(in srgb, var(--brand-gold, #C9A84C) 55%, white),var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 30%, white),var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 55%, white))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontFamily: 'Georgia, serif' }}>
               SHREE RAM
             </div>
             <div className="font-bold tracking-[0.45em] mt-1"
@@ -63,12 +63,12 @@ export default function Login() {
             </div>
             <button type="submit" disabled={loading}
               className="w-full py-2.5 rounded-lg text-sm font-black mt-1 transition-opacity"
-              style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000', opacity: loading ? 0.7 : 1 }}>
+              style={{ background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000', opacity: loading ? 0.7 : 1 }}>
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
         </div>
-        <p className="text-center text-xs mt-6" style={{ color: 'rgba(255,255,255,0.2)' }}>© {new Date().getFullYear()} Shree Ram Academy</p>
+        <p className="text-center text-xs mt-6" style={{ color: 'rgba(255,255,255,0.2)' }}>© {new Date().getFullYear()} All rights reserved</p>
       </div>
     </div>
   );

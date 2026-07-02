@@ -13,8 +13,8 @@ const RANKS = STD_OPTIONS;
 
 /* ── ClassicView (original design) ── */
 function ClassicView({ student, form, percentage, autoGrade, logoSrc }) {
-  const gold = '#C9A84C';
-  const dark = '#1a1a1a';
+  const gold = 'var(--brand-gold, #C9A84C)';
+  const dark = 'var(--brand-dark, #1a1a1a)';
   const cream = '#fdf8ee';
 
   return (
@@ -71,7 +71,7 @@ function ClassicView({ student, form, percentage, autoGrade, logoSrc }) {
 
         {/* Header — matches app navbar */}
         <div style={{
-          background: 'linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 50%,#0a0a0a 100%)',
+          background: 'linear-gradient(135deg,#0a0a0a 0%,var(--brand-dark, #1a1a1a) 50%,#0a0a0a 100%)',
           margin: '-24px -52px 0',
           borderBottom: `2px solid ${gold}`,
           display: 'flex', alignItems: 'center', padding: '10px 28px', gap: 16,
@@ -100,12 +100,12 @@ function ClassicView({ student, form, percentage, autoGrade, logoSrc }) {
               <defs>
                 <linearGradient id="tailG" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#f5e070"/>
-                  <stop offset="50%" stopColor="#C9A84C"/>
+                  <stop offset="50%" stopColor="var(--brand-gold, #C9A84C)"/>
                   <stop offset="100%" stopColor="#7a5c0a"/>
                 </linearGradient>
                 <linearGradient id="ringG" x1="10%" y1="0%" x2="90%" y2="100%">
                   <stop offset="0%" stopColor="#fff0a0"/>
-                  <stop offset="25%" stopColor="#C9A84C"/>
+                  <stop offset="25%" stopColor="var(--brand-gold, #C9A84C)"/>
                   <stop offset="60%" stopColor="#f0d060"/>
                   <stop offset="100%" stopColor="#7a5c0a"/>
                 </linearGradient>
@@ -139,7 +139,7 @@ function ClassicView({ student, form, percentage, autoGrade, logoSrc }) {
 
               <circle cx="40" cy="37" r="28" fill="none" stroke="#f0d060" strokeWidth="1.2"/>
               <circle cx="40" cy="37" r="27" fill="url(#navyG)"/>
-              <circle cx="40" cy="37" r="24.5" fill="none" stroke="#C9A84C" strokeWidth="1"/>
+              <circle cx="40" cy="37" r="24.5" fill="none" stroke="var(--brand-gold, #C9A84C)" strokeWidth="1"/>
 
               <text x="40" y="32" textAnchor="middle" fill="#f0d060"
                 fontSize="12" fontStyle="italic" fontWeight="700"
@@ -147,7 +147,7 @@ function ClassicView({ student, form, percentage, autoGrade, logoSrc }) {
               <text x="40" y="42" textAnchor="middle" fill="#ffffff"
                 fontSize="8.5" fontWeight="900" letterSpacing="1.5"
                 fontFamily="Arial Black,Arial,sans-serif">AWARD</text>
-              <text x="40" y="51" textAnchor="middle" fill="#C9A84C"
+              <text x="40" y="51" textAnchor="middle" fill="var(--brand-gold, #C9A84C)"
                 fontSize="7" fontFamily="Arial,sans-serif" letterSpacing="1">★ ★ ★</text>
             </svg>
           </div>
@@ -227,7 +227,7 @@ function ClassicView({ student, form, percentage, autoGrade, logoSrc }) {
 /* ── ModernView ── */
 function ModernView({ student, form, percentage, autoGrade, logoSrc }) {
   const navy = '#1e3a5f';
-  const gold = '#C9A84C';
+  const gold = 'var(--brand-gold, #C9A84C)';
 
   return (
     <div style={{
@@ -367,7 +367,7 @@ function ModernView({ student, form, percentage, autoGrade, logoSrc }) {
 
 /* ── RoyalView ── */
 function RoyalView({ student, form, percentage, autoGrade, logoSrc }) {
-  const gold = '#C9A84C';
+  const gold = 'var(--brand-gold, #C9A84C)';
   const bg = '#2b2b2b';
 
   return (
@@ -493,7 +493,7 @@ function RoyalView({ student, form, percentage, autoGrade, logoSrc }) {
 /* ── GeometricView ── */
 function GeometricView({ student, form, percentage, autoGrade, logoSrc }) {
   const teal = '#2a9d8f';
-  const gold = '#C9A84C';
+  const gold = 'var(--brand-gold, #C9A84C)';
   const dark = '#1a1a2e';
 
   return (
@@ -521,11 +521,11 @@ function GeometricView({ student, form, percentage, autoGrade, logoSrc }) {
         {/* Inner lighter teal */}
         <polygon points="12,12 196,12 12,164" fill="#3ab5a6" />
         {/* Top-right gold triangle */}
-        <polygon points="740,0 620,0 740,140" fill="#C9A84C" />
+        <polygon points="740,0 620,0 740,140" fill="var(--brand-gold, #C9A84C)" />
         {/* Inner gold-light */}
         <polygon points="728,12 636,12 728,124" fill="#e8c76a" />
         {/* Bottom-left gold triangle */}
-        <polygon points="0,500 140,500 0,380" fill="#C9A84C" />
+        <polygon points="0,500 140,500 0,380" fill="var(--brand-gold, #C9A84C)" />
         {/* Bottom-right teal triangle */}
         <polygon points="740,500 560,500 740,340" fill="#2a9d8f" />
       </svg>
@@ -536,12 +536,12 @@ function GeometricView({ student, form, percentage, autoGrade, logoSrc }) {
           <defs>
             <linearGradient id="geoTailG" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#f5e070"/>
-              <stop offset="50%" stopColor="#C9A84C"/>
+              <stop offset="50%" stopColor="var(--brand-gold, #C9A84C)"/>
               <stop offset="100%" stopColor="#7a5c0a"/>
             </linearGradient>
             <linearGradient id="geoRingG" x1="10%" y1="0%" x2="90%" y2="100%">
               <stop offset="0%" stopColor="#fff0a0"/>
-              <stop offset="25%" stopColor="#C9A84C"/>
+              <stop offset="25%" stopColor="var(--brand-gold, #C9A84C)"/>
               <stop offset="60%" stopColor="#f0d060"/>
               <stop offset="100%" stopColor="#7a5c0a"/>
             </linearGradient>
@@ -570,14 +570,14 @@ function GeometricView({ student, form, percentage, autoGrade, logoSrc }) {
           })()}
           <circle cx="40" cy="37" r="28" fill="none" stroke="#f0d060" strokeWidth="1.2"/>
           <circle cx="40" cy="37" r="27" fill="url(#geoNavyG)"/>
-          <circle cx="40" cy="37" r="24.5" fill="none" stroke="#C9A84C" strokeWidth="1"/>
+          <circle cx="40" cy="37" r="24.5" fill="none" stroke="var(--brand-gold, #C9A84C)" strokeWidth="1"/>
           <text x="40" y="32" textAnchor="middle" fill="#f0d060"
             fontSize="12" fontStyle="italic" fontWeight="700"
             fontFamily="Georgia,'Times New Roman',serif">Best</text>
           <text x="40" y="42" textAnchor="middle" fill="#ffffff"
             fontSize="8.5" fontWeight="900" letterSpacing="1.5"
             fontFamily="Arial Black,Arial,sans-serif">AWARD</text>
-          <text x="40" y="51" textAnchor="middle" fill="#C9A84C"
+          <text x="40" y="51" textAnchor="middle" fill="var(--brand-gold, #C9A84C)"
             fontSize="7" fontFamily="Arial,sans-serif" letterSpacing="1">★ ★ ★</text>
         </svg>
       </div>
@@ -669,7 +669,7 @@ function GeometricView({ student, form, percentage, autoGrade, logoSrc }) {
 /* ── PrestigeView ── */
 function PrestigeView({ student, form, percentage, autoGrade, logoSrc }) {
   const navy = '#1a2a6c';
-  const gold = '#C9A84C';
+  const gold = 'var(--brand-gold, #C9A84C)';
 
   return (
     <div style={{
@@ -694,17 +694,17 @@ function PrestigeView({ student, form, percentage, autoGrade, logoSrc }) {
         {/* Left navy sweep */}
         <path d="M0,0 C80,60 60,200 90,250 C60,300 80,440 0,500 Z" fill="#1a2a6c"/>
         {/* Left gold accent line */}
-        <path d="M0,20 C60,80 40,200 70,250 C40,300 60,440 0,480 Z" fill="none" stroke="#C9A84C" strokeWidth="2" opacity="0.6"/>
+        <path d="M0,20 C60,80 40,200 70,250 C40,300 60,440 0,480 Z" fill="none" stroke="var(--brand-gold, #C9A84C)" strokeWidth="2" opacity="0.6"/>
         {/* Right navy sweep */}
         <path d="M740,0 C660,60 680,200 650,250 C680,300 660,440 740,500 Z" fill="#1a2a6c"/>
         {/* Right gold accent line */}
-        <path d="M740,20 C680,80 700,200 670,250 C700,300 680,440 740,480 Z" fill="none" stroke="#C9A84C" strokeWidth="2" opacity="0.6"/>
+        <path d="M740,20 C680,80 700,200 670,250 C700,300 680,440 740,480 Z" fill="none" stroke="var(--brand-gold, #C9A84C)" strokeWidth="2" opacity="0.6"/>
         {/* Bottom-right gold ribbon 1 */}
-        <path d="M740,320 C700,350 660,400 620,460 C660,470 700,490 740,500 Z" fill="#C9A84C" opacity="0.9"/>
+        <path d="M740,320 C700,350 660,400 620,460 C660,470 700,490 740,500 Z" fill="var(--brand-gold, #C9A84C)" opacity="0.9"/>
         {/* Bottom-right gold ribbon 2 */}
-        <path d="M740,280 C680,320 640,380 580,440 C620,450 660,470 700,490 C720,495 740,498 740,500 Z" fill="#C9A84C" opacity="0.5"/>
+        <path d="M740,280 C680,320 640,380 580,440 C620,450 660,470 700,490 C720,495 740,498 740,500 Z" fill="var(--brand-gold, #C9A84C)" opacity="0.5"/>
         {/* Top-right swirl accent */}
-        <path d="M580,0 C620,20 680,10 740,30 L740,0 Z" fill="#C9A84C" opacity="0.4"/>
+        <path d="M580,0 C620,20 680,10 740,30 L740,0 Z" fill="var(--brand-gold, #C9A84C)" opacity="0.4"/>
       </svg>
 
       {/* Best Award badge top-right */}
@@ -713,12 +713,12 @@ function PrestigeView({ student, form, percentage, autoGrade, logoSrc }) {
           <defs>
             <linearGradient id="presTailG" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#f5e070"/>
-              <stop offset="50%" stopColor="#C9A84C"/>
+              <stop offset="50%" stopColor="var(--brand-gold, #C9A84C)"/>
               <stop offset="100%" stopColor="#7a5c0a"/>
             </linearGradient>
             <linearGradient id="presRingG" x1="10%" y1="0%" x2="90%" y2="100%">
               <stop offset="0%" stopColor="#fff0a0"/>
-              <stop offset="25%" stopColor="#C9A84C"/>
+              <stop offset="25%" stopColor="var(--brand-gold, #C9A84C)"/>
               <stop offset="60%" stopColor="#f0d060"/>
               <stop offset="100%" stopColor="#7a5c0a"/>
             </linearGradient>
@@ -747,14 +747,14 @@ function PrestigeView({ student, form, percentage, autoGrade, logoSrc }) {
           })()}
           <circle cx="40" cy="37" r="28" fill="none" stroke="#f0d060" strokeWidth="1.2"/>
           <circle cx="40" cy="37" r="27" fill="url(#presNavyG)"/>
-          <circle cx="40" cy="37" r="24.5" fill="none" stroke="#C9A84C" strokeWidth="1"/>
+          <circle cx="40" cy="37" r="24.5" fill="none" stroke="var(--brand-gold, #C9A84C)" strokeWidth="1"/>
           <text x="40" y="32" textAnchor="middle" fill="#f0d060"
             fontSize="12" fontStyle="italic" fontWeight="700"
             fontFamily="Georgia,'Times New Roman',serif">Best</text>
           <text x="40" y="42" textAnchor="middle" fill="#ffffff"
             fontSize="8.5" fontWeight="900" letterSpacing="1.5"
             fontFamily="Arial Black,Arial,sans-serif">AWARD</text>
-          <text x="40" y="51" textAnchor="middle" fill="#C9A84C"
+          <text x="40" y="51" textAnchor="middle" fill="var(--brand-gold, #C9A84C)"
             fontSize="7" fontFamily="Arial,sans-serif" letterSpacing="1">★ ★ ★</text>
         </svg>
       </div>
@@ -980,14 +980,14 @@ export default function CertificateModal({ open, onClose, student }) {
               {type === 'select' ? (
                 <select value={form[key]} onChange={(e) => set(key, e.target.value)}
                   className="px-2 py-1.5 rounded-lg text-xs outline-none"
-                  style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }}>
+                  style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }}>
                   {options.map((o) => <option key={o}>{o}</option>)}
                 </select>
               ) : (
                 <input type={type} value={form[key]} placeholder={placeholder}
                   onChange={(e) => set(key, e.target.value)}
                   className="px-2 py-1.5 rounded-lg text-xs outline-none"
-                  style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }} />
+                  style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }} />
               )}
             </div>
           ))}
@@ -1022,7 +1022,7 @@ export default function CertificateModal({ open, onClose, student }) {
         </button>
         <button onClick={handleDownload}
           className="flex-1 py-2 rounded-lg text-xs font-black flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)', color: '#C9A84C', border: '1.5px solid #C9A84C' }}>
+          style={{ background: 'linear-gradient(135deg,var(--brand-dark, #1a1a1a),#2a2a2a)', color: 'var(--brand-gold, #C9A84C)', border: '1.5px solid var(--brand-gold, #C9A84C)' }}>
           <DownloadOutlined /> Download PDF
         </button>
       </div>

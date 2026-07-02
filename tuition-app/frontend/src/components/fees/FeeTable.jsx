@@ -43,9 +43,9 @@ function PendingModal({ fee, open, onClose, onCommentSaved }) {
               <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #e5e7eb' }}>
                 <table className="w-full text-xs">
                   <thead>
-                    <tr style={{ background: '#1a1a1a' }}>
+                    <tr style={{ background: 'var(--brand-dark, #1a1a1a)' }}>
                       {['Month', 'Amount', 'Paid', 'Pending', 'Status'].map((h) => (
-                        <th key={h} className="px-3 py-2 text-left font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+                        <th key={h} className="px-3 py-2 text-left font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -69,8 +69,8 @@ function PendingModal({ fee, open, onClose, onCommentSaved }) {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr style={{ background: '#1a1a1a' }}>
-                      <td colSpan={3} className="px-3 py-2 text-xs font-black" style={{ color: '#C9A84C' }}>Total Pending</td>
+                    <tr style={{ background: 'var(--brand-dark, #1a1a1a)' }}>
+                      <td colSpan={3} className="px-3 py-2 text-xs font-black" style={{ color: 'var(--brand-gold, #C9A84C)' }}>Total Pending</td>
                       <td colSpan={2} className="px-3 py-2 text-sm font-black" style={{ color: '#f87171' }}>₹{lastPending}</td>
                     </tr>
                   </tfoot>
@@ -86,7 +86,7 @@ function PendingModal({ fee, open, onClose, onCommentSaved }) {
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Add any notes about this student's pending dues..."
                 className="w-full px-3 py-2 rounded-lg text-xs outline-none resize-none"
-                style={{ border: '1.5px solid #C9A84C', color: '#1a1a1a', background: '#fffdf5' }}
+                style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', color: 'var(--brand-dark, #1a1a1a)', background: '#fffdf5' }}
               />
             </div>
           </div>
@@ -137,26 +137,26 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
 
   return (
     <>
-      <div className="rounded-xl shadow-md overflow-x-auto" style={{ border: '1px solid #C9A84C' }}>
+      <div className="rounded-xl shadow-md overflow-x-auto" style={{ border: '1px solid var(--brand-gold, #C9A84C)' }}>
         <table className="w-full text-xs">
           <thead>
-            <tr style={{ background: '#1a1a1a' }}>
+            <tr style={{ background: 'var(--brand-dark, #1a1a1a)' }}>
               <th className="p-2">
                 <input type="checkbox" checked={allChecked} onChange={toggleAll}
                   className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
               </th>
               {['Student', 'Class', 'Group', 'Fee Type'].map((h) => (
-                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>{h}</th>
               ))}
               <SortableHeader label="Adm Date" field="dateOfAdmission" className="p-2"
                 sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
               {['Amount', 'Last Pending'].map((h) => (
-                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>{h}</th>
               ))}
               <SortableHeader label="Due Date" field="dueDate" className="p-2"
                 sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
               {['Status', 'Actions'].map((h) => (
-                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+                <th key={h} className="p-2 text-left text-xs font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -175,7 +175,7 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                   <td className="p-2">{fee.studentId?.std}</td>
                   <td className="p-2">
                     {fee.studentId?.groupNo
-                      ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{fee.studentId.groupNo}</span>
+                      ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)' }}>{fee.studentId.groupNo}</span>
                       : <span className="text-gray-400">—</span>}
                   </td>
                   <td className="p-2">
@@ -205,7 +205,7 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                         onClick={() => setPendingModal(fee)}
                         title="View pending breakdown"
                         className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #C9A84C', fontSize: 11 }}>
+                        style={{ background: '#fef3c7', color: '#92400e', border: '1px solid var(--brand-gold, #C9A84C)', fontSize: 11 }}>
                         <InfoCircleOutlined />
                       </button>
                     </div>
@@ -217,7 +217,7 @@ export default function FeeTable({ fees, onPay, onWhatsApp, onDelete, onBulkDele
                       {fee.status === 'Paid' ? (
                         <button onClick={() => setReceiptFee(fee)} title="Generate Receipt"
                           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold"
-                          style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+                          style={{ background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' }}>
                           <FileTextOutlined /> Receipt
                         </button>
                       ) : (

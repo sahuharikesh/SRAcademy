@@ -108,10 +108,10 @@ export default function WaGroupModal({ open, onClose, students }) {
               <button onClick={() => setSelectedYear(ALL_KEY)}
                 className="px-3 py-1 rounded-full text-xs font-bold"
                 style={activeYear === ALL_KEY
-                  ? { background: '#1a1a1a', color: '#C9A84C', border: '1.5px solid #C9A84C' }
+                  ? { background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1.5px solid var(--brand-gold, #C9A84C)' }
                   : { background: '#f3f4f6', color: '#374151', border: '1.5px solid #e5e7eb' }}>
                 All Students
-                <span className="ml-1.5" style={{ color: activeYear === ALL_KEY ? '#C9A84C' : allPending > 0 ? '#dc2626' : '#15803d' }}>
+                <span className="ml-1.5" style={{ color: activeYear === ALL_KEY ? 'var(--brand-gold, #C9A84C)' : allPending > 0 ? '#dc2626' : '#15803d' }}>
                   ({students.length})
                 </span>
               </button>
@@ -123,10 +123,10 @@ export default function WaGroupModal({ open, onClose, students }) {
               <button key={yr} onClick={() => setSelectedYear(yr)}
                 className="px-3 py-1 rounded-full text-xs font-bold"
                 style={activeYear === yr
-                  ? { background: '#1a1a1a', color: '#C9A84C', border: '1.5px solid #C9A84C' }
+                  ? { background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1.5px solid var(--brand-gold, #C9A84C)' }
                   : { background: '#f3f4f6', color: '#374151', border: '1.5px solid #e5e7eb' }}>
                 {yr}
-                <span className="ml-1.5" style={{ color: activeYear === yr ? '#C9A84C' : pending > 0 ? '#dc2626' : '#15803d' }}>
+                <span className="ml-1.5" style={{ color: activeYear === yr ? 'var(--brand-gold, #C9A84C)' : pending > 0 ? '#dc2626' : '#15803d' }}>
                   ({pending > 0 ? `${pending} pending` : 'all added'})
                 </span>
               </button>
@@ -142,11 +142,11 @@ export default function WaGroupModal({ open, onClose, students }) {
 
         {/* Invite link input */}
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
-          style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }}>
-          <LinkOutlined style={{ color: '#C9A84C', flexShrink: 0 }} />
+          style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }}>
+          <LinkOutlined style={{ color: 'var(--brand-gold, #C9A84C)', flexShrink: 0 }} />
           <input value={inviteLink} onChange={(e) => setInviteLink(e.target.value)}
             placeholder="Paste WhatsApp group invite link…"
-            className="flex-1 text-xs outline-none bg-transparent" style={{ color: '#1a1a1a' }} />
+            className="flex-1 text-xs outline-none bg-transparent" style={{ color: 'var(--brand-dark, #1a1a1a)' }} />
         </div>
 
         {/* Status bar */}
@@ -194,7 +194,7 @@ export default function WaGroupModal({ open, onClose, students }) {
               </button>
             </div>
             <div className="rounded-lg px-3 py-2" style={{ background: '#fff', border: '1px solid #86efac' }}>
-              <p className="text-sm font-black" style={{ color: '#1a1a1a' }}>{pendingStudents[seqIndex]?.name}</p>
+              <p className="text-sm font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>{pendingStudents[seqIndex]?.name}</p>
               <p className="text-xs text-gray-500">{pendingStudents[seqIndex]?.mobile} &nbsp;·&nbsp; Class {pendingStudents[seqIndex]?.std}</p>
             </div>
             <div className="flex gap-2">
@@ -221,7 +221,7 @@ export default function WaGroupModal({ open, onClose, students }) {
           <SearchOutlined style={{ color: '#9ca3af', flexShrink: 0 }} />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search student name or number…"
-            className="flex-1 text-xs outline-none bg-transparent" style={{ color: '#1a1a1a' }} />
+            className="flex-1 text-xs outline-none bg-transparent" style={{ color: 'var(--brand-dark, #1a1a1a)' }} />
           {search && (
             <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
           )}
@@ -252,7 +252,7 @@ export default function WaGroupModal({ open, onClose, students }) {
                     border: `1px solid ${isAdded ? '#86efac' : '#e5e7eb'}`,
                     opacity: isAdded ? 0.7 : 1 }}>
                   <div>
-                    <span className="text-sm font-semibold" style={{ color: isAdded ? '#15803d' : '#1a1a1a' }}>
+                    <span className="text-sm font-semibold" style={{ color: isAdded ? '#15803d' : 'var(--brand-dark, #1a1a1a)' }}>
                       {s.name}
                     </span>
                     {isAdded && <span className="ml-2 text-xs text-green-600 font-semibold">✓ Added</span>}
@@ -260,7 +260,7 @@ export default function WaGroupModal({ open, onClose, students }) {
                       style={{ background: '#fff3cd', color: '#856404' }}>{s.std}</span>
                     {s.groupNo && (
                       <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-semibold"
-                        style={{ background: '#1a1a1a', color: '#C9A84C' }}>{s.groupNo}</span>
+                        style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)' }}>{s.groupNo}</span>
                     )}
                     <div className="text-xs text-gray-500 mt-0.5">{s.mobile}</div>
                   </div>

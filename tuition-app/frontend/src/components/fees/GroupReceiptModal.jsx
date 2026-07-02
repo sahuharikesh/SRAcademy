@@ -21,8 +21,8 @@ function mergeFees(paidFees) {
 
 function GroupReceiptView({ groupNo, groupStudents, paidFees, receiptRef }) {
   paidFees = mergeFees(paidFees);
-  const gold  = '#C9A84C';
-  const dark  = '#1a1a1a';
+  const gold  = 'var(--brand-gold, #C9A84C)';
+  const dark  = 'var(--brand-dark, #1a1a1a)';
   const cream = '#fdf8ee';
 
   const totalPaid  = paidFees.reduce((s, f) => s + (f.paidAmount || f.amount || 0), 0);
@@ -253,7 +253,7 @@ export default function GroupReceiptModal({ open, onClose, groupNo, groupStudent
         </button>
         <button onClick={handleDownload} disabled={downloading}
           className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-black"
-          style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+          style={{ background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' }}>
           <DownloadOutlined /> {downloading ? 'Downloading...' : 'Download PDF'}
         </button>
       </div>

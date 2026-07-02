@@ -110,14 +110,14 @@ export default function Students() {
     <div className="anim-fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-lg font-black" style={{ color: '#1a1a1a' }}>Students</h1>
+          <h1 className="text-lg font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>Students</h1>
           <p className="text-xs mt-0.5 font-medium" style={{ color: '#888' }}>Manage admissions & student records</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => { setForm(EMPTY); setEditId(null); setShowForm((v) => !v); }}
             className="btn-shine px-3 py-1.5 rounded-lg font-bold text-xs"
-            style={{ background: 'linear-gradient(135deg, #C9A84C, #f0d080)', color: '#000' }}>
+            style={{ background: 'linear-gradient(135deg, var(--brand-gold, #C9A84C), color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' }}>
             {showForm ? 'Cancel' : '+ Admission'}
           </button>
           <button onClick={handleDownloadCSV}
@@ -144,13 +144,13 @@ export default function Students() {
       <div className="flex flex-wrap gap-2 mb-4 items-center">
         <input
           className="w-full md:w-56 rounded-md px-3 py-1.5 focus:outline-none text-xs"
-          style={{ border: '1px solid #C9A84C', background: '#fff' }}
+          style={{ border: '1px solid var(--brand-gold, #C9A84C)', background: '#fff' }}
           placeholder="Search by name, mobile, class..."
           value={search} onChange={(e) => setSearch(e.target.value)}
         />
         <select
           className="rounded-md px-2 py-1.5 text-xs focus:outline-none"
-          style={{ border: '1px solid #C9A84C', background: '#fff' }}
+          style={{ border: '1px solid var(--brand-gold, #C9A84C)', background: '#fff' }}
           value={filterStd} onChange={(e) => setFilterStd(e.target.value)}
         >
           <option value="">All Classes</option>
@@ -158,7 +158,7 @@ export default function Students() {
         </select>
         <select
           className="rounded-md px-2 py-1.5 text-xs focus:outline-none"
-          style={{ border: '1px solid #C9A84C', background: '#fff' }}
+          style={{ border: '1px solid var(--brand-gold, #C9A84C)', background: '#fff' }}
           value={filterGroup} onChange={(e) => setFilterGroup(e.target.value)}
         >
           <option value="">All Groups</option>
@@ -166,7 +166,7 @@ export default function Students() {
         </select>
         <select
           className="rounded-md px-2 py-1.5 text-xs focus:outline-none"
-          style={{ border: '1px solid #C9A84C', background: '#fff' }}
+          style={{ border: '1px solid var(--brand-gold, #C9A84C)', background: '#fff' }}
           value={filterMedium} onChange={(e) => setFilterMedium(e.target.value)}
         >
           <option value="">All Mediums</option>
@@ -175,7 +175,7 @@ export default function Students() {
         {(filterStd || filterGroup || filterMedium) && (
           <button
             className="text-xs px-2 py-1 rounded-md"
-            style={{ border: '1px solid #C9A84C', color: '#7a6020', background: '#f5f0e8' }}
+            style={{ border: '1px solid var(--brand-gold, #C9A84C)', color: '#7a6020', background: '#f5f0e8' }}
             onClick={() => { setFilterStd(''); setFilterGroup(''); setFilterMedium(''); }}
           >
             Clear
@@ -186,7 +186,7 @@ export default function Students() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
-            style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }} />
+            style={{ borderColor: 'var(--brand-gold, #C9A84C)', borderTopColor: 'transparent' }} />
         </div>
       ) : (
         <StudentTable students={students} onEdit={handleEdit} onDelete={handleDelete}

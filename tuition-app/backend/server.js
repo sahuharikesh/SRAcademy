@@ -1,8 +1,10 @@
+require('dotenv').config();
+
 const express   = require('express');
 const mongoose  = require('mongoose');
 const cors      = require('cors');
+const path      = require('path');
 const auth      = require('./middleware/auth');
-require('dotenv').config();
 
 const app = express();
 
@@ -22,6 +24,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const MONGO_URI =
   process.env.NODE_ENV === 'production'

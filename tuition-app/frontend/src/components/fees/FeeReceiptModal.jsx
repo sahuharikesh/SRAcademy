@@ -5,8 +5,8 @@ import toast from 'react-hot-toast';
 import { formatLong, formatShort } from '../../utils/dates';
 
 function ReceiptView({ fee, receiptRef }) {
-  const gold  = '#C9A84C';
-  const dark  = '#1a1a1a';
+  const gold  = 'var(--brand-gold, #C9A84C)';
+  const dark  = 'var(--brand-dark, #1a1a1a)';
   const cream = '#fdf8ee';
 
   const student   = fee.studentId || {};
@@ -102,7 +102,7 @@ function ReceiptView({ fee, receiptRef }) {
                 </tr>
               </tbody>
               <tfoot>
-                <tr style={{ background: '#1a1a1a' }}>
+                <tr style={{ background: 'var(--brand-dark, #1a1a1a)' }}>
                   <td colSpan={2} style={{ padding: '10px 12px', color: gold, fontFamily: 'Arial', fontWeight: 900, fontSize: 13 }}>Total Paid</td>
                   <td style={{ padding: '10px 12px', color: '#4DD97A', fontFamily: 'Arial', fontWeight: 900, fontSize: 15 }}>₹{fee.paidAmount || fee.amount}</td>
                 </tr>
@@ -212,7 +212,7 @@ export default function FeeReceiptModal({ open, onClose, fee }) {
         </button>
         <button onClick={handleDownload} disabled={downloading}
           className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-black"
-          style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+          style={{ background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' }}>
           <DownloadOutlined /> {downloading ? 'Downloading...' : 'Download PDF'}
         </button>
       </div>

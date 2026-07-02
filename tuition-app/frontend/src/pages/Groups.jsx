@@ -64,7 +64,7 @@ function PayModal({ fee, open, onClose, onSuccess }) {
               <input type="number" min="1" value={payment} autoFocus
                 onChange={(e) => setPayment(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }} />
+                style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }} />
             </div>
           </div>
           <div className="px-5 pb-5 flex gap-2">
@@ -171,21 +171,21 @@ export default function Groups() {
     <div className="anim-fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-lg font-black" style={{ color: '#1a1a1a' }}>Family Groups</h1>
+          <h1 className="text-lg font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>Family Groups</h1>
           <p className="text-xs mt-0.5 font-medium" style={{ color: '#888' }}>Family-wise fee tracking & bulk messaging</p>
         </div>
-        <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{groups.length} group(s)</span>
+        <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)' }}>{groups.length} group(s)</span>
       </div>
 
       {/* Groups Summary Table */}
-      <div className="rounded-xl shadow-md overflow-x-auto mb-6" style={{ border: "1px solid #C9A84C", background: "#fff" }}>
+      <div className="rounded-xl shadow-md overflow-x-auto mb-6" style={{ border: "1px solid var(--brand-gold, #C9A84C)", background: "#fff" }}>
         <table className="w-full text-xs text-center">
           <thead>
-            <tr style={{ background: "#1a1a1a" }}>
-              <th className="p-3 text-xs font-semibold" style={{ color: "#C9A84C" }}>Group No</th>
-              <th className="p-3 text-xs font-semibold" style={{ color: "#C9A84C" }}>Students</th>
-              <th className="p-3 text-xs font-semibold" style={{ color: "#C9A84C" }}>Total Fees</th>
-              <th className="p-3 text-xs font-semibold" style={{ color: "#C9A84C" }}>Actions</th>
+            <tr style={{ background: "var(--brand-dark, #1a1a1a)" }}>
+              <th className="p-3 text-xs font-semibold" style={{ color: "var(--brand-gold, #C9A84C)" }}>Group No</th>
+              <th className="p-3 text-xs font-semibold" style={{ color: "var(--brand-gold, #C9A84C)" }}>Students</th>
+              <th className="p-3 text-xs font-semibold" style={{ color: "var(--brand-gold, #C9A84C)" }}>Total Fees</th>
+              <th className="p-3 text-xs font-semibold" style={{ color: "var(--brand-gold, #C9A84C)" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -202,7 +202,7 @@ export default function Groups() {
                     onClick={() => handleSelect(g)}
                     className='border-b cursor-pointer transition' style={{ background: selected === g ? '#fffdf0' : '#fff' }}>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full font-semibold text-xs" style={{ background: "#1a1a1a", color: "#C9A84C" }}>
+                      <span className="px-2 py-0.5 rounded-full font-semibold text-xs" style={{ background: "var(--brand-dark, #1a1a1a)", color: "var(--brand-gold, #C9A84C)" }}>
                         {g}
                       </span>
                     </td>
@@ -303,7 +303,7 @@ export default function Groups() {
             {namesModal.students.map((s) => (
               <li key={s._id} className="flex items-center gap-3 text-sm">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
-                  style={{ background: '#C9A84C', color: '#000' }}>
+                  style={{ background: 'var(--brand-gold, #C9A84C)', color: '#000' }}>
                   {s.name.charAt(0).toUpperCase()}
                 </div>
                 <div>

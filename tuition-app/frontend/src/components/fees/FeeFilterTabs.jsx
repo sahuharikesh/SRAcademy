@@ -20,7 +20,7 @@ export default function FeeFilterTabs({ fees, active, onChange, yearly = false }
       {TABS.map((tab) => {
         const isActive = active === tab;
         const count = fees.filter((f) => tab === 'All' || f.status === tab).length;
-        const colorStyle = tabColors[tab]?.inactive || { background: '#fff', color: '#555', borderColor: '#C9A84C' };
+        const colorStyle = tabColors[tab]?.inactive || { background: '#fff', color: '#555', borderColor: 'var(--brand-gold, #C9A84C)' };
 
         return (
           <button

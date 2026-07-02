@@ -26,7 +26,7 @@ export default function Dashboard() {
   return (
     <div className="anim-fade-up">
       <div className="mb-6">
-        <h1 className="text-lg font-black" style={{ color: '#1a1a1a' }}>Dashboard</h1>
+        <h1 className="text-lg font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>Dashboard</h1>
         <p className="text-xs mt-0.5 font-medium" style={{ color: '#888' }}>Welcome back — here's your academy at a glance</p>
       </div>
       <StatsGrid stats={stats} onNavigate={navigate} />
@@ -36,7 +36,7 @@ export default function Dashboard() {
         <div className="mb-6 rounded-2xl p-4" style={{ background: '#fff', border: '1.5px solid #e5e7eb' }}>
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-sm font-black" style={{ color: '#1a1a1a' }}>Class-wise Students</h2>
+              <h2 className="text-sm font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>Class-wise Students</h2>
               <p className="text-[10px] font-medium" style={{ color: '#888' }}>{stats.stdWiseCount.length} classes · {stats.totalStudents} total</p>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function Dashboard() {
                 cursor={{ fill: '#f9f5e7' }}
                 content={({ active, payload }) =>
                   active && payload?.length ? (
-                    <div className="rounded-lg px-3 py-2 text-xs shadow-lg" style={{ background: '#1a1a1a', color: '#C9A84C' }}>
+                    <div className="rounded-lg px-3 py-2 text-xs shadow-lg" style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)' }}>
                       <span className="font-black">Class {payload[0].payload.std}</span>
                       <span className="ml-2 text-white">{payload[0].value} student{payload[0].value !== 1 ? 's' : ''}</span>
                     </div>
@@ -56,9 +56,9 @@ export default function Dashboard() {
                 }
               />
               <Bar dataKey="count" radius={[6, 6, 0, 0]} isAnimationActive={false} style={{ outline: 'none' }} tabIndex={-1}>
-                <LabelList dataKey="count" position="top" style={{ fontSize: 11, fontWeight: 700, fill: '#C9A84C' }} />
+                <LabelList dataKey="count" position="top" style={{ fontSize: 11, fontWeight: 700, fill: 'var(--brand-gold, #C9A84C)' }} />
                 {stats.stdWiseCount.map((entry, i) => (
-                  <Cell key={entry.std} fill={['#C9A84C','#3b82f6','#10b981','#f97316','#8b5cf6','#ef4444','#06b6d4','#ec4899','#84cc16','#f59e0b','#6366f1','#14b8a6'][i % 12]} />
+                  <Cell key={entry.std} fill={['var(--brand-gold, #C9A84C)','#3b82f6','#10b981','#f97316','#8b5cf6','#ef4444','#06b6d4','#ec4899','#84cc16','#f59e0b','#6366f1','#14b8a6'][i % 12]} />
                 ))}
               </Bar>
             </BarChart>

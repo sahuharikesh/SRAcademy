@@ -14,6 +14,8 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminEmail');
+      document.documentElement.style.removeProperty('--brand-gold');
+      document.documentElement.style.removeProperty('--brand-dark');
       window.location.href = '/login';
     }
     return Promise.reject(err);
@@ -22,6 +24,31 @@ api.interceptors.response.use(
 
 export const login = (email, password) =>
   api.post('/auth/login', { email, password }).then((r) => r.data);
+export const register = (data) => api.post('/auth/register', data).then((r) => r.data);
+export const getMe    = () => api.get('/auth/me').then((r) => r.data);
+export const updateMe = (data) => api.put('/auth/me', data).then((r) => r.data);
+export const uploadLogo = (file) => {
+  const fd = new FormData(); fd.append('logo', file);
+  return api.post('/auth/upload-logo', fd).then((r) => r.data);
+};
+export const uploadSignature = (file) => {
+  const fd = new FormData(); fd.append('signature', file);
+  return api.post('/auth/upload-signature', fd).then((r) => r.data);
+};
+
+export const adminUploadLogo = (id, file) => {
+  const fd = new FormData(); fd.append('logo', file);
+  return api.post(`/auth/users/${id}/upload-logo`, fd).then((r) => r.data);
+};
+export const adminUploadSignature = (id, file) => {
+  const fd = new FormData(); fd.append('signature', file);
+  return api.post(`/auth/users/${id}/upload-signature`, fd).then((r) => r.data);
+};
+
+export const getUsers   = () => api.get('/auth/users').then((r) => r.data);
+export const getUser    = (id) => api.get(`/auth/users/${id}`).then((r) => r.data);
+export const updateUser = (id, data) => api.put(`/auth/users/${id}`, data).then((r) => r.data);
+export const deleteUser = (id) => api.delete(`/auth/users/${id}`).then((r) => r.data);
 
 export const getStudents = ({ page = 1, limit = 15, search = '', std = '', group = '', medium = '' } = {}) =>
   api.get('/students', { params: { page, limit, search: search || undefined, std: std || undefined, group: group || undefined, medium: medium || undefined } })

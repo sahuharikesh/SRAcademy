@@ -15,12 +15,12 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
 
   return (
     <>
-    <div className="rounded-xl shadow-md overflow-x-auto mb-6" style={{ border: '1px solid #C9A84C' }}>
+    <div className="rounded-xl shadow-md overflow-x-auto mb-6" style={{ border: '1px solid var(--brand-gold, #C9A84C)' }}>
       <table className="w-full text-xs">
         <thead>
-          <tr style={{ background: '#1a1a1a' }}>
+          <tr style={{ background: 'var(--brand-dark, #1a1a1a)' }}>
             {['Student','Class','Status','Call','Group'].map((h) => (
-              <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+              <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -59,7 +59,7 @@ export default function AttendanceTable({ data, marks, onMark, loading }) {
                 </td>
                 <td className="p-3">
                   {row.student.groupNo
-                    ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#1a1a1a', color: '#C9A84C' }}>{row.student.groupNo}</span>
+                    ? <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)' }}>{row.student.groupNo}</span>
                     : <span className="text-gray-400">—</span>}
                 </td>
               </tr>

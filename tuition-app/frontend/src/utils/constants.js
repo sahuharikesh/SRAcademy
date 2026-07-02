@@ -34,8 +34,8 @@ export function getSubjectsForStd(std) {
 
 export const MEDIUM_OPTIONS = ['Hindi', 'English', 'Semi-English'];
 
-export const GOLD = { background: 'linear-gradient(135deg, #C9A84C, #f0d080)', color: '#000' };
-export const DARK = { background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' };
+export const GOLD = { background: 'linear-gradient(135deg, var(--brand-gold, #C9A84C), color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' };
+export const DARK = { background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1px solid var(--brand-gold, #C9A84C)' };
 
 export const UPI_ID   = '8422053851@ybl';
 export const UPI_NAME = 'Shree Ram Academy';

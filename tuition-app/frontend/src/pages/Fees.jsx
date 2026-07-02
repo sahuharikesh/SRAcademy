@@ -110,7 +110,7 @@ function PayModal({ fee, open, onClose, onSuccess }) {
               <input type="number" min="1" value={payment} autoFocus
                 onChange={(e) => setPayment(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }} />
+                style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }} />
               {Number(payment) > 0 && Number(payment) < remaining && (
                 <p className="text-xs mt-1" style={{ color: '#b45309' }}>
                   Still ₹{remaining - Number(payment)} pending — will be marked Partial
@@ -148,7 +148,7 @@ function ConfirmModal({ open, message, onConfirm, onClose }) {
 
   return (
     <AppModal open={open} onClose={onClose} title="Confirm Action">
-      <div className="px-5 py-5 text-sm text-center" style={{ color: '#1a1a1a' }}>{message}</div>
+      <div className="px-5 py-5 text-sm text-center" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>{message}</div>
       <div className="px-5 pb-5 flex gap-2">
         <button onClick={onClose} disabled={busy} className="flex-1 py-1.5 rounded-lg text-xs font-black"
           style={{ background: '#e5e7eb', color: '#374151' }}>Cancel</button>
@@ -198,7 +198,7 @@ function PaymentHistoryModal({ open, onClose }) {
     finally { setLoadingH(false); }
   };
 
-  const gold = '#C9A84C';
+  const gold = 'var(--brand-gold, #C9A84C)';
   const dueHistory   = history.filter(f => f.status !== 'Upcoming');
   const totalPaid    = dueHistory.reduce((s, f) => s + (f.paidAmount || 0), 0);
   const totalPending = dueHistory.reduce((s, f) => s + Math.max(0, (f.amount || 0) - (f.paidAmount || 0)), 0);
@@ -222,7 +222,7 @@ function PaymentHistoryModal({ open, onClose }) {
               {STD_OPTIONS.map(std => (
                 <button key={std} onClick={() => handleStdSelect(std)}
                   className="py-2 rounded-xl text-xs font-black transition-all"
-                  style={{ background: '#f9fafb', border: '1.5px solid #e5e7eb', color: '#1a1a1a' }}
+                  style={{ background: '#f9fafb', border: '1.5px solid #e5e7eb', color: 'var(--brand-dark, #1a1a1a)' }}
                   onMouseEnter={e => { e.currentTarget.style.background='#fffdf5'; e.currentTarget.style.borderColor=gold; }}
                   onMouseLeave={e => { e.currentTarget.style.background='#f9fafb'; e.currentTarget.style.borderColor='#e5e7eb'; }}>
                   {std}
@@ -245,7 +245,7 @@ function PaymentHistoryModal({ open, onClose }) {
               value={stuSearch}
               onChange={e => setStuSearch(e.target.value)}
               className="w-full px-3 py-1.5 rounded-lg text-xs outline-none mb-3"
-              style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }}
+              style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }}
             />
             {loadingS ? (
               <p className="text-xs text-gray-400 text-center py-8">Loading students…</p>
@@ -262,11 +262,11 @@ function PaymentHistoryModal({ open, onClose }) {
                     onMouseEnter={e => { e.currentTarget.style.background='#fffdf5'; e.currentTarget.style.borderColor=gold; }}
                     onMouseLeave={e => { e.currentTarget.style.background='#f9fafb'; e.currentTarget.style.borderColor='#e5e7eb'; }}>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
-                      style={{ background: '#1a1a1a', color: gold }}>
+                      style={{ background: 'var(--brand-dark, #1a1a1a)', color: gold }}>
                       {stu.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="text-xs font-bold" style={{ color: '#1a1a1a' }}>{stu.name}</div>
+                      <div className="text-xs font-bold" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>{stu.name}</div>
                       {stu.mobile && <div className="text-[10px]" style={{ color: '#888' }}>{stu.mobile}</div>}
                     </div>
                   </button>
@@ -335,7 +335,7 @@ function PaymentHistoryModal({ open, onClose }) {
 
                         {/* 3-equal-column header row */}
                         <div className="grid px-3 py-2" style={{ gridTemplateColumns: '1fr 1fr 1fr', background: '#f9fafb', borderBottom: displayLogs.length > 0 ? '1px dashed #e5e7eb' : 'none' }}>
-                          <span className="text-xs font-bold" style={{ color: '#1a1a1a' }}>{isYearly ? f.year : `${f.month} ${f.year}`}</span>
+                          <span className="text-xs font-bold" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>{isYearly ? f.year : `${f.month} ${f.year}`}</span>
                           <span className="text-[10px] font-bold text-center" style={{ color: '#059669' }}>Pd ₹{paid}</span>
                           <span className="text-[10px] font-bold text-right" style={{ color: remaining > 0 ? '#dc2626' : '#9ca3af' }}>Rem ₹{remaining}</span>
                         </div>
@@ -517,7 +517,7 @@ export default function Fees() {
     <div className="anim-fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-lg font-black" style={{ color: '#1a1a1a' }}>Fees Management</h1>
+          <h1 className="text-lg font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>Fees Management</h1>
           <p className="text-xs mt-0.5 font-medium" style={{ color: '#888' }}>Track, collect & manage student payments</p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -532,7 +532,7 @@ export default function Fees() {
             <ThunderboltOutlined /> {refreshing ? 'Refreshing…' : 'Refresh Fees'}
           </button>
           <button onClick={() => setHistModal(true)}
-            className="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5" style={{ background:'#fffdf5', border:'1.5px solid #C9A84C', color:'#7a6020' }}>
+            className="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5" style={{ background:'#fffdf5', border:'1.5px solid var(--brand-gold, #C9A84C)', color:'#7a6020' }}>
             <HistoryOutlined /> Payment History
           </button>
         </div>
@@ -565,20 +565,20 @@ export default function Fees() {
       <div className="flex flex-wrap gap-2 mb-4 items-center">
         <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}
           className="rounded-md px-2 text-xs focus:outline-none"
-          style={{ border: '1px solid #C9A84C', background: '#fff', height: 25 }}>
+          style={{ border: '1px solid var(--brand-gold, #C9A84C)', background: '#fff', height: 25 }}>
           <option value="">All Months</option>
           {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
         </select>
         <select value={filterStd} onChange={(e) => setFilterStd(e.target.value)}
           className="rounded-md px-2 text-xs focus:outline-none"
-          style={{ border: '1px solid #C9A84C', background: '#fff', height: 25 }}>
+          style={{ border: '1px solid var(--brand-gold, #C9A84C)', background: '#fff', height: 25 }}>
           <option value="">All Classes</option>
           {STD_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         {(filterMonth || filterStd || selected.size > 0) && (
           <button onClick={() => { setFilterMonth(''); setFilterStd(''); setSelected(new Set()); }}
             className="px-3 rounded-md text-xs font-bold"
-            style={{ border: '1px solid #C9A84C', color: '#7a6020', background: '#f5f0e8', height: 25 }}>
+            style={{ border: '1px solid var(--brand-gold, #C9A84C)', color: '#7a6020', background: '#f5f0e8', height: 25 }}>
             Clear
           </button>
         )}
@@ -595,7 +595,7 @@ export default function Fees() {
               <DeleteOutlined /> Selected
             </button>
             <span className="text-xs font-bold px-2.5 rounded-full flex items-center"
-              style={{ background: '#1a1a1a', color: '#C9A84C', height: 25 }}>
+              style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', height: 25 }}>
               {selected.size} selected
             </span>
           </>
@@ -605,7 +605,7 @@ export default function Fees() {
             <button key={mode} onClick={() => { setPeriodMode(mode); setFilter('All'); }}
               className="px-3 rounded-md text-xs font-bold"
               style={periodMode === mode
-                ? { background: '#1a1a1a', color: '#C9A84C', height: 25 }
+                ? { background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', height: 25 }
                 : { background: '#fff', color: '#6b7280', border: '1.5px solid #e5e7eb', height: 25 }}>
               {mode}
             </button>
@@ -645,16 +645,16 @@ export default function Fees() {
               <div className="flex flex-col items-center gap-2">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide self-start">UPI Payment QR — Scan to Pay</p>
                 <img src={waModal.qrUrl} alt="UPI QR" className="w-48 h-48 rounded-xl self-center"
-                  style={{ border: '2px solid #C9A84C' }} />
+                  style={{ border: '2px solid var(--brand-gold, #C9A84C)' }} />
                 <div className="text-center">
-                  <div className="text-base font-black" style={{ color: '#1a1a1a' }}>₹{waModal.amount}</div>
-                  <div className="text-xs font-semibold" style={{ color: '#C9A84C' }}>{waModal.fee.studentId?.name}</div>
+                  <div className="text-base font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>₹{waModal.amount}</div>
+                  <div className="text-xs font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>{waModal.fee.studentId?.name}</div>
                 </div>
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Message Preview</p>
                 <div className="rounded-xl px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap"
-                  style={{ background: '#DCF8C6', color: '#1a1a1a', border: '1px solid #b7e4a0', maxHeight: '160px', overflowY: 'auto', fontFamily: 'inherit' }}>
+                  style={{ background: '#DCF8C6', color: 'var(--brand-dark, #1a1a1a)', border: '1px solid #b7e4a0', maxHeight: '160px', overflowY: 'auto', fontFamily: 'inherit' }}>
                   {waModal.msg}
                 </div>
               </div>

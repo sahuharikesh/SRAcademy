@@ -57,8 +57,8 @@ async function processImage(file) {
 }
 
 const CLASSES = ALL_CLASSES;
-const gold = '#C9A84C';
-const dark = '#1a1a1a';
+const gold = 'var(--brand-gold, #C9A84C)';
+const dark = 'var(--brand-dark, #1a1a1a)';
 
 const qLangPrefix = (lang) => (lang === 'hi' || lang === 'mr') ? 'प्र' : 'Q';
 

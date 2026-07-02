@@ -12,8 +12,8 @@ export default function StudentForm({ form, setForm, editId, onSubmit, onCancel,
 
   return (
     <div className="rounded-xl shadow-md p-6 mb-6"
-      style={{ background: '#fff', border: '1px solid #C9A84C' }}>
-      <h2 className="text-lg font-bold mb-4" style={{ color: '#1a1a1a' }}>
+      style={{ background: '#fff', border: '1px solid var(--brand-gold, #C9A84C)' }}>
+      <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>
         {editId ? 'Edit Student' : 'New Admission'}
       </h2>
       <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">

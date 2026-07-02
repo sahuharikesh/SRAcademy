@@ -18,8 +18,8 @@ export default function Sidebar() {
     <aside className="hidden md:flex flex-col flex-shrink-0"
       style={{
         width: '230px',
-        background: 'linear-gradient(175deg,#0a0a0a 0%,#111 40%,#1a1a1a 100%)',
-        borderRight: '2px solid #C9A84C',
+        background: 'var(--brand-dark, #1a1a1a)',
+        borderRight: '2px solid var(--brand-gold, #C9A84C)',
       }}>
 
       {/* Nav links */}
@@ -37,7 +37,7 @@ export default function Sidebar() {
             style={({ isActive }) => ({
               animationDelay: `${delays[i]}ms`,
               ...(isActive
-                ? { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000', boxShadow: '0 4px 16px rgba(201,168,76,0.35)' }
+                ? { background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000', boxShadow: '0 4px 16px rgba(201,168,76,0.35)' }
                 : {}),
             })}>
             <span className="text-base leading-none flex-shrink-0">{n.icon}</span>
@@ -47,9 +47,9 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-5 py-4 text-center anim-fade-in"
+      <div className="px-5 py-4 flex flex-col items-center gap-2 anim-fade-in"
         style={{ borderTop: '1px solid rgba(201,168,76,0.15)', animationDelay: '350ms' }}>
-        <p className="text-[10px] font-semibold tracking-widest" style={{ color: 'rgba(201,168,76,0.35)' }}>
+        <p className="text-[10px] font-semibold tracking-widest text-center" style={{ color: 'rgba(201,168,76,0.35)' }}>
           SINCE 2016 -v.1.0
         </p>
       </div>

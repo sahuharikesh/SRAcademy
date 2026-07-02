@@ -32,7 +32,7 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
   return (
     <div className="rounded-xl p-5 mt-2" style={{ background: '#fffdf5', border: '1px solid #e8d5a3' }}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-bold text-base" style={{ color: '#1a1a1a' }}>Group {selected} — Details</h2>
+        <h2 className="font-bold text-base" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>Group {selected} — Details</h2>
         <div className="flex gap-2">
           {groupStudents[0]?.mobile && (
             <a href={`tel:${groupStudents[0].mobile}`} title={`Call ${groupStudents[0].mobile}`}
@@ -58,7 +58,7 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
           {paidFees.length > 0 && (
             <button onClick={() => setShowGroupReceipt(true)} title="Group Receipt"
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold"
-              style={{ background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+              style={{ background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' }}>
               <FileTextOutlined /> Receipt
             </button>
           )}
@@ -71,7 +71,7 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
             .filter((f) => (f.studentId?._id === s._id || f.studentId === s._id) && f.status !== 'Paid')
             .reduce((sum, f) => sum + (f.amount - (f.paidAmount || 0)), 0);
           return (
-            <div key={s._id} className="rounded-lg p-3" style={{ background: '#fff', border: '1px solid #C9A84C' }}>
+            <div key={s._id} className="rounded-lg p-3" style={{ background: '#fff', border: '1px solid var(--brand-gold, #C9A84C)' }}>
               <div className="font-semibold text-sm">{s.name}</div>
               <div className="text-xs text-gray-500">Class {s.std}</div>
               <div className="text-sm font-semibold mt-1"
@@ -87,9 +87,9 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
         <>
         <table className="w-full text-xs rounded overflow-hidden">
           <thead>
-            <tr style={{ background: '#1a1a1a' }}>
+            <tr style={{ background: 'var(--brand-dark, #1a1a1a)' }}>
               {['Student', 'Month', 'Total Fee', 'Paid', 'Remaining', 'Status'].map((h) => (
-                <th key={h} className="p-2 text-center text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+                <th key={h} className="p-2 text-center text-xs font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -144,7 +144,7 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
           {/* Pay Total button */}
           <button onClick={() => { setShowPicker(false); setSearch(''); onPayAll(unpaidFees); }}
             className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-black"
-            style={{ background: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)', color: '#C9A84C', border: '2px solid #C9A84C' }}>
+            style={{ background: 'linear-gradient(135deg,var(--brand-dark, #1a1a1a),#2a2a2a)', color: 'var(--brand-gold, #C9A84C)', border: '2px solid var(--brand-gold, #C9A84C)' }}>
             <span>Pay Total ({unpaidFees.length} fee{unpaidFees.length > 1 ? 's' : ''})</span>
             <span>Rs. {totalDue}</span>
           </button>
@@ -158,7 +158,7 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
             value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by student name..."
             className="w-full px-3 py-2 rounded-lg text-xs outline-none"
-            style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }}
+            style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }}
           />
           {filteredUnpaid.length === 0 && (
             <p className="text-xs text-center text-gray-400 py-2">No matching fees</p>
@@ -169,7 +169,7 @@ export default function GroupDetail({ selected, groupStudents, groupFees, totalD
             return (
               <button key={f._id} onClick={() => handlePickAndPay(f)}
                 className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm transition"
-                style={{ background: '#fff', border: '1.5px solid #C9A84C' }}
+                style={{ background: '#fff', border: '1.5px solid var(--brand-gold, #C9A84C)' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = '#fffbeb'}
                 onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}>
                 <div className="text-left">

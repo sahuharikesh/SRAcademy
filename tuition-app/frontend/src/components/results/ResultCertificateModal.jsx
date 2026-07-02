@@ -26,8 +26,8 @@ function gradeLabel(pct) {
 
 /* ── Template 1: Classic (cream + gold) ── */
 function ClassicView({ student, examName, total, maxTotal, pct, grade, month, year, logoSrc }) {
-  const gold  = '#C9A84C';
-  const dark  = '#1a1a1a';
+  const gold  = 'var(--brand-gold, #C9A84C)';
+  const dark  = 'var(--brand-dark, #1a1a1a)';
   const cream = '#fdf8ee';
 
   return (
@@ -61,7 +61,7 @@ function ClassicView({ student, examName, total, maxTotal, pct, grade, month, ye
       <div style={{ position: 'relative', zIndex: 2, padding: '16px 52px 20px' }}>
 
         {/* Header */}
-        <div style={{ background: 'linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 50%,#0a0a0a 100%)', margin: '-24px -52px 0', borderBottom: `2px solid ${gold}`, display: 'flex', alignItems: 'center', padding: '10px 28px', gap: 16, position: 'relative' }}>
+        <div style={{ background: 'linear-gradient(135deg,#0a0a0a 0%,var(--brand-dark, #1a1a1a) 50%,#0a0a0a 100%)', margin: '-24px -52px 0', borderBottom: `2px solid ${gold}`, display: 'flex', alignItems: 'center', padding: '10px 28px', gap: 16, position: 'relative' }}>
           <img src={logoSrc} alt="logo" style={{ width: 68, height: 68, borderRadius: '50%', border: `2px solid ${gold}`, objectFit: 'cover', flexShrink: 0 }} />
           <div style={{ position: 'absolute', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
             <div style={{ textAlign: 'center' }}>
@@ -74,8 +74,8 @@ function ClassicView({ student, examName, total, maxTotal, pct, grade, month, ye
           <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
             <svg width="72" height="96" viewBox="0 0 80 106" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <linearGradient id="rc1TailG" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#f5e070"/><stop offset="50%" stopColor="#C9A84C"/><stop offset="100%" stopColor="#7a5c0a"/></linearGradient>
-                <linearGradient id="rc1RingG" x1="10%" y1="0%" x2="90%" y2="100%"><stop offset="0%" stopColor="#fff0a0"/><stop offset="25%" stopColor="#C9A84C"/><stop offset="60%" stopColor="#f0d060"/><stop offset="100%" stopColor="#7a5c0a"/></linearGradient>
+                <linearGradient id="rc1TailG" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#f5e070"/><stop offset="50%" stopColor="var(--brand-gold, #C9A84C)"/><stop offset="100%" stopColor="#7a5c0a"/></linearGradient>
+                <linearGradient id="rc1RingG" x1="10%" y1="0%" x2="90%" y2="100%"><stop offset="0%" stopColor="#fff0a0"/><stop offset="25%" stopColor="var(--brand-gold, #C9A84C)"/><stop offset="60%" stopColor="#f0d060"/><stop offset="100%" stopColor="#7a5c0a"/></linearGradient>
                 <radialGradient id="rc1NavyG" cx="40%" cy="33%" r="68%"><stop offset="0%" stopColor="#2535b0"/><stop offset="60%" stopColor="#0f1560"/><stop offset="100%" stopColor="#060920"/></radialGradient>
                 <filter id="rc1Bsh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#000" floodOpacity="0.5"/></filter>
               </defs>
@@ -83,10 +83,10 @@ function ClassicView({ student, examName, total, maxTotal, pct, grade, month, ye
               <polygon points="40,67 55,67 64,104 55,97 48,104" fill="url(#rc1TailG)"/>
               {(() => { const cx=40,cy=37,oR=35,iR=29,pts=20; let d=''; for(let i=0;i<pts*2;i++){const r=i%2===0?oR:iR;const a=(i*Math.PI/pts)-Math.PI/2;d+=(i===0?'M':'L')+`${(cx+r*Math.cos(a)).toFixed(2)},${(cy+r*Math.sin(a)).toFixed(2)}`;} return <path d={d+'Z'} fill="url(#rc1RingG)" filter="url(#rc1Bsh)"/>; })()}
               <circle cx="40" cy="37" r="27" fill="url(#rc1NavyG)"/>
-              <circle cx="40" cy="37" r="24.5" fill="none" stroke="#C9A84C" strokeWidth="1"/>
+              <circle cx="40" cy="37" r="24.5" fill="none" stroke="var(--brand-gold, #C9A84C)" strokeWidth="1"/>
               <text x="40" y="33" textAnchor="middle" fill="#f0d060" fontSize="10" fontStyle="italic" fontWeight="700" fontFamily="Georgia,serif">Merit</text>
               <text x="40" y="43" textAnchor="middle" fill="#ffffff" fontSize="8" fontWeight="900" letterSpacing="1" fontFamily="Arial,sans-serif">AWARD</text>
-              <text x="40" y="52" textAnchor="middle" fill="#C9A84C" fontSize="7" fontFamily="Arial,sans-serif">★ ★ ★</text>
+              <text x="40" y="52" textAnchor="middle" fill="var(--brand-gold, #C9A84C)" fontSize="7" fontFamily="Arial,sans-serif">★ ★ ★</text>
             </svg>
           </div>
         </div>
@@ -142,7 +142,7 @@ function ClassicView({ student, examName, total, maxTotal, pct, grade, month, ye
 /* ── Template 2: Modern (navy + white) ── */
 function ModernView({ student, examName, total, maxTotal, pct, grade, month, year, logoSrc }) {
   const navy = '#1e3a5f';
-  const gold = '#C9A84C';
+  const gold = 'var(--brand-gold, #C9A84C)';
 
   return (
     <div style={{ width: '100%', maxWidth: 740, height: 450, margin: '0 auto', background: '#ffffff', border: `4px solid ${navy}`, outline: `2px solid ${gold}`, outlineOffset: '-14px', position: 'relative', overflow: 'hidden', fontFamily: 'Helvetica, Arial, sans-serif', boxShadow: '0 12px 48px rgba(0,0,0,0.18)' }}>
@@ -217,7 +217,7 @@ function ModernView({ student, examName, total, maxTotal, pct, grade, month, yea
 
 /* ── Template 3: Royal (dark + gold) ── */
 function RoyalView({ student, examName, total, maxTotal, pct, grade, month, year, logoSrc }) {
-  const gold = '#C9A84C';
+  const gold = 'var(--brand-gold, #C9A84C)';
   const bg   = '#0d0d0d';
 
   return (
@@ -370,7 +370,7 @@ export default function ResultCertificateModal({ open, onClose, student, examNam
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Template</label>
             <select value={template} onChange={e => setTemplate(e.target.value)}
               className="px-2 py-1.5 rounded-lg text-xs outline-none"
-              style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }}>
+              style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }}>
               {['Template 1', 'Template 2', 'Template 3'].map(o => <option key={o}>{o}</option>)}
             </select>
           </div>
@@ -378,7 +378,7 @@ export default function ResultCertificateModal({ open, onClose, student, examNam
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Month</label>
             <select value={month} onChange={e => setMonth(e.target.value)}
               className="px-2 py-1.5 rounded-lg text-xs outline-none"
-              style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }}>
+              style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }}>
               {MONTHS.map(m => <option key={m}>{m}</option>)}
             </select>
           </div>
@@ -386,7 +386,7 @@ export default function ResultCertificateModal({ open, onClose, student, examNam
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Year</label>
             <input type="text" value={year} onChange={e => setYear(e.target.value)}
               className="px-2 py-1.5 rounded-lg text-xs outline-none"
-              style={{ border: '1.5px solid #C9A84C', background: '#fffdf5' }} />
+              style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fffdf5' }} />
           </div>
         </div>
 
@@ -398,9 +398,9 @@ export default function ResultCertificateModal({ open, onClose, student, examNam
             { label: 'Grade', value: grade },
           ].map(({ label, value }) => (
             <div key={label} className="flex flex-col items-center px-4 py-2 rounded-xl"
-              style={{ background: '#fffdf5', border: '1.5px solid #C9A84C' }}>
+              style={{ background: '#fffdf5', border: '1.5px solid var(--brand-gold, #C9A84C)' }}>
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">{label}</span>
-              <span className="text-sm font-black" style={{ color: '#1a1a1a' }}>{value}</span>
+              <span className="text-sm font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>{value}</span>
             </div>
           ))}
         </div>
@@ -445,7 +445,7 @@ export default function ResultCertificateModal({ open, onClose, student, examNam
         </button>
         <button onClick={handleDownload}
           className="flex-1 py-2 rounded-lg text-xs font-black flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)', color: '#C9A84C', border: '1.5px solid #C9A84C' }}>
+          style={{ background: 'linear-gradient(135deg,var(--brand-dark, #1a1a1a),#2a2a2a)', color: 'var(--brand-gold, #C9A84C)', border: '1.5px solid var(--brand-gold, #C9A84C)' }}>
           <DownloadOutlined /> Download PDF
         </button>
       </div>

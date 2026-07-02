@@ -5,7 +5,7 @@ export default function SortableHeader({ label, field, sortField, sortDir, onSor
     <th
       onClick={() => onSort(field)}
       className={`${className} text-left text-xs font-semibold cursor-pointer select-none`}
-      style={{ color: '#C9A84C' }}
+      style={{ color: 'var(--brand-gold, #C9A84C)' }}
       title="Sort by date"
     >
       <span className="inline-flex items-center gap-1">

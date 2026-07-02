@@ -39,7 +39,7 @@ export default function Pagination({ page, pageSize, total, onChange, onPageSize
             <button key={p} onClick={() => onChange(p)}
               className={btnBase}
               style={p === page
-                ? { background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' }
+                ? { background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1px solid var(--brand-gold, #C9A84C)' }
                 : { background: '#fff', color: '#374151', border: '1px solid #e5e7eb' }}>
               {p}
             </button>
@@ -55,7 +55,7 @@ export default function Pagination({ page, pageSize, total, onChange, onPageSize
         {onPageSizeChange && (
           <select value={pageSize} onChange={(e) => { onPageSizeChange(Number(e.target.value)); onChange(1); }}
             className="ml-2 text-xs rounded px-1.5 py-1 outline-none"
-            style={{ border: '1px solid #C9A84C', background: '#fff', color: '#374151' }}>
+            style={{ border: '1px solid var(--brand-gold, #C9A84C)', background: '#fff', color: '#374151' }}>
             {[15, 25, 50].map((s) => <option key={s} value={s}>{s} / page</option>)}
           </select>
         )}

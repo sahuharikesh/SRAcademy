@@ -265,15 +265,15 @@ export default function Attendance() {
           onClick={() => setTab('daily')}
           className="px-3 py-1.5 text-xs font-bold rounded-lg transition-all"
           style={tab === 'daily'
-            ? { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }
-            : { background: '#1a1a1a', color: '#888', border: '1px solid #333' }}
+            ? { background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' }
+            : { background: 'var(--brand-dark, #1a1a1a)', color: '#888', border: '1px solid #333' }}
         >Daily Attendance</button>
         <button
           onClick={handleTabMonthly}
           className="px-3 py-1.5 text-xs font-bold rounded-lg transition-all"
           style={tab === 'monthly'
-            ? { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }
-            : { background: '#1a1a1a', color: '#888', border: '1px solid #333' }}
+            ? { background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' }
+            : { background: 'var(--brand-dark, #1a1a1a)', color: '#888', border: '1px solid #333' }}
         >Monthly Report</button>
       </div>
 
@@ -285,7 +285,7 @@ export default function Attendance() {
               <div ref={stdDropRef} className="relative">
                 <button onClick={() => setStdDropOpen(v => !v)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold"
-                  style={{ background: filterStds.length > 0 ? '#fffdf5' : '#f9fafb', border: `1.5px solid ${filterStds.length > 0 ? '#C9A84C' : '#d1d5db'}`, color: filterStds.length > 0 ? '#7a6020' : '#374151' }}>
+                  style={{ background: filterStds.length > 0 ? '#fffdf5' : '#f9fafb', border: `1.5px solid ${filterStds.length > 0 ? 'var(--brand-gold, #C9A84C)' : '#d1d5db'}`, color: filterStds.length > 0 ? '#7a6020' : '#374151' }}>
                   {filterStds.length === 0 ? 'All Classes' : filterStds.length === 1 ? `Class ${filterStds[0]}` : `${filterStds.length} Classes`}
                   <svg width="10" height="10" viewBox="0 0 12 12" style={{ transform: stdDropOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round"/></svg>
                 </button>
@@ -294,7 +294,7 @@ export default function Attendance() {
                     style={{ background: '#fff', border: '1.5px solid #e5e7eb' }}>
                     {dailyStdOptions.map(std => (
                       <label key={std} className="flex items-center gap-2.5 px-3 py-1.5 cursor-pointer text-xs font-semibold"
-                        style={{ color: '#1a1a1a' }}
+                        style={{ color: 'var(--brand-dark, #1a1a1a)' }}
                         onMouseEnter={e => e.currentTarget.style.background='#fffdf5'}
                         onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                         <input type="checkbox" checked={filterStds.includes(std)} onChange={() => toggleStd(std)}
@@ -335,8 +335,8 @@ export default function Attendance() {
           {/* Top bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2 flex-wrap">
-              {filterStd  && <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' }}>Class: {filterStd}</span>}
-              {filterName && <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' }}>Name: {filterName}</span>}
+              {filterStd  && <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1px solid var(--brand-gold, #C9A84C)' }}>Class: {filterStd}</span>}
+              {filterName && <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1px solid var(--brand-gold, #C9A84C)' }}>Name: {filterName}</span>}
               <button onClick={() => setShowModal(true)}
                 className="text-xs font-semibold px-3 py-1 rounded-full underline"
                 style={{ color: '#888' }}>Change Filter</button>
@@ -344,12 +344,12 @@ export default function Attendance() {
             <div className="flex items-center gap-2 flex-wrap">
               <select value={month} onChange={(e) => { const m = Number(e.target.value); setMonth(m); loadMonthly(m, year); }}
                 className="text-xs font-semibold rounded-lg px-2 py-1 outline-none"
-                style={{ background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' }}>
+                style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1px solid var(--brand-gold, #C9A84C)' }}>
                 {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
               </select>
               <select value={year} onChange={(e) => { const y = Number(e.target.value); setYear(y); loadMonthly(month, y); }}
                 className="text-xs font-semibold rounded-lg px-2 py-1 outline-none"
-                style={{ background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' }}>
+                style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1px solid var(--brand-gold, #C9A84C)' }}>
                 {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
               </select>
               <button onClick={handleSendMonthlyAll}
@@ -381,7 +381,7 @@ export default function Attendance() {
                 </button>
               </div>
               <div className="rounded-lg px-3 py-2" style={{ background: '#fff', border: '1px solid #86efac' }}>
-                <p className="text-sm font-black" style={{ color: '#1a1a1a' }}>{filteredData[monthlySeqIdx]?.student.name}</p>
+                <p className="text-sm font-black" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>{filteredData[monthlySeqIdx]?.student.name}</p>
                 <p className="text-xs text-gray-500">
                   {filteredData[monthlySeqIdx]?.student.mobile} &nbsp;·&nbsp; Class {filteredData[monthlySeqIdx]?.student.std}
                 </p>
@@ -420,15 +420,15 @@ export default function Attendance() {
 
                     {/* Student header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3"
-                      style={{ background: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)', borderBottom: '2px solid #C9A84C' }}>
+                      style={{ background: 'linear-gradient(135deg,var(--brand-dark, #1a1a1a),#2a2a2a)', borderBottom: '2px solid var(--brand-gold, #C9A84C)' }}>
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0"
-                          style={{ background: '#C9A84C', color: '#000' }}>
+                          style={{ background: 'var(--brand-gold, #C9A84C)', color: '#000' }}>
                           {row.student.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div className="font-bold text-white text-sm">{row.student.name}</div>
-                          <div className="text-xs" style={{ color: '#C9A84C' }}>Class {row.student.std} · Group {row.student.groupNo}</div>
+                          <div className="text-xs" style={{ color: 'var(--brand-gold, #C9A84C)' }}>Class {row.student.std} · Group {row.student.groupNo}</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -539,7 +539,7 @@ export default function Attendance() {
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Month</label>
               <select value={month} onChange={(e) => setMonth(Number(e.target.value))}
                 className="w-full px-2 py-1.5 rounded-lg text-xs font-semibold outline-none"
-                style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
+                style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fafaf8', color: 'var(--brand-dark, #1a1a1a)' }}>
                 {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
               </select>
             </div>
@@ -547,7 +547,7 @@ export default function Attendance() {
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Year</label>
               <select value={year} onChange={(e) => setYear(Number(e.target.value))}
                 className="w-full px-2 py-1.5 rounded-lg text-xs font-semibold outline-none"
-                style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
+                style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fafaf8', color: 'var(--brand-dark, #1a1a1a)' }}>
                 {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
               </select>
             </div>
@@ -558,7 +558,7 @@ export default function Attendance() {
             <select value={filterStd}
               onChange={(e) => { setFilterStd(e.target.value); setFilterName(''); }}
               className="w-full px-2 py-1.5 rounded-lg text-xs font-semibold outline-none"
-              style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
+              style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fafaf8', color: 'var(--brand-dark, #1a1a1a)' }}>
               <option value="">-- All Classes --</option>
               {stdOptions.map((s) => <option key={s} value={s}>Class {s}</option>)}
             </select>
@@ -569,7 +569,7 @@ export default function Attendance() {
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Student</label>
               <select value={filterName} onChange={(e) => setFilterName(e.target.value)}
                 className="w-full px-2 py-1.5 rounded-lg text-xs font-semibold outline-none"
-                style={{ border: '1.5px solid #C9A84C', background: '#fafaf8', color: '#1a1a1a' }}>
+                style={{ border: '1.5px solid var(--brand-gold, #C9A84C)', background: '#fafaf8', color: 'var(--brand-dark, #1a1a1a)' }}>
                 <option value="">-- All Students of Class {filterStd} --</option>
                 {studentOptions.map((s) => <option key={s._id} value={s.name}>{s.name}</option>)}
               </select>
@@ -587,7 +587,7 @@ export default function Attendance() {
             className="flex-1 py-1.5 rounded-lg text-xs font-black flex items-center justify-center gap-2"
             style={generating
               ? { background: '#9ca3af', color: '#fff', cursor: 'not-allowed' }
-              : { background: 'linear-gradient(135deg,#C9A84C,#f0d080)', color: '#000' }}>
+              : { background: 'linear-gradient(135deg,var(--brand-gold, #C9A84C),color-mix(in srgb, var(--brand-gold, #C9A84C) 65%, white))', color: '#000' }}>
             {generating && (
               <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

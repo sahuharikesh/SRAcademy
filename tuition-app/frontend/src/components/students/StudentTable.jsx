@@ -57,20 +57,20 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
           </button>
         </div>
       )}
-      <div className="rounded-xl shadow-md overflow-x-auto" style={{ border: '1px solid #C9A84C' }}>
+      <div className="rounded-xl shadow-md overflow-x-auto" style={{ border: '1px solid var(--brand-gold, #C9A84C)' }}>
         <table className="w-full text-xs">
           <thead>
-            <tr style={{ background: '#1a1a1a' }}>
+            <tr style={{ background: 'var(--brand-dark, #1a1a1a)' }}>
               <th className="p-3">
                 <input type="checkbox" checked={allChecked} onChange={toggleAll}
                   className="w-3.5 h-3.5 accent-yellow-500 cursor-pointer" />
               </th>
               {['Name','Class','Mobile','School','Medium','Group','Fee Type','Fees (Rs.)'].map((h) => (
-                <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>{h}</th>
+                <th key={h} className="p-3 text-left text-xs font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>{h}</th>
               ))}
               <SortableHeader label="Admission Date" field="dateOfAdmission"
                 sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-              <th className="p-3 text-left text-xs font-semibold" style={{ color: '#C9A84C' }}>Actions</th>
+              <th className="p-3 text-left text-xs font-semibold" style={{ color: 'var(--brand-gold, #C9A84C)' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -100,11 +100,11 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
                   <td className="p-3">
                     {s.groupNo
                       ? <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
-                          style={{ background: '#1a1a1a', color: '#C9A84C' }}>{s.groupNo}</span>
+                          style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)' }}>{s.groupNo}</span>
                       : '—'}
                   </td>
                   <td className="p-3 text-gray-600">{s.feeType}</td>
-                  <td className="p-3 font-semibold" style={{ color: '#1a1a1a' }}>Rs. {s.recommendedFees}</td>
+                  <td className="p-3 font-semibold" style={{ color: 'var(--brand-dark, #1a1a1a)' }}>Rs. {s.recommendedFees}</td>
                   <td className="p-3 text-gray-600">{formatDate(s.dateOfAdmission)}</td>
                   <td className="p-3">
                     <div className="flex gap-2">
@@ -120,7 +120,7 @@ export default function StudentTable({ students, onEdit, onDelete, onBulkDelete,
                       </button>
                       <button onClick={() => onEdit(s)} title="Edit"
                         className="w-7 h-7 rounded flex items-center justify-center"
-                        style={{ background: '#1a1a1a', color: '#C9A84C', border: '1px solid #C9A84C' }}>
+                        style={{ background: 'var(--brand-dark, #1a1a1a)', color: 'var(--brand-gold, #C9A84C)', border: '1px solid var(--brand-gold, #C9A84C)' }}>
                         <EditOutlined />
                       </button>
                       <button onClick={() => onDelete(s._id)} title="Remove"
